@@ -1,0 +1,4 @@
+repository "Last Stand 2025-11-19_18-40-29/Last-Stand-Co_op-Survival-Shooter@18968317782027@cloud"
+  path "/"
+    br "/main"
+    co "/main"
