@@ -1,0 +1,18 @@
+fileFormatVersion: 2
+guid: 3f34b53bea38e4f259eb8dc211e4fdb6
+AssetOrigin:
+  serializedVersion: 1
+  productId: 129321
+  packageName: Mirror
+  packageVersion: 96.0.1
+  assetPath: Assets/Mirror/Core/NetworkWriterPool.cs
+  uploadId: 736421
+MonoImporter:
+  externalObjects: {}
+  serializedVersion: 2
+  defaultReferences: []
+  executionOrder: 0
+  icon: {instanceID: 0}
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 

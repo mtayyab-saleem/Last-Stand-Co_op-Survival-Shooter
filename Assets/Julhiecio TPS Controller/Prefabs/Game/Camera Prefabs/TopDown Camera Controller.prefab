@@ -1,0 +1,364 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &2371141769173249422
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2371141769173249420}
+  - component: {fileID: 1001010056594958992}
+  - component: {fileID: -7180565335036784545}
+  m_Layer: 0
+  m_Name: TopDown Camera Controller
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2371141769173249420
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769173249422}
+  m_LocalRotation: {x: 0.19996412, y: 0.3736123, z: -0.08282785, w: 0.90198}
+  m_LocalPosition: {x: 0, y: 1.0999998, z: -0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children:
+  - {fileID: 2371141769593258406}
+  m_Father: {fileID: 0}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 25, y: 45, z: 0}
+--- !u!114 &1001010056594958992
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769173249422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3c6434d18e1845c4e981bdb9a2e5e308, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Aiming: 0
+  IsTransitioningToCustomState: 0
+  IsTargetInForward: 0
+  mCamera: {fileID: 2371141769593258401}
+  TargetToFollow: {fileID: 0}
+  CameraCollisionLayerMask:
+    serializedVersion: 2
+    m_Bits: 0
+  CrosshairRaycastLayerMask:
+    serializedVersion: 2
+    m_Bits: 104961
+  LockCursor: 0
+  HideCursor: 0
+  CustomCameraStates:
+  - StateName: Example State
+    Distance: 2
+    MovementSpeed: 15
+    CameraFieldOfView: 80
+    UpTargetOffset: 0
+    RightTargetOffset: 0
+    ForwardTargetOffset: 0
+    RightCameraOffset: 0.6
+    UpCameraOffset: 0.6
+    ForwardCameraOffset: 0
+    RotationSensibility: 5
+    VerticalRotationSensibility: 0.7
+    MaxRotation: 80
+    MinRotation: -80
+    CollisionLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    SettingsIDName: Example State
+  GeneralSensibility: 1
+  GeneralVerticalSensibility: 1
+  InvertHorizontal: 0
+  InvertVertical: 0
+  rotX: 0
+  rotY: 0
+  rotxtarget: 0
+  rotytarget: 0
+  CameraRecoilReaction: 1
+  RecoilRotateCamera: 0
+  CameraRecoilSensibility: 0.5
+  PlayerTarget: {fileID: 0}
+  NormalCameraState:
+    StateName: Normal Camera State
+    Distance: 15
+    MovementSpeed: 15
+    CameraFieldOfView: 50
+    UpTargetOffset: 0
+    RightTargetOffset: 0
+    ForwardTargetOffset: 0
+    RightCameraOffset: 0
+    UpCameraOffset: 0
+    ForwardCameraOffset: 0
+    RotationSensibility: 5
+    VerticalRotationSensibility: 0.7
+    MaxRotation: 80
+    MinRotation: -80
+    CollisionLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    SettingsIDName: Normal Camera State
+  FireModeCameraState:
+    StateName: Fire Mode Camera State
+    Distance: 15
+    MovementSpeed: 15
+    CameraFieldOfView: 50
+    UpTargetOffset: 0
+    RightTargetOffset: 0
+    ForwardTargetOffset: 0
+    RightCameraOffset: 0
+    UpCameraOffset: 0
+    ForwardCameraOffset: 0
+    RotationSensibility: 5
+    VerticalRotationSensibility: 0.7
+    MaxRotation: 80
+    MinRotation: -80
+    CollisionLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    SettingsIDName: Fire Mode Camera State
+  AimModeCameraState:
+    StateName: Scope Mode Camera State
+    Distance: 15
+    MovementSpeed: 15
+    CameraFieldOfView: 50
+    UpTargetOffset: 0
+    RightTargetOffset: 0
+    ForwardTargetOffset: 0
+    RightCameraOffset: 0
+    UpCameraOffset: 0
+    ForwardCameraOffset: 0
+    RotationSensibility: 5
+    VerticalRotationSensibility: 0.7
+    MaxRotation: 80
+    MinRotation: -80
+    CollisionLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    SettingsIDName: Scope Mode Camera State
+  DrivingVehicleCameraState:
+    StateName: Driving Vehicle Camera State
+    Distance: 15
+    MovementSpeed: 15
+    CameraFieldOfView: 50
+    UpTargetOffset: 0
+    RightTargetOffset: 0
+    ForwardTargetOffset: 0
+    RightCameraOffset: 0
+    UpCameraOffset: 0
+    ForwardCameraOffset: 0
+    RotationSensibility: 5
+    VerticalRotationSensibility: 0.7
+    MaxRotation: 80
+    MinRotation: -80
+    CollisionLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    SettingsIDName: Driving Vehicle Camera State
+  DeadPlayerCameraState:
+    StateName: Dead Player Camera State
+    Distance: 15
+    MovementSpeed: 15
+    CameraFieldOfView: 30
+    UpTargetOffset: 0
+    RightTargetOffset: 0
+    ForwardTargetOffset: 0
+    RightCameraOffset: 0
+    UpCameraOffset: 0
+    ForwardCameraOffset: 0
+    RotationSensibility: 5
+    VerticalRotationSensibility: 0.7
+    MaxRotation: 80
+    MinRotation: -80
+    CollisionLayers:
+      serializedVersion: 2
+      m_Bits: 0
+    SettingsIDName: Dead Player Camera State
+--- !u!114 &-7180565335036784545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769173249422}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6fea81b23f2c33247a7457a083a939bb, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  CameraController: {fileID: 1001010056594958992}
+--- !u!1 &2371141769593258403
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2371141769593258406}
+  - component: {fileID: 2371141769593258401}
+  - component: {fileID: 2371141769593258400}
+  - component: {fileID: 1001010056843442748}
+  - component: {fileID: 1001010057533712112}
+  m_Layer: 0
+  m_Name: Main Camera
+  m_TagString: MainCamera
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &2371141769593258406
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769593258403}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -0, y: -0, z: -30}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_Children: []
+  m_Father: {fileID: 2371141769173249420}
+  m_RootOrder: 0
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!20 &2371141769593258401
+Camera:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769593258403}
+  m_Enabled: 1
+  serializedVersion: 2
+  m_ClearFlags: 1
+  m_BackGroundColor: {r: 0.19215687, g: 0.3019608, b: 0.4745098, a: 0}
+  m_projectionMatrixMode: 1
+  m_GateFitMode: 2
+  m_FOVAxisMode: 0
+  m_SensorSize: {x: 36, y: 24}
+  m_LensShift: {x: 0, y: 0}
+  m_FocalLength: 50
+  m_NormalizedViewPortRect:
+    serializedVersion: 2
+    x: 0
+    y: 0
+    width: 1
+    height: 1
+  near clip plane: 0.1
+  far clip plane: 2000
+  field of view: 50
+  orthographic: 1
+  orthographic size: 5
+  m_Depth: -1
+  m_CullingMask:
+    serializedVersion: 2
+    m_Bits: 4294967295
+  m_RenderingPath: -1
+  m_TargetTexture: {fileID: 0}
+  m_TargetDisplay: 0
+  m_TargetEye: 3
+  m_HDR: 1
+  m_AllowMSAA: 1
+  m_AllowDynamicResolution: 0
+  m_ForceIntoRT: 0
+  m_OcclusionCulling: 1
+  m_StereoConvergence: 10
+  m_StereoSeparation: 0.022
+--- !u!81 &2371141769593258400
+AudioListener:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769593258403}
+  m_Enabled: 1
+--- !u!114 &1001010056843442748
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769593258403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 948f4100a11a5c24981795d21301da5c, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  volumeTrigger: {fileID: 2371141769593258406}
+  volumeLayer:
+    serializedVersion: 2
+    m_Bits: 1
+  stopNaNPropagation: 1
+  finalBlitToCameraTarget: 0
+  antialiasingMode: 2
+  temporalAntialiasing:
+    jitterSpread: 0.75
+    sharpness: 0.25
+    stationaryBlending: 0.95
+    motionBlending: 0.85
+  subpixelMorphologicalAntialiasing:
+    quality: 2
+  fastApproximateAntialiasing:
+    fastMode: 0
+    keepAlpha: 0
+  fog:
+    enabled: 1
+    excludeSkybox: 1
+  debugLayer:
+    lightMeter:
+      width: 512
+      height: 256
+      showCurves: 1
+    histogram:
+      width: 512
+      height: 256
+      channel: 3
+    waveform:
+      exposure: 0.12
+      height: 256
+    vectorscope:
+      size: 256
+      exposure: 0.12
+    overlaySettings:
+      linearDepth: 0
+      motionColorIntensity: 4
+      motionGridSize: 64
+      colorBlindnessType: 0
+      colorBlindnessStrength: 1
+  m_Resources: {fileID: 11400000, guid: d82512f9c8e5d4a4d938b575d47f88d4, type: 2}
+  m_ShowToolkit: 0
+  m_ShowCustomSorter: 0
+  breakBeforeColorGrading: 0
+  m_BeforeTransparentBundles: []
+  m_BeforeStackBundles: []
+  m_AfterStackBundles: []
+--- !u!114 &1001010057533712112
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2371141769593258403}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0ce416d832e7a89469b3bcb7d7dbedd0, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  ShakeTarget: {fileID: 2371141769593258406}
+  MaxAngle: 0
+  ShakeIntensity: 0.442
+  ShakeStartIntensity: 3
+  ShakeEndIntensity: 0.5
+  ShakeSpeed: 2
+  AwaysShaking: 0
+  IsShaking: 0

@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: 84cc3c58dc82be4429f500367883f749
+NativeFormatImporter:
+  externalObjects: {}
+  mainObjectFileID: 2100000
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 282889
+  packageName: Hill Rock Mountain Terrain
+  packageVersion: 1.0
+  assetPath: Assets/Hill Rock Mountain Terrain/Materials/Terrain/mountain_terrain_02/mountain_terrain_02.mat
+  uploadId: 658479

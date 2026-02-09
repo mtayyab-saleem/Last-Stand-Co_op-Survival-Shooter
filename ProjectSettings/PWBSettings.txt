@@ -1,0 +1,1668 @@
+{
+    "_dataDir": "Assets/PluginMaster/DesignTools/Editor/PrefabWorldBuilder/Resources/Data",
+    "_shortcutProfiles": [
+        {
+            "_profileName": "Default 1",
+            "_gridEnableShortcuts": {
+                "_name": "Enable grid shorcuts",
+                "_group": 3,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 103
+                }
+            },
+            "_gridToggle": {
+                "_name": "Toggle grid",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 103
+                }
+            },
+            "_gridToggleSnapping": {
+                "_name": "Toggle snapping",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 104
+                }
+            },
+            "_gridToggleLock": {
+                "_name": "Toggle grid lock",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 108
+                }
+            },
+            "_gridSetOriginPosition": {
+                "_name": "Set the origin to the active gameobject position",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 119
+                }
+            },
+            "_gridSetOriginRotation": {
+                "_name": "Set the grid rotation to the active gameobject rotation",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 101
+                }
+            },
+            "_gridSetSize": {
+                "_name": "Set the snap value to the size of the active gameobject",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 114
+                }
+            },
+            "_gridFrameOrigin": {
+                "_name": "Frame grid origin",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 113
+                }
+            },
+            "_gridTogglePositionHandle": {
+                "_name": "Toggle Postion Handle",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 119
+                }
+            },
+            "_gridToggleRotationHandle": {
+                "_name": "Toggle Rotation Handle",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 101
+                }
+            },
+            "_gridToggleSpacingHandle": {
+                "_name": "Toggle Spacing Handle",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 114
+                }
+            },
+            "_gridMoveOriginUp": {
+                "_name": "Move the origin one step up",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 106
+                }
+            },
+            "_gridMoveOriginDown": {
+                "_name": "Move the origin one step down",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 109
+                }
+            },
+            "_pinMoveHandlesUp": {
+                "_name": "Move handles up",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 117
+                }
+            },
+            "_pinMoveHandlesDown": {
+                "_name": "Move handles down",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 106
+                }
+            },
+            "_pinSelectNextHandle": {
+                "_name": "Select the next handle as active",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 121
+                }
+            },
+            "_pinSelectPrevHandle": {
+                "_name": "Select the previous handle as active",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 104
+                }
+            },
+            "_pinSelectPivotHandle": {
+                "_name": "Set the pivot as the active handle",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 116
+                }
+            },
+            "_pinToggleRepeatItem": {
+                "_name": "Toggle repeat item option",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 116
+                }
+            },
+            "_pinResetScale": {
+                "_name": "Reset scale",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 46
+                }
+            },
+            "_pinRotate90YCW": {
+                "_name": "Rotate 90º around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 113
+                }
+            },
+            "_pinRotate90YCCW": {
+                "_name": "Rotate -90º around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 119
+                }
+            },
+            "_pinRotateAStepYCW": {
+                "_name": "Rotate in steps around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 113
+                }
+            },
+            "_pinRotateAStepYCCW": {
+                "_name": "Rotate in negative steps around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 119
+                }
+            },
+            "_pinRotate90XCW": {
+                "_name": "Rotate 90º around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 107
+                }
+            },
+            "_pinRotate90XCCW": {
+                "_name": "Rotate -90º around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 108
+                }
+            },
+            "_pinRotateAStepXCW": {
+                "_name": "Rotate in steps around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 107
+                }
+            },
+            "_pinRotateAStepXCCW": {
+                "_name": "Rotate in negative steps around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 108
+                }
+            },
+            "_pinRotate90ZCW": {
+                "_name": "Rotate 90º around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 46
+                }
+            },
+            "_pinRotate90ZCCW": {
+                "_name": "Rotate -90º around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 44
+                }
+            },
+            "_pinRotateAStepZCW": {
+                "_name": "Rotate in steps around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 46
+                }
+            },
+            "_pinRotateAStepZCCW": {
+                "_name": "Rotate in negative steps around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 44
+                }
+            },
+            "_pinResetRotation": {
+                "_name": "Reset rotation to zero",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 109
+                }
+            },
+            "_pinSnapRotationToGrid": {
+                "_name": "Snap rotation to grid",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 103
+                }
+            },
+            "_pinAdd1UnitToSurfDist": {
+                "_name": "Surface distance +1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 117
+                }
+            },
+            "_pinSubtract1UnitFromSurfDist": {
+                "_name": "Surface distance -1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 106
+                }
+            },
+            "_pinAdd01UnitToSurfDist": {
+                "_name": "Surface distance +0.1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 117
+                }
+            },
+            "_pinSubtract01UnitFromSurfDist": {
+                "_name": "Surface distance -0.1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 106
+                }
+            },
+            "_pinResetSurfDist": {
+                "_name": "Surface distance = 0.0",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 98
+                }
+            },
+            "_pinSelectPreviousItem": {
+                "_name": "Select previous item in the multi-brush",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 111
+                }
+            },
+            "_pinSelectNextItem": {
+                "_name": "Select next item in the multi-brush",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 110
+                }
+            },
+            "_pinFlipX": {
+                "_name": "Flip sprite horizontally",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 117
+                }
+            },
+            "_brushUpdatebrushstroke": {
+                "_name": "Update brushstroke",
+                "_group": 24,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 46
+                }
+            },
+            "_brushResetRotation": {
+                "_name": "Reset brush rotation",
+                "_group": 24,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 109
+                }
+            },
+            "_gravityAdd1UnitToSurfDist": {
+                "_name": "Surface distance +1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 117
+                }
+            },
+            "_gravitySubtract1UnitFromSurfDist": {
+                "_name": "Surface distance -1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 106
+                }
+            },
+            "_gravityAdd01UnitToSurfDist": {
+                "_name": "Surface distance +0.1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 117
+                }
+            },
+            "_gravitySubtract01UnitFromSurfDist": {
+                "_name": "Surface distance -0.1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 106
+                }
+            },
+            "_editModeDeleteItemAndItsChildren": {
+                "_name": "Delete selected item and its children",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 4,
+                    "_keyCode": 127
+                }
+            },
+            "_editModeDeleteItemButNotItsChildren": {
+                "_name": "Delete selected item but not its children",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 5,
+                    "_keyCode": 127
+                }
+            },
+            "_editModeSelectParent": {
+                "_name": "Select parent object",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 116
+                }
+            },
+            "_editModeToggle": {
+                "_name": "Toggle edit mode",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 5,
+                    "_keyCode": 46
+                }
+            },
+            "_editModeDuplicate": {
+                "_name": "Duplicate",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 100
+                }
+            },
+            "_lineSelectAllPoints": {
+                "_name": "Select all points",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 97
+                }
+            },
+            "_lineDeselectAllPoints": {
+                "_name": "Deselect all points",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 100
+                }
+            },
+            "_lineToggleCurve": {
+                "_name": "Set previous segment as Curved or Straight",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 121
+                }
+            },
+            "_lineToggleClosed": {
+                "_name": "Close or open the line",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 111
+                }
+            },
+            "_lineEditModeTypeToggle": {
+                "_name": "Toggle edit mode type",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 5,
+                    "_keyCode": 44
+                }
+            },
+            "_selectionRotate90XCW": {
+                "_name": "Rotate 90º around X",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 117
+                }
+            },
+            "_selectionRotate90XCCW": {
+                "_name": "Rotate -90º around X",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 106
+                }
+            },
+            "_selectionRotate90YCW": {
+                "_name": "Rotate 90º around Y",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 107
+                }
+            },
+            "_selectionRotate90YCCW": {
+                "_name": "Rotate -90º around Y",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 108
+                }
+            },
+            "_selectionRotate90ZCW": {
+                "_name": "Rotate 90º around Z",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 117
+                }
+            },
+            "_selectionRotate90ZCCW": {
+                "_name": "Rotate -90º around Z",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 106
+                }
+            },
+            "_selectionTogglePositionHandle": {
+                "_name": "Toggle position handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 119
+                }
+            },
+            "_selectionToggleRotationHandle": {
+                "_name": "Toggle rotation handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 101
+                }
+            },
+            "_selectionToggleScaleHandle": {
+                "_name": "Toggle scale handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 114
+                }
+            },
+            "_selectionEditCustomHandle": {
+                "_name": "Edit custom handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 117
+                }
+            },
+            "_paletteDeleteBrush": {
+                "_name": "Delete selected brushes",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 127
+                }
+            },
+            "_palettePreviousBrush": {
+                "_name": "Select previous brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 122
+                }
+            },
+            "_paletteNextBrush": {
+                "_name": "Select next brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 120
+                }
+            },
+            "_palettePreviousPalette": {
+                "_name": "Select previous palette",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 122
+                }
+            },
+            "_paletteNextPalette": {
+                "_name": "Select next palette",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 120
+                }
+            },
+            "_palettePickBrush": {
+                "_name": "Pick or add a brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 49
+                }
+            },
+            "_pinScale": {
+                "_name": "Edit Scale",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 1
+                }
+            },
+            "_pinSelectNextItemScroll": {
+                "_name": "Select prev/next item in the multi-brush",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 1
+                }
+            },
+            "_pinRotateAroundY": {
+                "_name": "Rotate freely around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 2
+                }
+            },
+            "_pinRotateAroundYSnaped": {
+                "_name": "Rotate freely around Y in steps",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 2
+                }
+            },
+            "_pinRotateAroundX": {
+                "_name": "Rotate freely around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinRotateAroundXSnaped": {
+                "_name": "Rotate freely around X in steps",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinRotateAroundZ": {
+                "_name": "Rotate freely around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinRotateAroundZSnaped": {
+                "_name": "Rotate freely around Z in steps",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 7,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinSurfDist": {
+                "_name": "Edit distance to the surface",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 3
+                }
+            },
+            "_brushRadius": {
+                "_name": "Change radius",
+                "_group": 4888,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 1
+                }
+            },
+            "_brushDensity": {
+                "_name": "Edit density",
+                "_group": 24,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 1
+                }
+            },
+            "_brushRotate": {
+                "_name": "Rotate brush",
+                "_group": 24,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 2
+                }
+            },
+            "_gravitySurfDist": {
+                "_name": "Edit distance to the surface",
+                "_group": 16,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 3
+                }
+            },
+            "_lineEditGap": {
+                "_name": "Edit gap size",
+                "_group": 96,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 2
+                }
+            },
+            "_tilingEditSpacing1": {
+                "_name": "Edit spacing on axis 1",
+                "_group": 128,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 2
+                }
+            },
+            "_tilingEditSpacing2": {
+                "_name": "Edit spacing on axis 2",
+                "_group": 128,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 2
+                }
+            },
+            "_paletteNextBrushScroll": {
+                "_name": "Select prev/next brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 1
+                }
+            },
+            "_paletteNextPaletteScroll": {
+                "_name": "Select prev/next palette",
+                "_group": 2049,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 7,
+                    "_mouseEvent": 1
+                }
+            }
+        },
+        {
+            "_profileName": "Default 2",
+            "_gridEnableShortcuts": {
+                "_name": "Enable grid shorcuts",
+                "_group": 3,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 103
+                }
+            },
+            "_gridToggle": {
+                "_name": "Toggle grid",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 103
+                }
+            },
+            "_gridToggleSnapping": {
+                "_name": "Toggle snapping",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 104
+                }
+            },
+            "_gridToggleLock": {
+                "_name": "Toggle grid lock",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 108
+                }
+            },
+            "_gridSetOriginPosition": {
+                "_name": "Set the origin to the active gameobject position",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 119
+                }
+            },
+            "_gridSetOriginRotation": {
+                "_name": "Set the grid rotation to the active gameobject rotation",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 101
+                }
+            },
+            "_gridSetSize": {
+                "_name": "Set the snap value to the size of the active gameobject",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 114
+                }
+            },
+            "_gridFrameOrigin": {
+                "_name": "Frame grid origin",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 113
+                }
+            },
+            "_gridTogglePositionHandle": {
+                "_name": "Toggle Postion Handle",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 119
+                }
+            },
+            "_gridToggleRotationHandle": {
+                "_name": "Toggle Rotation Handle",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 101
+                }
+            },
+            "_gridToggleSpacingHandle": {
+                "_name": "Toggle Spacing Handle",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 114
+                }
+            },
+            "_gridMoveOriginUp": {
+                "_name": "Move the origin one step up",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 106
+                }
+            },
+            "_gridMoveOriginDown": {
+                "_name": "Move the origin one step down",
+                "_group": 2,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 109
+                }
+            },
+            "_pinMoveHandlesUp": {
+                "_name": "Move handles up",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 280
+                }
+            },
+            "_pinMoveHandlesDown": {
+                "_name": "Move handles down",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 281
+                }
+            },
+            "_pinSelectNextHandle": {
+                "_name": "Select the next handle as active",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 279
+                }
+            },
+            "_pinSelectPrevHandle": {
+                "_name": "Select the previous handle as active",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 104
+                }
+            },
+            "_pinSelectPivotHandle": {
+                "_name": "Set the pivot as the active handle",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 278
+                }
+            },
+            "_pinToggleRepeatItem": {
+                "_name": "Toggle repeat item option",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 116
+                }
+            },
+            "_pinResetScale": {
+                "_name": "Reset scale",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 278
+                }
+            },
+            "_pinRotate90YCW": {
+                "_name": "Rotate 90º around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 276
+                }
+            },
+            "_pinRotate90YCCW": {
+                "_name": "Rotate -90º around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 275
+                }
+            },
+            "_pinRotateAStepYCW": {
+                "_name": "Rotate in steps around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 276
+                }
+            },
+            "_pinRotateAStepYCCW": {
+                "_name": "Rotate in negative steps around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 275
+                }
+            },
+            "_pinRotate90XCW": {
+                "_name": "Rotate 90º around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 276
+                }
+            },
+            "_pinRotate90XCCW": {
+                "_name": "Rotate -90º around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 275
+                }
+            },
+            "_pinRotateAStepXCW": {
+                "_name": "Rotate in steps around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 276
+                }
+            },
+            "_pinRotateAStepXCCW": {
+                "_name": "Rotate in negative steps around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 275
+                }
+            },
+            "_pinRotate90ZCW": {
+                "_name": "Rotate 90º around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 46
+                }
+            },
+            "_pinRotate90ZCCW": {
+                "_name": "Rotate -90º around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 44
+                }
+            },
+            "_pinRotateAStepZCW": {
+                "_name": "Rotate in steps around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 46
+                }
+            },
+            "_pinRotateAStepZCCW": {
+                "_name": "Rotate in negative steps around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 44
+                }
+            },
+            "_pinResetRotation": {
+                "_name": "Reset rotation to zero",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 278
+                }
+            },
+            "_pinSnapRotationToGrid": {
+                "_name": "Snap rotation to grid",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 103
+                }
+            },
+            "_pinAdd1UnitToSurfDist": {
+                "_name": "Surface distance +1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 273
+                }
+            },
+            "_pinSubtract1UnitFromSurfDist": {
+                "_name": "Surface distance -1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 274
+                }
+            },
+            "_pinAdd01UnitToSurfDist": {
+                "_name": "Surface distance +0.1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 273
+                }
+            },
+            "_pinSubtract01UnitFromSurfDist": {
+                "_name": "Surface distance -0.1",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 274
+                }
+            },
+            "_pinResetSurfDist": {
+                "_name": "Surface distance = 0.0",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 98
+                }
+            },
+            "_pinSelectPreviousItem": {
+                "_name": "Select previous item in the multi-brush",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 111
+                }
+            },
+            "_pinSelectNextItem": {
+                "_name": "Select next item in the multi-brush",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 110
+                }
+            },
+            "_pinFlipX": {
+                "_name": "Flip sprite horizontally",
+                "_group": 4,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 117
+                }
+            },
+            "_brushUpdatebrushstroke": {
+                "_name": "Update brushstroke",
+                "_group": 24,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 46
+                }
+            },
+            "_brushResetRotation": {
+                "_name": "Reset brush rotation",
+                "_group": 24,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 2,
+                    "_keyCode": 109
+                }
+            },
+            "_gravityAdd1UnitToSurfDist": {
+                "_name": "Surface distance +1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 117
+                }
+            },
+            "_gravitySubtract1UnitFromSurfDist": {
+                "_name": "Surface distance -1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 106
+                }
+            },
+            "_gravityAdd01UnitToSurfDist": {
+                "_name": "Surface distance +0.1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 117
+                }
+            },
+            "_gravitySubtract01UnitFromSurfDist": {
+                "_name": "Surface distance -0.1",
+                "_group": 16,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 106
+                }
+            },
+            "_editModeDeleteItemAndItsChildren": {
+                "_name": "Delete selected item and its children",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 4,
+                    "_keyCode": 127
+                }
+            },
+            "_editModeDeleteItemButNotItsChildren": {
+                "_name": "Delete selected item but not its children",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 5,
+                    "_keyCode": 127
+                }
+            },
+            "_editModeSelectParent": {
+                "_name": "Select parent object",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 116
+                }
+            },
+            "_editModeToggle": {
+                "_name": "Toggle edit mode",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 5,
+                    "_keyCode": 46
+                }
+            },
+            "_editModeDuplicate": {
+                "_name": "Duplicate",
+                "_group": 224,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 100
+                }
+            },
+            "_lineSelectAllPoints": {
+                "_name": "Select all points",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 97
+                }
+            },
+            "_lineDeselectAllPoints": {
+                "_name": "Deselect all points",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 100
+                }
+            },
+            "_lineToggleCurve": {
+                "_name": "Set previous segment as Curved or Straight",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 281
+                }
+            },
+            "_lineToggleClosed": {
+                "_name": "Close or open the line",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 279
+                }
+            },
+            "_lineEditModeTypeToggle": {
+                "_name": "Toggle edit mode type",
+                "_group": 32,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 5,
+                    "_keyCode": 44
+                }
+            },
+            "_selectionRotate90XCW": {
+                "_name": "Rotate 90º around X",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 280
+                }
+            },
+            "_selectionRotate90XCCW": {
+                "_name": "Rotate -90º around X",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 281
+                }
+            },
+            "_selectionRotate90YCW": {
+                "_name": "Rotate 90º around Y",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 276
+                }
+            },
+            "_selectionRotate90YCCW": {
+                "_name": "Rotate -90º around Y",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 275
+                }
+            },
+            "_selectionRotate90ZCW": {
+                "_name": "Rotate 90º around Z",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 273
+                }
+            },
+            "_selectionRotate90ZCCW": {
+                "_name": "Rotate -90º around Z",
+                "_group": 1152,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 6,
+                    "_keyCode": 274
+                }
+            },
+            "_selectionTogglePositionHandle": {
+                "_name": "Toggle position handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 119
+                }
+            },
+            "_selectionToggleRotationHandle": {
+                "_name": "Toggle rotation handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 101
+                }
+            },
+            "_selectionToggleScaleHandle": {
+                "_name": "Toggle scale handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 114
+                }
+            },
+            "_selectionEditCustomHandle": {
+                "_name": "Edit custom handle",
+                "_group": 1024,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 0,
+                    "_keyCode": 117
+                }
+            },
+            "_paletteDeleteBrush": {
+                "_name": "Delete selected brushes",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 127
+                }
+            },
+            "_palettePreviousBrush": {
+                "_name": "Select previous brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 122
+                }
+            },
+            "_paletteNextBrush": {
+                "_name": "Select next brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 3,
+                    "_keyCode": 120
+                }
+            },
+            "_palettePreviousPalette": {
+                "_name": "Select previous palette",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 122
+                }
+            },
+            "_paletteNextPalette": {
+                "_name": "Select next palette",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 7,
+                    "_keyCode": 120
+                }
+            },
+            "_palettePickBrush": {
+                "_name": "Pick or add a brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_keyCombination": {
+                    "_modifiers": 1,
+                    "_keyCode": 49
+                }
+            },
+            "_pinScale": {
+                "_name": "Edit Scale",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 1
+                }
+            },
+            "_pinSelectNextItemScroll": {
+                "_name": "Select prev/next item in the multi-brush",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 1
+                }
+            },
+            "_pinRotateAroundY": {
+                "_name": "Rotate freely around Y",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 2
+                }
+            },
+            "_pinRotateAroundYSnaped": {
+                "_name": "Rotate freely around Y in steps",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 2
+                }
+            },
+            "_pinRotateAroundX": {
+                "_name": "Rotate freely around X",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinRotateAroundXSnaped": {
+                "_name": "Rotate freely around X in steps",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinRotateAroundZ": {
+                "_name": "Rotate freely around Z",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinRotateAroundZSnaped": {
+                "_name": "Rotate freely around Z in steps",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 7,
+                    "_mouseEvent": 5
+                }
+            },
+            "_pinSurfDist": {
+                "_name": "Edit distance to the surface",
+                "_group": 4,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 3
+                }
+            },
+            "_brushRadius": {
+                "_name": "Change radius",
+                "_group": 4888,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 1,
+                    "_mouseEvent": 2
+                }
+            },
+            "_brushDensity": {
+                "_name": "Edit density",
+                "_group": 24,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 6,
+                    "_mouseEvent": 1
+                }
+            },
+            "_brushRotate": {
+                "_name": "Rotate brush",
+                "_group": 24,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 2
+                }
+            },
+            "_gravitySurfDist": {
+                "_name": "Edit distance to the surface",
+                "_group": 16,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 3
+                }
+            },
+            "_lineEditGap": {
+                "_name": "Edit gap size",
+                "_group": 96,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 2
+                }
+            },
+            "_tilingEditSpacing1": {
+                "_name": "Edit spacing on axis 1",
+                "_group": 128,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 2,
+                    "_mouseEvent": 2
+                }
+            },
+            "_tilingEditSpacing2": {
+                "_name": "Edit spacing on axis 2",
+                "_group": 128,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 2
+                }
+            },
+            "_paletteNextBrushScroll": {
+                "_name": "Select prev/next brush",
+                "_group": 2049,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 3,
+                    "_mouseEvent": 1
+                }
+            },
+            "_paletteNextPaletteScroll": {
+                "_name": "Select prev/next palette",
+                "_group": 2049,
+                "_conflicted": false,
+                "_combination": {
+                    "_modifiers": 7,
+                    "_mouseEvent": 1
+                }
+            }
+        }
+    ],
+    "_selectedProfileIdx": 0
+}

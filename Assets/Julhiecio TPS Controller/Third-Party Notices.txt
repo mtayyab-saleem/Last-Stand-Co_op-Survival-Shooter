@@ -1,0 +1,11 @@
+ALL AUDIOS inside the [Assets/Julhiecio TPS Controller/Audio] folder are under CC0 1.0 license
+This means that all files inside this folder are in the public domain and have no rights reserved.
+These files are found at: www.freesounds.org
+
+ALL TEXTURES inside the [Assets/Julhiecio TPS Controller/Demos/Textures/Third Party Textures] folder are under the CC0 1.0 license
+This means that all files inside this folder are in the public domain and have no rights reserved.
+These files are found at: www.ambientcg.com
+
+All the rest of the content not mentioned above is made by me (Julhiecio GameDev) and is under the AssetStore License (https://unity.com/pt/legal/as-terms)
+
+More information about CC0 1.0 License: https://creativecommons.org/publicdomain/zero/1.0/
