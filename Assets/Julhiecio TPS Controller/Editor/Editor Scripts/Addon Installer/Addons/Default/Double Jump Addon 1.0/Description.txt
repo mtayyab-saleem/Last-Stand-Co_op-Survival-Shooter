@@ -1,2 +1,0 @@
-This addon allows the player 
-to jump more than once
