@@ -7,70 +7,53 @@ using JUTPS.JUInputSystem;
 
 public class JU_NetSetup : NetworkBehaviour
 {
-    [Header("Drag Components Here")]
+    [Header("Disable on Remote Players")]
     public MonoBehaviour[] scriptsToDisable;
     public GameObject[] objectsToDisable;
 
     [Header("Mobile Controls")]
-    [Tooltip("Mobile controls force enable? (Testing ke liye)")]
     public bool ForceMobileMode = false;
 
-    [Header("Network Sync Components")]
-    [Tooltip("Player ka Animator (Auto-find hoga)")]
+    [Header("Animation")]
     public Animator playerAnimator;
 
     void Start()
     {
-        // Auto-find animator agar assign nahi hai
         if (playerAnimator == null)
-        {
-            playerAnimator = GetComponent<Animator>();
-            if (playerAnimator == null)
-            {
-                playerAnimator = GetComponentInChildren<Animator>();
-            }
-        }
+            playerAnimator = GetComponent<Animator>() ?? GetComponentInChildren<Animator>();
 
-        // === REMOTE PLAYER ===
         if (!isLocalPlayer)
-        {
-            foreach (var s in scriptsToDisable) s.enabled = false;
-            foreach (var o in objectsToDisable) o.SetActive(false);
-            if (TryGetComponent(out Rigidbody rb)) rb.isKinematic = true;
-            gameObject.tag = "Untagged";
-
-            // ✅ IMPORTANT: Remote player ka animator ENABLE rakho
-            // Taaki animations sync ho sakein
-            if (playerAnimator != null)
-            {
-                playerAnimator.enabled = true;
-                Debug.Log($"✅ Remote player animator enabled: {gameObject.name}");
-            }
-        }
-        // === LOCAL PLAYER ===
+            SetupRemotePlayer();
         else
-        {
-            gameObject.tag = "Player";
             SetupLocalPlayer();
-        }
+    }
+
+    void SetupRemotePlayer()
+    {
+        foreach (var s in scriptsToDisable) if (s != null) s.enabled = false;
+        foreach (var o in objectsToDisable) if (o != null) o.SetActive(false);
+
+        if (TryGetComponent(out Rigidbody rb)) rb.isKinematic = true;
+
+        gameObject.tag = "Untagged";
+
+        // Keep animator enabled so synced animations can play
+        if (playerAnimator != null) playerAnimator.enabled = true;
     }
 
     void SetupLocalPlayer()
     {
-        // 1. GAME MANAGER SETUP
+        gameObject.tag = "Player";
+
         var character = GetComponent<JUCharacterController>();
-        if (character != null)
+        if (character == null)
         {
-            JUGameManager.PlayerController = character;
-            Debug.Log("✅ Player registered with JUGameManager");
-        }
-        else
-        {
-            Debug.LogError("❌ JUCharacterController not found on player!");
+            Debug.LogError("[JU_NetSetup] JUCharacterController not found!");
             return;
         }
 
-        // 2. CAMERA SETUP
+        JUGameManager.PlayerController = character;
+
         var cam = FindFirstObjectByType<TPSCameraController>(FindObjectsInactive.Include);
         if (cam != null)
         {
@@ -78,41 +61,25 @@ public class JU_NetSetup : NetworkBehaviour
             cam.characterTarget = character;
             cam.gameObject.SetActive(true);
             cam.enabled = true;
-            Debug.Log("✅ Camera setup complete");
         }
 
-        // 3. MOBILE MODE SETUP
-        if (ForceMobileMode)
-        {
-            SetupMobileControls();
-        }
+        if (ForceMobileMode) SetupMobileControls();
 
-        // 4. NETWORK ANIMATOR SETUP
         SetupNetworkAnimator();
     }
 
     void SetupNetworkAnimator()
     {
-        // Check if NetworkAnimator already exists
         var netAnimator = GetComponent<NetworkAnimator>();
 
         if (netAnimator == null && playerAnimator != null)
         {
-            // Add NetworkAnimator component
             netAnimator = gameObject.AddComponent<NetworkAnimator>();
             netAnimator.animator = playerAnimator;
-            Debug.Log("✅ NetworkAnimator automatically added and configured");
         }
         else if (netAnimator != null && netAnimator.animator == null)
         {
-            // Configure existing NetworkAnimator
             netAnimator.animator = playerAnimator;
-            Debug.Log("✅ NetworkAnimator configured with player animator");
-        }
-
-        if (netAnimator != null)
-        {
-            Debug.Log($"✅ Animation sync enabled for {gameObject.name}");
         }
     }
 
@@ -123,34 +90,23 @@ public class JU_NetSetup : NetworkBehaviour
         {
             mobileRig.gameObject.SetActive(true);
             mobileRig.enabled = true;
-            Debug.Log("✅ Mobile Rig enabled");
-
-            if (JUInput.Instance() != null)
-            {
-                JUInput.Instance().EnableBlockStandardInputs();
-                Debug.Log("✅ Keyboard inputs blocked - Mobile mode active");
-            }
+            JUInput.Instance()?.EnableBlockStandardInputs();
         }
         else
         {
-            Debug.LogWarning("⚠️ Mobile Rig not found!");
+            Debug.LogWarning("[JU_NetSetup] MobileRig not found!");
         }
     }
 
     void OnDestroy()
     {
-        if (isLocalPlayer)
-        {
-            if (JUGameManager.PlayerController == GetComponent<JUCharacterController>())
-            {
-                JUGameManager.PlayerController = null;
-                Debug.Log("🔄 Player unregistered from JUGameManager");
-            }
+        if (!isLocalPlayer) return;
 
-            if (JUInput.Instance() != null && JUInput.Instance().IsBlockingDefaultInputs)
-            {
-                JUInput.Instance().DisableBlockStandardInputs();
-            }
-        }
+        if (JUGameManager.PlayerController == GetComponent<JUCharacterController>())
+            JUGameManager.PlayerController = null;
+
+        var input = JUInput.Instance();
+        if (input != null && input.IsBlockingDefaultInputs)
+            input.DisableBlockStandardInputs();
     }
 }

@@ -27,94 +27,68 @@ public class JU_NetworkManager : NetworkBehaviour
 
     void Update()
     {
-        // Agar main Local Player nahi hoon (Dushman hoon) aur Bullet ne mujhe locally damage diya hai
-        if (!isLocalPlayer)
+        // Detect damage applied locally by a bullet and report it to the server
+        if (!isLocalPlayer && _juHealth.Health < netHealth)
         {
-            // Check agar health kam hui hai
-            if (_juHealth.Health < netHealth)
-            {
-                float damageAmount = netHealth - _juHealth.Health;
+            float damage = netHealth - _juHealth.Health;
 
-                // CRITICAL FIX: Health ko wapis reset karein taake glitch na ho
-                _juHealth.Health = netHealth;
-                _juHealth.IsDead = netIsDead; // Death state bhi reset karein
+            // Reset local values to server authority to prevent visual glitch
+            _juHealth.Health = netHealth;
+            _juHealth.IsDead = netIsDead;
 
-                // Server ko batayen
-                var myPlayer = NetworkClient.connection.identity.GetComponent<JU_NetworkManager>();
-                if (myPlayer != null)
-                {
-                    myPlayer.CmdReportDamage(this.gameObject, damageAmount);
-                }
-            }
+            var localPlayer = NetworkClient.connection?.identity?.GetComponent<JU_NetworkManager>();
+            localPlayer?.CmdReportDamage(this.gameObject, damage);
         }
 
-        // Agar main Local Player hoon (Fall damage etc)
-        if (isLocalPlayer)
+        // Same check for local player (fall damage, explosions, etc.)
+        if (isLocalPlayer && _juHealth.Health < netHealth)
         {
-            if (_juHealth.Health < netHealth)
-            {
-                float damageAmount = netHealth - _juHealth.Health;
-                _juHealth.Health = netHealth;
-                CmdReportDamage(this.gameObject, damageAmount);
-            }
+            float damage = netHealth - _juHealth.Health;
+            _juHealth.Health = netHealth;
+            CmdReportDamage(this.gameObject, damage);
         }
     }
 
     [Command]
     public void CmdReportDamage(GameObject target, float amount)
     {
-        if (target != null)
-        {
-            var targetScript = target.GetComponent<JU_NetworkManager>();
-            if (targetScript != null)
-            {
-                targetScript.ApplyDamageOnServer(amount);
-            }
-        }
+        target?.GetComponent<JU_NetworkManager>()?.ApplyDamageOnServer(amount);
     }
 
     [Server]
     public void ApplyDamageOnServer(float amount)
     {
-        if (netIsDead) return; // Agar pehle se dead hai to kuch na karein
+        if (netIsDead) return;
 
         netHealth -= amount;
-        if (netHealth <= 0)
+        if (netHealth <= 0f)
         {
-            netHealth = 0;
-            netIsDead = true; // Server par death confirm
+            netHealth = 0f;
+            netIsDead = true;
         }
 
-        // Server par JUHealth update
         _juHealth.Health = netHealth;
         _juHealth.CheckHealthState();
     }
 
-    // --- HOOKS ---
+    // --- SYNCVAR HOOKS ---
 
     void OnServerHealthChanged(float oldHealth, float newHealth)
     {
         _juHealth.Health = newHealth;
 
-        // Sirf Local Player (Victim) ko Blood dikhayein
         if (isLocalPlayer && newHealth < oldHealth && !netIsDead)
-        {
             BloodScreen.PlayerTakingDamaged();
-        }
     }
 
     void OnDeathStateChanged(bool oldState, bool newState)
     {
         _juHealth.IsDead = newState;
 
-        if (newState == true) // Agar Dead hua hai
+        if (newState)
         {
-            _juHealth.Health = 0;
-            _juHealth.CheckHealthState(); // Ye JU TPS ki death logic (Ragdoll/Anim) chalayega
-        }
-        else // Agar Respawn hua hai
-        {
-            // Respawn logic agar chahiye ho to yahan ayegi
+            _juHealth.Health = 0f;
+            _juHealth.CheckHealthState(); // Triggers ragdoll / death anim in JU TPS
         }
     }
 }

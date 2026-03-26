@@ -6,17 +6,11 @@ public class DisconnectButton : MonoBehaviour
     public void OnDisconnectClick()
     {
         NetworkManager networkManager = FindFirstObjectByType<NetworkManager>();
+        if (networkManager == null) return;
 
-        if (networkManager != null)
-        {
-            if (NetworkServer.active && NetworkClient.active)
-            {
-                networkManager.StopHost();
-            }
-            else if (NetworkClient.isConnected)
-            {
-                networkManager.StopClient();
-            }
-        }
+        if (NetworkServer.active && NetworkClient.active)
+            networkManager.StopHost();       // This machine is the Host
+        else if (NetworkClient.isConnected)
+            networkManager.StopClient();     // This machine is a Client
     }
 }

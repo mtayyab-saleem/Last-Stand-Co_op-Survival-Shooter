@@ -41,8 +41,8 @@ namespace JUTPS.CharacterBrain
 
         //MOVEMENT VARIABLES
         [HideInInspector] public float VelocityMultiplier;
-        protected float VerticalY;
-        protected float HorizontalX;
+        public float VerticalY;
+        public float HorizontalX;
         [HideInInspector] public Transform DirectionTransform;
 
         //ROTATION VARIABLES
