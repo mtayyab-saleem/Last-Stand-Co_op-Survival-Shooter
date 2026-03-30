@@ -8985,8 +8985,6 @@ GameObject:
   - component: {fileID: 3523895120984373470}
   - component: {fileID: 7002734277997374623}
   - component: {fileID: 4832140895701918141}
-  - component: {fileID: 7810508834808877472}
-  - component: {fileID: 9211133332598418488}
   m_Layer: 5
   m_Name: JUTPS User Interface
   m_TagString: Untagged
@@ -9204,78 +9202,6 @@ MonoBehaviour:
   OnContinue:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &7810508834808877472
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7029114239654419012}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: d1e10501a59849b4da17ce0538caedb6, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  MoveHorizontal: 0
-  MoveVertical: 0
-  RotateHorizontal: 0
-  RotateVertical: 0
-  PressedShooting: 0
-  PressedAiming: 0
-  PressedReload: 0
-  PressedRun: 0
-  PressedJump: 0
-  PressedPunch: 0
-  PressedCrouch: 0
-  PressedProne: 0
-  PressedRoll: 0
-  PressedPickup: 0
-  PressedInteract: 0
-  PressedNextItem: 0
-  PressedPreviousItem: 0
-  PressedShootingDown: 0
-  PressedAimingDown: 0
-  PressedReloadDown: 0
-  PressedRunDown: 0
-  PressedJumpDown: 0
-  PressedPunchDown: 0
-  PressedCrouchDown: 0
-  PressedProneDown: 0
-  PressedRollDown: 0
-  PressedPickupDown: 0
-  PressedInteractDown: 0
-  PressedNextItemDown: 0
-  PressedPreviousItemDown: 0
-  PressedOpenInventoryDown: 0
-  PressedShootingUp: 0
-  PressedAimingUp: 0
-  PressedReloadUp: 0
-  PressedRunUp: 0
-  PressedJumpUp: 0
-  PressedPunchUp: 0
-  PressedCrouchUp: 0
-  PressedProneUp: 0
-  PressedRollUp: 0
-  PressedPickupUp: 0
-  PressedInteractUp: 0
-  PressedNextItemUp: 0
-  PressedPreviousItemUp: 0
-  CustomTouchButton: []
-  CustomTouchfield: []
-  CustomJoystickVirtual: []
-  CustomButton: []
---- !u!114 &9211133332598418488
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 7029114239654419012}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 04d40478f07212b42b674b9bef5002c5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
 --- !u!1 &7329803911680720164
 GameObject:
   m_ObjectHideFlags: 0
