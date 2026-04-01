@@ -5,7 +5,7 @@ public class DisconnectButton : MonoBehaviour
 {
     public void OnDisconnectClick()
     {
-        NetworkManager networkManager = FindFirstObjectByType<NetworkManager>();
+        Mirror.NetworkManager networkManager = FindFirstObjectByType<Mirror.NetworkManager>();
 
         if (networkManager != null)
         {
