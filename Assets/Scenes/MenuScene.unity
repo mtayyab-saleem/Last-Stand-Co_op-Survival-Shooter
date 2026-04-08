@@ -1888,6 +1888,7 @@ GameObject:
   - component: {fileID: 105631553}
   - component: {fileID: 105631555}
   - component: {fileID: 105631554}
+  - component: {fileID: 105631556}
   m_Layer: 0
   m_Name: ConnectionPanel
   m_TagString: Untagged
@@ -1956,6 +1957,22 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 105631552}
   m_CullTransparentMesh: 1
+--- !u!114 &105631556
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 105631552}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 4c9f44ff91a72ed4289f1739f99c8724, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ConnectionMenuUI
+  networkDiscovery: {fileID: 295797629}
+  serverListView: {fileID: 1842056062}
+  refreshButton: {fileID: 2120138657}
+  backButton: {fileID: 1354000303}
 --- !u!1 &111607953
 GameObject:
   m_ObjectHideFlags: 0
@@ -5883,6 +5900,7 @@ GameObject:
   - component: {fileID: 278866815}
   - component: {fileID: 278866817}
   - component: {fileID: 278866816}
+  - component: {fileID: 278866818}
   m_Layer: 0
   m_Name: MainMenuPanel
   m_TagString: Untagged
@@ -5952,6 +5970,25 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 278866814}
   m_CullTransparentMesh: 1
+--- !u!114 &278866818
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 278866814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a93ac4f4657ec064da7b5410cafce428, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::MainMenuUI
+  startButton: {fileID: 1080564141}
+  joinButton: {fileID: 1439974801}
+  settingButton: {fileID: 1238702161}
+  exitButton: {fileID: 1134791712}
+  quitModalWindow: {fileID: 2130569553}
+  confirmQuitButton: {fileID: 730913381}
+  cancelQuitButton: {fileID: 830350550}
 --- !u!1 &282535962
 GameObject:
   m_ObjectHideFlags: 0
@@ -6531,9 +6568,8 @@ GameObject:
   - component: {fileID: 295797626}
   - component: {fileID: 295797624}
   - component: {fileID: 295797629}
-  - component: {fileID: 295797628}
   m_Layer: 0
-  m_Name: NetworkManager
+  m_Name: Network Components
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -6628,49 +6664,6 @@ Transform:
   m_Children: []
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &295797628
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 295797623}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5998da9e3eb733b46823f5c31ec323e8, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  networkDiscovery: {fileID: 295797629}
-  mainMenuPanel: {fileID: 278866814}
-  connectionPanel: {fileID: 105631552}
-  hostPanel: {fileID: 2112323259}
-  loadingPanel: {fileID: 6990882937779663196}
-  settingPanel: {fileID: 1355225032}
-  quitModalWindow: {fileID: 2130569553}
-  startButton: {fileID: 1080564141}
-  joinButton: {fileID: 1439974801}
-  settingButton: {fileID: 1238702161}
-  exitButton: {fileID: 1134791712}
-  connectionExitButton: {fileID: 1354000303}
-  serverListView: {fileID: 1842056062}
-  refreshButton: {fileID: 2120138657}
-  hostMatchButton: {fileID: 1428073282}
-  hostbackButton: {fileID: 1959989248}
-  mapButtons:
-  - {fileID: 200206318}
-  - {fileID: 449577527}
-  gameModeButtons:
-  - {fileID: 220825887}
-  - {fileID: 1133519399}
-  - {fileID: 33858728}
-  characterImage: {fileID: 4203892780468055620}
-  progressBar: {fileID: 5542616840653820696}
-  loadingText: {fileID: 1617208979334323076}
-  confirmQuitButton: {fileID: 730913381}
-  cancelQuitButton: {fileID: 830350550}
-  settingBackButton: {fileID: 1038816757}
-  normalColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
-  selectedColor: {r: 0, g: 0.8, b: 0.2, a: 1}
 --- !u!114 &295797629
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -23052,6 +23045,7 @@ GameObject:
   - component: {fileID: 1355225033}
   - component: {fileID: 1355225035}
   - component: {fileID: 1355225034}
+  - component: {fileID: 1355225036}
   m_Layer: 0
   m_Name: Setting Panel
   m_TagString: Untagged
@@ -23117,6 +23111,19 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1355225032}
   m_CullTransparentMesh: 1
+--- !u!114 &1355225036
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1355225032}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 92ba159887146e54f82b8469d833fd0e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SettingsMenuUI
+  backButton: {fileID: 1038816757}
 --- !u!1 &1361679549
 GameObject:
   m_ObjectHideFlags: 0
@@ -28700,6 +28707,7 @@ GameObject:
   - component: {fileID: 1794324112}
   - component: {fileID: 1794324111}
   - component: {fileID: 1794324110}
+  - component: {fileID: 1794324113}
   m_Layer: 0
   m_Name: UICanvas
   m_TagString: Untagged
@@ -28794,6 +28802,23 @@ Canvas:
   m_SortingLayerID: 0
   m_SortingOrder: 100
   m_TargetDisplay: 0
+--- !u!114 &1794324113
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1794324108}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d3c0ade2b15078e4586c96fbd85d45c6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::GameUIManager
+  _mainMenuPanel: {fileID: 278866814}
+  _connectionPanel: {fileID: 105631552}
+  _hostPanel: {fileID: 2112323259}
+  _loadingPanel: {fileID: 6990882937779663196}
+  _settingPanel: {fileID: 1355225032}
 --- !u!1 &1798617020
 GameObject:
   m_ObjectHideFlags: 0
@@ -34149,6 +34174,7 @@ GameObject:
   - component: {fileID: 2112323260}
   - component: {fileID: 2112323262}
   - component: {fileID: 2112323261}
+  - component: {fileID: 2112323263}
   m_Layer: 0
   m_Name: Host Panel
   m_TagString: Untagged
@@ -34219,6 +34245,30 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2112323259}
   m_CullTransparentMesh: 1
+--- !u!114 &2112323263
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2112323259}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e8cc581273bd2d545ba0c8ffae38be10, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::HostMenuUI
+  networkDiscovery: {fileID: 295797629}
+  hostMatchButton: {fileID: 1428073282}
+  backButton: {fileID: 1959989248}
+  mapButtons:
+  - {fileID: 200206318}
+  - {fileID: 449577527}
+  gameModeButtons:
+  - {fileID: 220825887}
+  - {fileID: 1133519399}
+  - {fileID: 33858728}
+  normalColor: {r: 0.2, g: 0.2, b: 0.2, a: 1}
+  selectedColor: {r: 0, g: 0.8, b: 0.2, a: 1}
 --- !u!1 &2118586639
 GameObject:
   m_ObjectHideFlags: 0
@@ -35842,6 +35892,7 @@ GameObject:
   - component: {fileID: 2255522334923955153}
   - component: {fileID: 4824386067489716711}
   - component: {fileID: 2384982003299539642}
+  - component: {fileID: 6990882937779663197}
   m_Layer: 0
   m_Name: Loading Panel
   m_TagString: Untagged
@@ -35849,6 +35900,21 @@ GameObject:
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
+--- !u!114 &6990882937779663197
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6990882937779663196}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 3a28b427db7485f4dbf56aaf3f5f9813, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::LoadingMenuUI
+  progressBar: {fileID: 5542616840653820696}
+  loadingText: {fileID: 1617208979334323076}
+  characterImage: {fileID: 3621407119050767069}
 --- !u!1 &8156587522878693341
 GameObject:
   m_ObjectHideFlags: 0
