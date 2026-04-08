@@ -2,17 +2,14 @@
 using JUTPS;
 using System.Collections;
 
-/// <summary>
-/// UI Scripts ko safe banata hai bina original code change kiye
-/// Scene mein ek empty GameObject pe lagao (naam: "UI Safety Manager")
-/// </summary>
+// Disables JU TPS UI until a networked player is spawned, then re-enables it.
+// Attach to an empty GameObject in the scene.
 public class UISafetyWrapper : MonoBehaviour
 {
-    [Header("UI Elements (Auto-find hoga)")]
-    public GameObject UIPanel; // "JUTPS User Interface" GameObject
+    [Header("UI Elements (Auto-found if not assigned)")]
+    public GameObject UIPanel;
 
     [Header("Settings")]
-    [Tooltip("UI ko initially disable rakho? (Recommended: YES)")]
     public bool DisableUIOnStart = true;
 
     private bool uiInitialized = false;
@@ -20,63 +17,39 @@ public class UISafetyWrapper : MonoBehaviour
     void Start()
     {
         if (DisableUIOnStart && UIPanel != null)
-        {
             UIPanel.SetActive(false);
-            Debug.Log("🔒 UI temporarily disabled, waiting for player...");
-        }
 
         StartCoroutine(WaitForPlayerAndEnableUI());
     }
 
+    void Update()
+    {
+        // If player is destroyed (disconnect), hide UI to prevent null-ref errors
+        if (uiInitialized && JUGameManager.PlayerController == null)
+        {
+            if (UIPanel != null) UIPanel.SetActive(false);
+            uiInitialized = false;
+        }
+    }
+
     IEnumerator WaitForPlayerAndEnableUI()
     {
-        // Step 1: Player ka intezar karo
         while (JUGameManager.PlayerController == null)
-        {
             yield return new WaitForSeconds(0.1f);
-        }
 
-        Debug.Log("✅ Player found! Initializing UI...");
-
-        // Step 2: Thoda wait karo taake player fully setup ho jaye
-        yield return new WaitForSeconds(0.2f);
-
-        // Step 3: UI ko enable karo
+        yield return new WaitForSeconds(0.2f); // Let player fully initialize
         EnableUI();
-
         uiInitialized = true;
     }
 
     void EnableUI()
     {
-        // Auto-find UI panel agar assign nahi hai
         if (UIPanel == null)
-        {
             UIPanel = GameObject.Find("JUTPS User Interface");
-        }
 
         if (UIPanel != null)
-        {
-            // UI ko enable karo - ab Scripts safe hain kyunki Player mil gaya
             UIPanel.SetActive(true);
-            Debug.Log("✅ UI enabled successfully!");
-        }
         else
-        {
-            Debug.LogError("❌ UI Panel not found! Scene mein 'JUTPS User Interface' hai?");
-        }
-    }
-
-    void Update()
-    {
-        // Agar player destroy ho gaya (disconnect), UI disable karo
-        if (uiInitialized && JUGameManager.PlayerController == null)
-        {
-            if (UIPanel != null)
-            {
-                UIPanel.SetActive(false);
-            }
-            uiInitialized = false;
-        }
+            Debug.LogError("[UISafetyWrapper] 'JUTPS User Interface' not found in scene.");
     }
 }

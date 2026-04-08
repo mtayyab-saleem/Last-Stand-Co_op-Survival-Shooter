@@ -1675,6 +1675,8 @@ MonoBehaviour:
   LeftFootDamager: {fileID: 0}
   RightFootDamager: {fileID: 0}
   VelocityMultiplier: 0
+  VerticalY: 0
+  HorizontalX: 0
   DirectionTransform: {fileID: 0}
   DesiredDirection: {x: 0, y: 0, z: 0}
   LocomotionMode: 0

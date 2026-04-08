@@ -6102,6 +6102,8 @@ MonoBehaviour:
   LeftFootDamager: {fileID: 0}
   RightFootDamager: {fileID: 0}
   VelocityMultiplier: 0
+  VerticalY: 0
+  HorizontalX: 0
   DirectionTransform: {fileID: 0}
   DesiredDirection: {x: 0, y: 0, z: 0}
   LocomotionMode: 0
@@ -6654,7 +6656,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 590396510
+  _assetId: 918097560
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
