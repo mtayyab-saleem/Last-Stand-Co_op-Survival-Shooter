@@ -4,14 +4,11 @@ using JUTPS;
 using JUTPS.FX;
 
 [RequireComponent(typeof(JUHealth))]
-public class NetworkManager : NetworkBehaviour
+public class GameNetworkManager : NetworkBehaviour
 {
     [Header("Core References")]
     [SerializeField] private JUHealth _juHealth;
-
-    // --- STATIC CACHE FOR OPTIMIZATION ---
-    // Replaces expensive GetComponent calls inside the Update loop (Rule 6)
-    public static NetworkManager LocalInstance { get; private set; }
+    public static GameNetworkManager LocalInstance { get; private set; }
 
     // --- CONSTANTS ---
     private const float MAX_ALLOWED_DAMAGE = 500f; // Security threshold to prevent insta-kill hacks
@@ -87,7 +84,7 @@ public class NetworkManager : NetworkBehaviour
 
         if (target != null)
         {
-            var targetScript = target.GetComponent<NetworkManager>();
+            var targetScript = target.GetComponent<GameNetworkManager>();
             if (targetScript != null)
             {
                 targetScript.ServerApplyDamage(amount);
