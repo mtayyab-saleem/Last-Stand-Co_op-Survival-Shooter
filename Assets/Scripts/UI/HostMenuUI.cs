@@ -171,7 +171,7 @@ public class HostMenuUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[HostMenuUI] Mirror NetworkManager Singleton not found!");
+            Debug.LogError("[HostMenuUI] Mirror GameNetworkManager Singleton not found!");
         }
     }
 
