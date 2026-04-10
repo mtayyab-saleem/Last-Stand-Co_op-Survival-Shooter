@@ -12,15 +12,11 @@ public class NetworkCompleteSync : NetworkBehaviour
     [SerializeField] private Animator _animator;
     [SerializeField] private JUHealth juHealth;
 
-    // Avoid hardcoding strings throughout the code. Centralizing them here prevents typos.
     private const string ANIM_DIE = "Die";
     private const string TRIG_PUNCH = "Punch";
     private const string TRIG_ROLL = "Roll";
     private const string TRIG_RELOAD_RIGHT = "ReloadRightWeapon";
 
-    // --- NETWORK DATA STRUCTURES ---
-    // Packing state into a struct is highly optimized for Mirror. 
-    // It sends all these booleans and floats in a single clean packet.
     public struct CharacterSyncState
     {
         public float horizontal;
@@ -35,7 +31,7 @@ public class NetworkCompleteSync : NetworkBehaviour
         public bool isItemEquipped;
         public bool isDead;
 
-        // Helper method to check if the state has changed enough to warrant a network update
+        // check if the state has changed enough for network update
         public bool HasChanged(CharacterSyncState other)
         {
             return horizontal != other.horizontal ||
@@ -59,14 +55,11 @@ public class NetworkCompleteSync : NetworkBehaviour
     [SyncVar(hook = nameof(OnWeaponChanged))]
     private int netWeaponID = -1;
 
-    // --- LOCAL STATE TRACKERS ---
-    // Used to prevent network spam. We only send updates when these change.
     private CharacterSyncState lastSentState;
     private Vector3 lastSentLookPos;
 
     void Awake()
     {
-        // Safety check: ensure components are assigned, or grab them automatically
         if (juController == null) juController = GetComponent<JUCharacterController>();
         if (_animator == null) _animator = GetComponent<Animator>();
         if (juHealth == null) juHealth = GetComponent<JUHealth>();
@@ -94,13 +87,9 @@ public class NetworkCompleteSync : NetworkBehaviour
         }
     }
 
-    // =========================================================
-    // LOCAL PLAYER LOGIC (Authoritative Input)
-    // =========================================================
-
     private void ProcessLocalPlayer()
     {
-        // 1. Gather current state directly from Input and JUTPS public properties (NO REFLECTION)
+        // Gather current state directly from Input and JUTPS public properties 
         CharacterSyncState currentState = new CharacterSyncState
         {
             horizontal = JUInput.GetAxis(JUInput.Axis.MoveHorizontal),
@@ -118,7 +107,7 @@ public class NetworkCompleteSync : NetworkBehaviour
 
         Vector3 currentLookPos = juController.GetLookPosition();
 
-        // 2. Prevent Network Spam: Only send Command if state changed, or if look position moved significantly
+        // send Command if state changed, or if look position moved significantly
         bool stateChanged = currentState.HasChanged(lastSentState);
         bool lookChanged = Vector3.Distance(currentLookPos, lastSentLookPos) > 0.1f;
 
@@ -131,7 +120,7 @@ public class NetworkCompleteSync : NetworkBehaviour
             lastSentLookPos = currentLookPos;
         }
 
-        // 3. Handle Actions (Punch, Reload, Roll, Weapon Switch)
+        // handle Actions (Punch, Reload, Roll, Weapon Switch)
         HandleLocalInputActions();
     }
 
@@ -149,7 +138,7 @@ public class NetworkCompleteSync : NetworkBehaviour
         if (JUInput.GetButtonDown(JUInput.Buttons.ReloadButton))
             CmdPlayTrigger(TRIG_RELOAD_RIGHT);
 
-        // Safe Weapon Switch Check
+        // Weapon Switch Check
         if (juController.Inventory != null)
         {
             int currentLocalWeapon = juController.Inventory.CurrentRightHandItemID;
@@ -160,13 +149,9 @@ public class NetworkCompleteSync : NetworkBehaviour
         }
     }
 
-    // =========================================================
-    // REMOTE PLAYER LOGIC (Apply Synced Data)
-    // =========================================================
-
     private void ProcessRemotePlayer()
     {
-        // Utilize JUTPS built-in public method to apply movement inputs securely
+        // JUTPS built-in method to apply movement inputs 
         juController.SetMoveInput(netState.horizontal, netState.vertical);
 
         juController.IsRunning = netState.isRunning;
@@ -185,10 +170,6 @@ public class NetworkCompleteSync : NetworkBehaviour
             _animator.SetBool(ANIM_DIE, netState.isDead);
         }
     }
-
-    // =========================================================
-    // COMMANDS (Client -> Server)
-    // =========================================================
 
     [Command]
     private void CmdUpdateMovementState(CharacterSyncState newState, Vector3 newLookPosition)
@@ -209,9 +190,6 @@ public class NetworkCompleteSync : NetworkBehaviour
         netWeaponID = newWeaponID;
     }
 
-    // =========================================================
-    // RPCS & HOOKS (Server -> Client)
-    // =========================================================
 
     [ClientRpc]
     private void RpcPlayTrigger(string triggerName)
@@ -220,10 +198,6 @@ public class NetworkCompleteSync : NetworkBehaviour
         if (_animator != null) _animator.SetTrigger(triggerName);
     }
 
-    /// <summary>
-    /// Safely toggles weapon meshes on remote clients without using Reflection.
-    /// Utilizes the public HoldableItensRightHand array provided by JUTPS JUInventory.
-    /// </summary>
     private void OnWeaponChanged(int oldID, int newID)
     {
         if (isLocalPlayer) return;
@@ -240,7 +214,6 @@ public class NetworkCompleteSync : NetworkBehaviour
         {
             if (rightHandItems[i] != null && rightHandItems[i].gameObject != null)
             {
-                // Only activate the object if its index matches the requested weapon ID
                 rightHandItems[i].gameObject.SetActive(i == newID);
             }
         }

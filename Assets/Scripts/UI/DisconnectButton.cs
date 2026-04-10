@@ -12,10 +12,12 @@ public class DisconnectButton : MonoBehaviour
             if (NetworkServer.active && NetworkClient.active)
             {
                 networkManager.StopHost();
+                GameUIManager.Instance.ShowLoadingPanel();
             }
             else if (NetworkClient.isConnected)
             {
                 networkManager.StopClient();
+                GameUIManager.Instance.ShowLoadingPanel();
             }
         }
     }

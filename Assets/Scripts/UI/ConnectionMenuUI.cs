@@ -2,63 +2,58 @@ using UnityEngine;
 using System.Collections.Generic;
 using Mirror;
 using Mirror.Discovery;
-using Michsky.MUIP; // Michsky UI Namespace
+using Michsky.MUIP;
 using TMPro;
 
 /// <summary>
-/// Handles the Server Discovery screen, allowing players to find and connect to LAN matches.
+/// Handles the Server Discovery screen safely, guaranteeing clean reconnections.
 /// </summary>
 public class ConnectionMenuUI : MonoBehaviour
 {
-    [Header("Network Discovery")]
-    [Tooltip("If left empty, the script will automatically find it in the scene.")]
-    [SerializeField] private NetworkDiscovery networkDiscovery;
-
     [Header("UI References")]
     [SerializeField] private ListView serverListView;
     [SerializeField] private ButtonManager refreshButton;
     [SerializeField] private ButtonManager backButton;
+
+    private NetworkDiscovery _networkDiscovery;
 
     // Tracks servers to prevent duplicate buttons from appearing in the list
     private Dictionary<long, GameObject> _foundServers = new Dictionary<long, GameObject>();
 
     private void Start()
     {
-        InitializeDiscovery();
         SetupButtons();
     }
 
     private void OnEnable()
     {
-        // Automatically start searching for servers the moment this panel is opened
+        InitializeDiscovery();
         StartDiscoverySearch();
     }
 
     private void OnDisable()
     {
-        // Save network bandwidth by stopping the search when the panel is closed
-        if (networkDiscovery != null)
+        if (_networkDiscovery != null)
         {
-            networkDiscovery.StopDiscovery();
+            _networkDiscovery.StopDiscovery();
         }
     }
 
     private void InitializeDiscovery()
     {
-        if (networkDiscovery == null)
+        if (Mirror.NetworkManager.singleton != null)
         {
-            networkDiscovery = Object.FindFirstObjectByType<NetworkDiscovery>();
+            _networkDiscovery = Mirror.NetworkManager.singleton.GetComponent<NetworkDiscovery>();
         }
 
-        // Securely bind the event listener to avoid double-subscriptions
-        if (networkDiscovery != null)
+        if (_networkDiscovery != null)
         {
-            networkDiscovery.OnServerFound.RemoveListener(OnServerFound);
-            networkDiscovery.OnServerFound.AddListener(OnServerFound);
+            _networkDiscovery.OnServerFound.RemoveListener(OnServerFound);
+            _networkDiscovery.OnServerFound.AddListener(OnServerFound);
         }
         else
         {
-            Debug.LogError("[ConnectionMenuUI] NetworkDiscovery component is missing from the scene!");
+            Debug.LogError("[ConnectionMenuUI] NetworkDiscovery component missing on Mirror NetworkManager!");
         }
     }
 
@@ -68,46 +63,55 @@ public class ConnectionMenuUI : MonoBehaviour
         if (backButton) backButton.onClick.AddListener(OnBackClick);
     }
 
-    // =========================================================
-    // SERVER DISCOVERY LOGIC
-    // =========================================================
-
     private void StartDiscoverySearch()
     {
         if (serverListView == null || serverListView.itemParent == null) return;
 
-        // 1. Clear old UI buttons
         foreach (Transform child in serverListView.itemParent)
         {
             Destroy(child.gameObject);
         }
         _foundServers.Clear();
 
-        // 2. Restart the Mirror Discovery listener
-        if (networkDiscovery != null)
+        // Restart Mirror Discovery
+        if (_networkDiscovery != null)
         {
-            networkDiscovery.StopDiscovery();
-            networkDiscovery.StartDiscovery();
+            try
+            {
+                _networkDiscovery.StopDiscovery();
+                Invoke(nameof(ExecuteStartDiscovery), 0.1f);
+            }
+            catch (System.Exception e)
+            {
+                Debug.LogError("[ConnectionMenuUI] Failed to restart discovery: " + e.Message);
+            }
+        }
+    }
+
+    private void ExecuteStartDiscovery()
+    {
+        if (this.gameObject.activeInHierarchy && _networkDiscovery != null && !NetworkServer.active)
+        {
+            _networkDiscovery.StartDiscovery();
+            Debug.Log("[ConnectionMenuUI] Scanning for LAN Servers...");
         }
     }
 
     private void OnServerFound(ServerResponse info)
     {
-        // Prevent duplicate server listings
         if (_foundServers.ContainsKey(info.serverId)) return;
         if (serverListView == null || serverListView.itemPreset == null) return;
 
-        // 1. Instantiate the UI button manually
         GameObject newItem = Instantiate(serverListView.itemPreset, serverListView.itemParent);
 
-        // 2. Format the display name (e.g., using the host's IP Address)
+        // Format the display host's IP 
         string serverName = info.EndPoint.Address.ToString();
 
-        // 3. Configure the Michsky Button
+        // Configure Button
         ButtonManager btnManager = newItem.GetComponent<ButtonManager>();
         if (btnManager != null)
         {
-            btnManager.buttonText = serverName; 
+            btnManager.buttonText = serverName;
             if (btnManager.normalText != null) btnManager.normalText.text = serverName;
 
             btnManager.onClick.RemoveAllListeners();
@@ -115,35 +119,20 @@ public class ConnectionMenuUI : MonoBehaviour
 
             btnManager.UpdateUI();
         }
-        else
-        {
-            // Standard Unity UI Fallback just in case Michsky is missing
-            TextMeshProUGUI txt = newItem.GetComponentInChildren<TextMeshProUGUI>();
-            if (txt) txt.text = serverName;
 
-            UnityEngine.UI.Button btn = newItem.GetComponentInChildren<UnityEngine.UI.Button>();
-            if (btn) btn.onClick.AddListener(() => ConnectToFoundServer(info));
-        }
-
-        // Register the server to prevent duplicates
+        // Register the server 
         _foundServers.Add(info.serverId, newItem);
     }
 
-    // =========================================================
-    // ACTION ROUTING
-    // =========================================================
-
     private void ConnectToFoundServer(ServerResponse info)
     {
-        if (networkDiscovery != null)
+        if (_networkDiscovery != null)
         {
-            networkDiscovery.StopDiscovery();
+            _networkDiscovery.StopDiscovery();
         }
 
-        // 1. Tell Router to switch to the Loading Screen
         GameUIManager.Instance.ShowLoadingPanel();
 
-        // 2. Command Mirror to connect to the specific server URI
         if (Mirror.NetworkManager.singleton != null)
         {
             Mirror.NetworkManager.singleton.StartClient(info.uri);

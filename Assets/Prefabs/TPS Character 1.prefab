@@ -9244,8 +9244,7 @@ MonoBehaviour:
   - {fileID: 3489979222139667193}
   - {fileID: 3489979222139667199}
   - {fileID: 3489979222139667192}
-  objectsToDisable: []
-  ForceMobileMode: 1
+  - {fileID: 3489979222139667197}
   playerAnimator: {fileID: 6990835895164698112}
 --- !u!114 &4290107145203711557
 MonoBehaviour:
