@@ -1,7 +1,8 @@
-using UnityEngine;
-using Mirror;
 using JUTPS;
 using JUTPS.FX;
+using JUTPS.PhysicsScripts;
+using Mirror;
+using UnityEngine;
 
 [RequireComponent(typeof(JUHealth))]
 public class GameNetworkManager : NetworkBehaviour
@@ -118,6 +119,7 @@ public class GameNetworkManager : NetworkBehaviour
         if (netHealth <= 0)
         {
             netIsDead = true;
+            Invoke(nameof(ServerCleanupPlayer), 2f);
         }
 
         // Apply on the server so physics/events process correctly
@@ -129,10 +131,72 @@ public class GameNetworkManager : NetworkBehaviour
         }
     }
 
+    [Server]
+    private void ServerCleanupPlayer()
+    {
+        RpcDisableCharacter();
+        if (isServer && isLocalPlayer)
+        {
+            Debug.Log("🛡 Host character hidden, but server is still running.");
+        }
+        else
+        {
+            NetworkConnectionToClient conn = connectionToClient;
+            if (conn != null)
+            {
+                Debug.Log($"🔌 Disconnecting and destroying player: {conn.connectionId}");
+
+                conn.Disconnect();
+            }
+            NetworkServer.Destroy(gameObject);
+        }
+
+    }
     // =========================================================
     // SYNCVAR HOOKS (Server -> Client Visuals)
     // =========================================================
+    [ClientRpc]
+    private void RpcDisableCharacter()
+    {
+        Debug.Log("🧹 Cleaning up player physics and visuals...");
 
+        foreach (Transform child in transform)
+        {
+            child.gameObject.SetActive(false);
+        }
+
+        if (TryGetComponent(out CapsuleCollider mainCollider))
+        {
+            mainCollider.enabled = false;
+            Debug.Log("🚫 Main Collider Disabled");
+        }
+
+        if (TryGetComponent(out Rigidbody rb))
+        {
+            rb.isKinematic = true; // Physics band
+            rb.detectCollisions = false; // Takrana band
+        }
+
+        if (TryGetComponent(out JUTPS.PhysicsScripts.AdvancedRagdollController ragdoll))
+        {
+            ragdoll.enabled = false;
+
+            if (ragdoll.RagdollBones != null)
+            {
+                foreach (var boneRb in ragdoll.RagdollBones)
+                {
+                    boneRb.isKinematic = true;
+                    boneRb.detectCollisions = false;
+                }
+            }
+        }
+
+        // 5. Damage script (Health) ko bhi disable kardo taake phantom damage na ho
+        if (TryGetComponent(out JUHealth health))
+        {
+            health.enabled = false;
+        }
+    }
     private void OnServerHealthChanged(float oldHealth, float newHealth)
     {
         _juHealth.Health = newHealth;
