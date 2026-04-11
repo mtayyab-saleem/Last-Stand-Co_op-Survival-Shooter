@@ -10,14 +10,9 @@ public class GameNetworkManager : NetworkBehaviour
     [Header("Core References")]
     [SerializeField] private JUHealth _juHealth;
     public static GameNetworkManager LocalInstance { get; private set; }
-
-    // --- CONSTANTS ---
-    private const float MAX_ALLOWED_DAMAGE = 500f; // Security threshold to prevent insta-kill hacks
-
-    // --- NETWORKED STATE ---
+    private const float MAX_ALLOWED_DAMAGE = 500f;
     [SyncVar(hook = nameof(OnServerHealthChanged))]
     public float netHealth = 100f;
-
     [SyncVar(hook = nameof(OnDeathStateChanged))]
     public bool netIsDead = false;
 
@@ -25,13 +20,10 @@ public class GameNetworkManager : NetworkBehaviour
     {
         if (_juHealth == null) _juHealth = GetComponent<JUHealth>();
     }
-
     public override void OnStartLocalPlayer()
     {
-        // Cache the local player instance when they spawn
         LocalInstance = this;
     }
-
     public override void OnStartServer()
     {
         netHealth = _juHealth.Health;
@@ -40,25 +32,19 @@ public class GameNetworkManager : NetworkBehaviour
 
     void Update()
     {
-        // Only process the watchdog logic on clients
         if (!isClient) return;
 
-        // Watchdog: Did the local JUHealth change without server permission?
         if (Mathf.Abs(_juHealth.Health - netHealth) > 0.01f)
         {
             float difference = netHealth - _juHealth.Health;
 
-            // Instantly revert to the authoritative server state to prevent desyncs
             _juHealth.Health = netHealth;
             _juHealth.IsDead = netIsDead;
 
-            // If health dropped (took damage locally)
             if (difference > 0)
             {
                 if (!isLocalPlayer)
                 {
-                    // SHOOTER AUTHORITY: I am observing a remote player take damage on my screen (my bullet hit them).
-                    // Route the damage request through MY local player connection.
                     if (LocalInstance != null)
                     {
                         LocalInstance.CmdDealDamage(this.gameObject, difference);
@@ -66,21 +52,15 @@ public class GameNetworkManager : NetworkBehaviour
                 }
                 else
                 {
-                    // VICTIM AUTHORITY: I took environment damage locally on my own screen (e.g., Fall Damage, Spikes).
                     CmdTakeEnvironmentDamage(difference);
                 }
             }
         }
     }
 
-    // =========================================================
-    // COMMANDS (Client -> Server)
-    // =========================================================
-
     [Command]
     public void CmdDealDamage(GameObject target, float amount)
     {
-        // Security Check: Prevent spoofed massive damage hacks
         if (amount <= 0 || amount > MAX_ALLOWED_DAMAGE) return;
 
         if (target != null)
@@ -96,16 +76,12 @@ public class GameNetworkManager : NetworkBehaviour
     [Command]
     public void CmdTakeEnvironmentDamage(float amount)
     {
-        // Security Check: Prevent spoofed massive fall damage
         if (amount <= 0 || amount > MAX_ALLOWED_DAMAGE) return;
 
         ServerApplyDamage(amount);
     }
 
-    // =========================================================
-    // SERVER LOGIC
-    // =========================================================
-
+ 
     [Server]
     public void ServerApplyDamage(float amount)
     {
@@ -119,10 +95,17 @@ public class GameNetworkManager : NetworkBehaviour
         if (netHealth <= 0)
         {
             netIsDead = true;
-            Invoke(nameof(ServerCleanupPlayer), 2f);
+            if (isLocalPlayer)
+            {
+                Invoke(nameof(HostDeathSequence), 3f);
+            }
+            else
+            {
+                Invoke(nameof(ClientDeathSequence), 3f);
+            }
         }
 
-        // Apply on the server so physics/events process correctly
+        // Apply on the server 
         _juHealth.Health = netHealth;
 
         if (netIsDead)
@@ -132,33 +115,43 @@ public class GameNetworkManager : NetworkBehaviour
     }
 
     [Server]
-    private void ServerCleanupPlayer()
+    private void HostDeathSequence()
     {
+        Debug.Log("[Server] Host died. Keeping server alive and hiding the body.");
         RpcDisableCharacter();
-        if (isServer && isLocalPlayer)
-        {
-            Debug.Log("🛡 Host character hidden, but server is still running.");
-        }
-        else
-        {
-            NetworkConnectionToClient conn = connectionToClient;
-            if (conn != null)
-            {
-                Debug.Log($"🔌 Disconnecting and destroying player: {conn.connectionId}");
-
-                conn.Disconnect();
-            }
-            NetworkServer.Destroy(gameObject);
-        }
-
     }
-    // =========================================================
-    // SYNCVAR HOOKS (Server -> Client Visuals)
-    // =========================================================
+
+    [Server]
+    private void ClientDeathSequence()
+    {
+        Debug.Log("[Server] Client died. Instructing client to disconnect and return to menu.");
+
+        TargetDisconnect(connectionToClient);
+
+        NetworkServer.Destroy(gameObject);
+    }
+    [Server]
+
+    [TargetRpc]
+    private void TargetDisconnect(NetworkConnection target)
+    {
+        Debug.Log("[Client] died. Showing loading screen and disconnecting.");
+
+        if (GameUIManager.Instance != null)
+        {
+            GameUIManager.Instance.ShowLoadingPanel();
+        }
+
+        if (Mirror.NetworkManager.singleton != null)
+        {
+            Mirror.NetworkManager.singleton.StopClient();
+        }
+    }
+
     [ClientRpc]
     private void RpcDisableCharacter()
     {
-        Debug.Log("🧹 Cleaning up player physics and visuals...");
+        Debug.Log("Cleaning up player physics and visuals...");
 
         foreach (Transform child in transform)
         {
@@ -168,13 +161,13 @@ public class GameNetworkManager : NetworkBehaviour
         if (TryGetComponent(out CapsuleCollider mainCollider))
         {
             mainCollider.enabled = false;
-            Debug.Log("🚫 Main Collider Disabled");
+            Debug.Log("Main Collider Disabled");
         }
 
         if (TryGetComponent(out Rigidbody rb))
         {
-            rb.isKinematic = true; // Physics band
-            rb.detectCollisions = false; // Takrana band
+            rb.isKinematic = true; 
+            rb.detectCollisions = false; 
         }
 
         if (TryGetComponent(out JUTPS.PhysicsScripts.AdvancedRagdollController ragdoll))
@@ -191,7 +184,6 @@ public class GameNetworkManager : NetworkBehaviour
             }
         }
 
-        // 5. Damage script (Health) ko bhi disable kardo taake phantom damage na ho
         if (TryGetComponent(out JUHealth health))
         {
             health.enabled = false;
@@ -214,8 +206,8 @@ public class GameNetworkManager : NetworkBehaviour
         if (newState)
         {
             _juHealth.Health = 0;
-            // Trigger native JUTPS ragdoll and death events safely via hook
             _juHealth.CheckHealthState();
+
         }
     }
 }

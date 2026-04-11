@@ -1,182 +1,111 @@
 using UnityEngine;
 using Mirror;
 using Mirror.Discovery;
-using Michsky.MUIP; // Michsky UI Namespace
+using Michsky.MUIP;
 
-/// <summary>
-/// Handles the Host Match screen, including Map selection, Game Mode selection, and starting the Server/Host.
-/// </summary>
 public class HostMenuUI : MonoBehaviour
 {
     [Header("Network Components")]
-    [Tooltip("If left empty, the script will try to find it in the scene automatically.")]
     [SerializeField] private NetworkDiscovery networkDiscovery;
 
     [Header("Host Controls")]
     [SerializeField] private ButtonManager hostMatchButton;
     [SerializeField] private ButtonManager backButton;
 
-    [Header("Selection Lists")]
-    [SerializeField] private ButtonManager[] mapButtons;
-    [SerializeField] private ButtonManager[] gameModeButtons;
+    [Header("Map Selection")]
+    [SerializeField] private ButtonManager mapArena;
+    [SerializeField] private ButtonManager mapBattleRoyale;
+
+    [Header("Mode Selection")]
+    [SerializeField] private ButtonManager modeSolo;
+    [SerializeField] private ButtonManager modeDuo;
+    [SerializeField] private ButtonManager modeSquad;
 
     [Header("UI Colors")]
     [SerializeField] private Color normalColor = new Color(0.2f, 0.2f, 0.2f, 1f);
     [SerializeField] private Color selectedColor = new Color(0.0f, 0.8f, 0.2f, 1f);
 
-    // State Tracking
-    private int _selectedMapIndex = -1;
-    private int _selectedModeIndex = -1;
+    private int _selectedMapIndex = -1; // 0: Arena, 1: Battle Royale
+    private int _selectedModeIndex = -1; // 0: Solo, 1: Duo, 2: Squad
 
     private void Start()
     {
-        InitializeNetworkDiscovery();
         SetupButtons();
     }
 
     private void OnEnable()
     {
-        // Reset selections every time this panel is opened
         _selectedMapIndex = -1;
         _selectedModeIndex = -1;
-        
-        UpdateMapButtonVisuals();
-        UpdateModeButtonVisuals();
-        ValidateHostButton();
-    }
 
-    private void InitializeNetworkDiscovery()
-    {
-        if (networkDiscovery == null)
-        {
-            networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
-        }
+        UpdateUI();
+        ValidateHostButton();
     }
 
     private void SetupButtons()
     {
-        // 1. Setup Map Buttons
-        if (mapButtons != null)
-        {
-            for (int i = 0; i < mapButtons.Length; i++)
-            {
-                int index = i; // Cache index for the lambda closure
-                if (mapButtons[i] != null) 
-                {
-                    mapButtons[i].onClick.AddListener(() => OnMapSelected(index));
-                }
-            }
-        }
+        // Map Callbacks
+        if (mapArena) mapArena.onClick.AddListener(() => SelectMap(0));
+        if (mapBattleRoyale) mapBattleRoyale.onClick.AddListener(() => SelectMap(1));
 
-        // 2. Setup Game Mode Buttons
-        if (gameModeButtons != null)
-        {
-            for (int i = 0; i < gameModeButtons.Length; i++)
-            {
-                int index = i; // Cache index for the lambda closure
-                if (gameModeButtons[i] != null) 
-                {
-                    gameModeButtons[i].onClick.AddListener(() => OnGameModeSelected(index));
-                }
-            }
-        }
+        // Mode Callbacks
+        if (modeSolo) modeSolo.onClick.AddListener(() => SelectMode(0));
+        if (modeDuo) modeDuo.onClick.AddListener(() => SelectMode(1));
+        if (modeSquad) modeSquad.onClick.AddListener(() => SelectMode(2));
 
-        // 3. Setup Navigation/Action Buttons
         if (hostMatchButton) hostMatchButton.onClick.AddListener(OnHostMatchClick);
         if (backButton) backButton.onClick.AddListener(OnBackClick);
     }
 
-    // =========================================================
-    // SELECTION LOGIC
-    // =========================================================
-
-    private void OnMapSelected(int mapIndex)
+    private void SelectMap(int index)
     {
-        _selectedMapIndex = mapIndex;
-        UpdateMapButtonVisuals();
+        _selectedMapIndex = index;
+        UpdateUI();
+    }
+
+    private void SelectMode(int index)
+    {
+        _selectedModeIndex = index;
+        UpdateUI();
+    }
+
+    private void UpdateUI()
+    {
+        // Update Maps
+        if (mapArena) SetColor(mapArena, _selectedMapIndex == 0);
+        if (mapBattleRoyale) SetColor(mapBattleRoyale, _selectedMapIndex == 1);
+
+        // Update Modes
+        if (modeSolo) SetColor(modeSolo, _selectedModeIndex == 0);
+        if (modeDuo) SetColor(modeDuo, _selectedModeIndex == 1);
+        if (modeSquad) SetColor(modeSquad, _selectedModeIndex == 2);
+
         ValidateHostButton();
     }
 
-    private void OnGameModeSelected(int modeIndex)
+    private void SetColor(ButtonManager btn, bool isSelected)
     {
-        _selectedModeIndex = modeIndex;
-        UpdateModeButtonVisuals();
-        ValidateHostButton();
+        if (btn.normalImage != null)
+            btn.normalImage.color = isSelected ? selectedColor : normalColor;
     }
 
     private void ValidateHostButton()
     {
-        // The host button is only clickable if the player has chosen both a map and a mode
         bool isReady = (_selectedMapIndex >= 0 && _selectedModeIndex >= 0);
         if (hostMatchButton) hostMatchButton.Interactable(isReady);
     }
 
-    // =========================================================
-    // VISUAL UPDATES
-    // =========================================================
-
-    private void UpdateMapButtonVisuals()
-    {
-        if (mapButtons == null) return;
-        for (int i = 0; i < mapButtons.Length; i++)
-        {
-            if (mapButtons[i] != null && mapButtons[i].normalImage != null)
-            {
-                mapButtons[i].normalImage.color = (i == _selectedMapIndex) ? selectedColor : normalColor;
-            }
-        }
-    }
-
-    private void UpdateModeButtonVisuals()
-    {
-        if (gameModeButtons == null) return;
-        for (int i = 0; i < gameModeButtons.Length; i++)
-        {
-            if (gameModeButtons[i] != null && gameModeButtons[i].normalImage != null)
-            {
-                gameModeButtons[i].normalImage.color = (i == _selectedModeIndex) ? selectedColor : normalColor;
-            }
-        }
-    }
-
-    // =========================================================
-    // ACTION ROUTING
-    // =========================================================
-
     private void OnHostMatchClick()
     {
-        if (_selectedMapIndex < 0 || _selectedModeIndex < 0) return;
-
-        // 1. Tell Router to switch to the Loading Screen
         GameUIManager.Instance.ShowLoadingPanel();
 
-        // 2. Start advertising the server on the Local Network (LAN)
-        if (networkDiscovery != null)
-        {
-            networkDiscovery.AdvertiseServer();
-        }
-        else
-        {
-            Debug.LogWarning("[HostMenuUI] NetworkDiscovery is missing! LAN Players won't find this match.");
-        }
+        if (networkDiscovery != null) networkDiscovery.AdvertiseServer();
 
-        // 3. Command Mirror to start hosting (Rule 6: Use Singleton)
         if (Mirror.NetworkManager.singleton != null)
         {
-#if UNITY_WEBGL
-            // WebGL cannot act as a host/server in Mirror
-            NetworkServer.listen = false;
-#endif
             Mirror.NetworkManager.singleton.StartHost();
-        }
-        else
-        {
-            Debug.LogError("[HostMenuUI] Mirror GameNetworkManager Singleton not found!");
         }
     }
 
-    private void OnBackClick()
-    {
-        GameUIManager.Instance.ShowMainMenu();
-    }
+    private void OnBackClick() => GameUIManager.Instance.ShowMainMenu();
 }

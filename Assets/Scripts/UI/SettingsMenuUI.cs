@@ -1,9 +1,6 @@
 using UnityEngine;
-using Michsky.MUIP; // Michsky UI Namespace
+using Michsky.MUIP;
 
-/// <summary>
-/// Handles interactions specifically for the Settings Menu screen.
-/// </summary>
 public class SettingsMenuUI : MonoBehaviour
 {
     [Header("Settings Controls")]
@@ -23,13 +20,8 @@ public class SettingsMenuUI : MonoBehaviour
         }
     }
 
-    // =========================================================
-    // BUTTON ACTIONS (Routing to the GameUIManager)
-    // =========================================================
-
     private void OnBackClick()
     {
-        // Tell the central router to hide this panel and show the Main Menu
         if (GameUIManager.Instance != null)
         {
             GameUIManager.Instance.ShowMainMenu();

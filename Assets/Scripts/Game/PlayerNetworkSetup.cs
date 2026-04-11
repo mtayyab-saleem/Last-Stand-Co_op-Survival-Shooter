@@ -23,10 +23,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (!isLocalPlayer)
         {
             foreach (var s in scriptsToDisable) s.enabled = false;
+
             if (TryGetComponent(out Rigidbody rb)) rb.isKinematic = true;
             gameObject.tag = "Untagged";
 
-            // Ensure animator is enabled for remote players to sync animations
             if (playerAnimator != null)
             {
                 playerAnimator.enabled = true;
@@ -68,7 +68,6 @@ public class PlayerNetworkSetup : NetworkBehaviour
         }
 
 
-        // NETWORK ANIMATOR SETUP
         SetupNetworkAnimator();
     }
 
@@ -82,6 +81,19 @@ public class PlayerNetworkSetup : NetworkBehaviour
         else
         {
             Debug.LogError("NetworkAnimator missing on Player Prefab!");
+        }
+    }
+
+    public override void OnStopClient()
+    {
+        base.OnStopClient();
+
+        if (isLocalPlayer)
+        {
+            if (GameUIManager.Instance != null)
+            {
+                GameUIManager.Instance.TriggerDisconnectSequence();
+            }
         }
     }
 
@@ -101,6 +113,11 @@ public class PlayerNetworkSetup : NetworkBehaviour
             if (JUInput.Instance() != null && JUInput.Instance().IsBlockingDefaultInputs)
             {
                 JUInput.Instance().DisableBlockStandardInputs();
+            }
+            var mobileRig = Object.FindFirstObjectByType<MobileRig>(FindObjectsInactive.Include);
+            if (mobileRig != null)
+            {
+                mobileRig.gameObject.SetActive(false);
             }
         }
     }

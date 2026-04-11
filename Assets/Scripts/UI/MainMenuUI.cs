@@ -1,5 +1,5 @@
 using UnityEngine;
-using Michsky.MUIP; // Michsky UI Namespace
+using Michsky.MUIP; 
 
 /// <summary>
 /// Handles interactions specifically for the Main Menu screen (Start, Join, Settings, Exit).
@@ -25,7 +25,6 @@ public class MainMenuUI : MonoBehaviour
 
     private void SetupButtons()
     {
-        // Bind UI clicks to their respective functions
         if (startButton) startButton.onClick.AddListener(OnStartClick);
         if (joinButton) joinButton.onClick.AddListener(OnJoinClick);
         if (settingButton) settingButton.onClick.AddListener(OnSettingsClick);
@@ -37,7 +36,11 @@ public class MainMenuUI : MonoBehaviour
     private void SetupQuitModal()
     {
         // Safely configure the Michsky Modal Window via code so it never breaks
-        if (quitModalWindow == null) return;
+        if (quitModalWindow == null)
+        {
+            Debug.LogError("Quit Modal Window is not assigned in the inspector.");
+            return;
+        }
 
         quitModalWindow.titleText = "Quit Game";
         quitModalWindow.descriptionText = "Are you sure you want to quit?";
@@ -48,10 +51,6 @@ public class MainMenuUI : MonoBehaviour
         quitModalWindow.startBehaviour = ModalWindowManager.StartBehaviour.Disable;
         quitModalWindow.gameObject.SetActive(false);
     }
-
-    // =========================================================
-    // BUTTON ACTIONS (Routing to the GameUIManager)
-    // =========================================================
 
     private void OnStartClick()
     {
@@ -72,7 +71,6 @@ public class MainMenuUI : MonoBehaviour
     {
         if (quitModalWindow != null)
         {
-            // Ensure the GameObject is active before opening the Michsky animation
             if (!quitModalWindow.gameObject.activeSelf)
             {
                 quitModalWindow.gameObject.SetActive(true);
@@ -83,7 +81,6 @@ public class MainMenuUI : MonoBehaviour
 
     private void OnConfirmQuit()
     {
-        // Handles quitting securely whether you are in the Unity Editor or a Built Game
 #if UNITY_EDITOR
         UnityEditor.EditorApplication.isPlaying = false;
 #else
