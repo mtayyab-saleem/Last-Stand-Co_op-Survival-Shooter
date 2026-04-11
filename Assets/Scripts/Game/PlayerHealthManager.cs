@@ -5,11 +5,11 @@ using Mirror;
 using UnityEngine;
 
 [RequireComponent(typeof(JUHealth))]
-public class GameNetworkManager : NetworkBehaviour
+public class PlayerHealthManager : NetworkBehaviour
 {
     [Header("Core References")]
     [SerializeField] private JUHealth _juHealth;
-    public static GameNetworkManager LocalInstance { get; private set; }
+    public static PlayerHealthManager LocalInstance { get; private set; }
     private const float MAX_ALLOWED_DAMAGE = 500f;
     [SyncVar(hook = nameof(OnServerHealthChanged))]
     public float netHealth = 100f;
@@ -65,7 +65,7 @@ public class GameNetworkManager : NetworkBehaviour
 
         if (target != null)
         {
-            var targetScript = target.GetComponent<GameNetworkManager>();
+            var targetScript = target.GetComponent<PlayerHealthManager>();
             if (targetScript != null)
             {
                 targetScript.ServerApplyDamage(amount);
