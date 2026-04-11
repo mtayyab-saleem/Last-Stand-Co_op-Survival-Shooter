@@ -1968,7 +1968,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 4c9f44ff91a72ed4289f1739f99c8724, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::ConnectionMenuUI
-  networkDiscovery: {fileID: 295797629}
   serverListView: {fileID: 1842056062}
   refreshButton: {fileID: 2120138657}
   backButton: {fileID: 1354000303}
@@ -23019,7 +23018,7 @@ MonoBehaviour:
       m_Calls: []
   m_Sprite: {fileID: 21300000, guid: 5e9b94291ce95424c9498c1e8cabac58, type: 3}
   m_Type: 0
-  m_PreserveAspect: 1
+  m_PreserveAspect: 0
   m_FillCenter: 1
   m_FillMethod: 4
   m_FillAmount: 1
