@@ -665,6 +665,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   UIPanel: {fileID: 1345482973}
   DisableUIOnStart: 1
+  CheckInterval: 0.5
 --- !u!4 &459219578
 Transform:
   m_ObjectHideFlags: 0

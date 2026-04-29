@@ -2,6 +2,7 @@
 using Mirror;
 using JUTPS;
 using JUTPS.JUInputSystem;
+using JUTPS.ItemSystem; // Required for JUHoldableItem
 
 [RequireComponent(typeof(JUCharacterController))]
 [RequireComponent(typeof(NetworkAnimator))]
@@ -9,14 +10,18 @@ public class NetworkCompleteSync : NetworkBehaviour
 {
     [Header("Core References")]
     [SerializeField] private JUCharacterController juController;
-    [SerializeField] private Animator _animator;
+    [SerializeField] private Animator characterAnimator;
     [SerializeField] private JUHealth juHealth;
 
+    // String literals converted to constants to avoid allocation and typos
     private const string ANIM_DIE = "Die";
     private const string TRIG_PUNCH = "Punch";
     private const string TRIG_ROLL = "Roll";
     private const string TRIG_RELOAD_RIGHT = "ReloadRightWeapon";
 
+    /// <summary>
+    /// Struct to efficiently synchronize character state across the network.
+    /// </summary>
     public struct CharacterSyncState
     {
         public float horizontal;
@@ -31,7 +36,7 @@ public class NetworkCompleteSync : NetworkBehaviour
         public bool isItemEquipped;
         public bool isDead;
 
-        // check if the state has changed enough for network update
+        // Evaluates if the state has changed enough to warrant a network update
         public bool HasChanged(CharacterSyncState other)
         {
             return horizontal != other.horizontal ||
@@ -52,30 +57,35 @@ public class NetworkCompleteSync : NetworkBehaviour
     [SyncVar] private CharacterSyncState netState;
     [SyncVar] private Vector3 netLookPosition;
 
-    [SyncVar(hook = nameof(OnWeaponChanged))]
-    private int netWeaponID = -1;
+    // Dual-wield weapon synchronization hooks
+    [SyncVar(hook = nameof(OnRightWeaponChanged))] private int netRightWeaponID = -1;
+    [SyncVar(hook = nameof(OnLeftWeaponChanged))] private int netLeftWeaponID = -1;
 
     private CharacterSyncState lastSentState;
     private Vector3 lastSentLookPos;
 
-    void Awake()
+    private void Awake()
     {
         if (juController == null) juController = GetComponent<JUCharacterController>();
-        if (_animator == null) _animator = GetComponent<Animator>();
+        if (characterAnimator == null) characterAnimator = GetComponent<Animator>();
         if (juHealth == null) juHealth = GetComponent<JUHealth>();
     }
 
-    void Start()
+    private void Start()
     {
         if (!isLocalPlayer)
         {
-            // Disable local input processing for remote characters
+            // Disable local input processing for remote avatars to prevent interference
             juController.UseDefaultControllerInput = false;
-            if (TryGetComponent(out Rigidbody rb)) rb.isKinematic = true;
+
+            if (TryGetComponent(out Rigidbody rb))
+            {
+                rb.isKinematic = true;
+            }
         }
     }
 
-    void Update()
+    private void Update()
     {
         if (isLocalPlayer)
         {
@@ -89,7 +99,7 @@ public class NetworkCompleteSync : NetworkBehaviour
 
     private void ProcessLocalPlayer()
     {
-        // Gather current state directly from Input and JUTPS public properties 
+        // Gather current state directly from Input and JUTPS public properties
         CharacterSyncState currentState = new CharacterSyncState
         {
             horizontal = JUInput.GetAxis(JUInput.Axis.MoveHorizontal),
@@ -107,7 +117,7 @@ public class NetworkCompleteSync : NetworkBehaviour
 
         Vector3 currentLookPos = juController.GetLookPosition();
 
-        // send Command if state changed, or if look position moved significantly
+        // Send Command only if the core state changed or look position moved significantly (optimization)
         bool stateChanged = currentState.HasChanged(lastSentState);
         bool lookChanged = Vector3.Distance(currentLookPos, lastSentLookPos) > 0.1f;
 
@@ -115,12 +125,10 @@ public class NetworkCompleteSync : NetworkBehaviour
         {
             CmdUpdateMovementState(currentState, currentLookPos);
 
-            // Update trackers
             lastSentState = currentState;
             lastSentLookPos = currentLookPos;
         }
 
-        // handle Actions (Punch, Reload, Roll, Weapon Switch)
         HandleLocalInputActions();
     }
 
@@ -128,7 +136,7 @@ public class NetworkCompleteSync : NetworkBehaviour
     {
         if (juHealth.IsDead) return;
 
-        // Triggers
+        // Synchronize one-off animation triggers
         if (JUInput.GetButtonDown(JUInput.Buttons.ShotButton) && !juController.IsItemEquiped)
             CmdPlayTrigger(TRIG_PUNCH);
 
@@ -138,20 +146,22 @@ public class NetworkCompleteSync : NetworkBehaviour
         if (JUInput.GetButtonDown(JUInput.Buttons.ReloadButton))
             CmdPlayTrigger(TRIG_RELOAD_RIGHT);
 
-        // Weapon Switch Check
+        // Synchronize active weapons for both hands
         if (juController.Inventory != null)
         {
-            int currentLocalWeapon = juController.Inventory.CurrentRightHandItemID;
-            if (currentLocalWeapon != netWeaponID)
+            int currentLocalRightWeapon = juController.Inventory.CurrentRightHandItemID;
+            int currentLocalLeftWeapon = juController.Inventory.CurrentLeftHandItemID;
+
+            if (currentLocalRightWeapon != netRightWeaponID || currentLocalLeftWeapon != netLeftWeaponID)
             {
-                CmdChangeWeapon(currentLocalWeapon);
+                CmdChangeWeapons(currentLocalRightWeapon, currentLocalLeftWeapon);
             }
         }
     }
 
     private void ProcessRemotePlayer()
     {
-        // JUTPS built-in method to apply movement inputs 
+        // Apply synchronized state to the remote avatar using JUTPS built-in methods
         juController.SetMoveInput(netState.horizontal, netState.vertical);
 
         juController.IsRunning = netState.isRunning;
@@ -162,12 +172,11 @@ public class NetworkCompleteSync : NetworkBehaviour
         juController.IsJumping = netState.isJumping;
         juController.IsGrounded = netState.isGrounded;
         juController.IsItemEquiped = netState.isItemEquipped;
-
         juController.LookAtPosition = netLookPosition;
 
-        if (_animator != null && _animator.GetBool(ANIM_DIE) != netState.isDead)
+        if (characterAnimator != null && characterAnimator.GetBool(ANIM_DIE) != netState.isDead)
         {
-            _animator.SetBool(ANIM_DIE, netState.isDead);
+            characterAnimator.SetBool(ANIM_DIE, netState.isDead);
         }
     }
 
@@ -185,37 +194,48 @@ public class NetworkCompleteSync : NetworkBehaviour
     }
 
     [Command]
-    private void CmdChangeWeapon(int newWeaponID)
+    private void CmdChangeWeapons(int newRightWeaponID, int newLeftWeaponID)
     {
-        netWeaponID = newWeaponID;
+        netRightWeaponID = newRightWeaponID;
+        netLeftWeaponID = newLeftWeaponID;
     }
-
 
     [ClientRpc]
     private void RpcPlayTrigger(string triggerName)
     {
         if (isLocalPlayer) return;
-        if (_animator != null) _animator.SetTrigger(triggerName);
+        if (characterAnimator != null) characterAnimator.SetTrigger(triggerName);
     }
 
-    private void OnWeaponChanged(int oldID, int newID)
+    #region Weapon Synchronization Hooks
+
+    private void OnRightWeaponChanged(int oldID, int newID)
     {
-        if (isLocalPlayer) return;
+        if (isLocalPlayer || juController.Inventory == null) return;
+        UpdateWeaponVisibility(juController.Inventory.HoldableItensRightHand, newID);
+    }
 
-        if (juController.Inventory == null || juController.Inventory.HoldableItensRightHand == null)
+    private void OnLeftWeaponChanged(int oldID, int newID)
+    {
+        if (isLocalPlayer || juController.Inventory == null) return;
+        UpdateWeaponVisibility(juController.Inventory.HoldableItensLeftHand, newID);
+    }
+
+    /// <summary>
+    /// Safely enables the active weapon and disables all others in the provided item array.
+    /// </summary>
+    private void UpdateWeaponVisibility(JUHoldableItem[] items, int activeWeaponID)
+    {
+        if (items == null) return;
+
+        for (int i = 0; i < items.Length; i++)
         {
-            Debug.LogWarning("NetworkCompleteSync: Inventory not initialized yet on remote client.");
-            return;
-        }
-
-        var rightHandItems = juController.Inventory.HoldableItensRightHand;
-
-        for (int i = 0; i < rightHandItems.Length; i++)
-        {
-            if (rightHandItems[i] != null && rightHandItems[i].gameObject != null)
+            if (items[i] != null && items[i].gameObject != null)
             {
-                rightHandItems[i].gameObject.SetActive(i == newID);
+                items[i].gameObject.SetActive(i == activeWeaponID);
             }
         }
     }
+
+    #endregion
 }

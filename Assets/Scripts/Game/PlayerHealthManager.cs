@@ -1,8 +1,9 @@
 using JUTPS;
 using JUTPS.FX;
-using JUTPS.PhysicsScripts;
 using Mirror;
 using UnityEngine;
+using UnityEngine.SceneManagement; 
+using System.Linq; 
 
 [RequireComponent(typeof(JUHealth))]
 public class PlayerHealthManager : NetworkBehaviour
@@ -11,19 +12,26 @@ public class PlayerHealthManager : NetworkBehaviour
     [SerializeField] private JUHealth _juHealth;
     public static PlayerHealthManager LocalInstance { get; private set; }
     private const float MAX_ALLOWED_DAMAGE = 500f;
+
     [SyncVar(hook = nameof(OnServerHealthChanged))]
     public float netHealth = 100f;
+
     [SyncVar(hook = nameof(OnDeathStateChanged))]
     public bool netIsDead = false;
+
+    private LSPlayer _playerData;
 
     void Awake()
     {
         if (_juHealth == null) _juHealth = GetComponent<JUHealth>();
+        _playerData = GetComponent<LSPlayer>(); 
     }
+
     public override void OnStartLocalPlayer()
     {
         LocalInstance = this;
     }
+
     public override void OnStartServer()
     {
         netHealth = _juHealth.Health;
@@ -81,10 +89,12 @@ public class PlayerHealthManager : NetworkBehaviour
         ServerApplyDamage(amount);
     }
 
- 
     [Server]
     public void ServerApplyDamage(float amount)
     {
+        // 1. NO DAMAGE IN LOBBY SCENE
+        if (SceneManager.GetActiveScene().name == "LobbyScene") return;
+
         if (netIsDead) return;
 
         netHealth -= amount;
@@ -95,6 +105,8 @@ public class PlayerHealthManager : NetworkBehaviour
         if (netHealth <= 0)
         {
             netIsDead = true;
+            if (_playerData != null) _playerData.isAlive = false; // Mark dead for team logic
+
             if (isLocalPlayer)
             {
                 Invoke(nameof(HostDeathSequence), 3f);
@@ -117,34 +129,27 @@ public class PlayerHealthManager : NetworkBehaviour
     [Server]
     private void HostDeathSequence()
     {
-        Debug.Log("[Server] Host died. Keeping server alive and hiding the body.");
+        Debug.Log("[Server] Host died. Enabling Free Roam.");
         RpcDisableCharacter();
     }
 
     [Server]
     private void ClientDeathSequence()
     {
-        Debug.Log("[Server] Client died. Instructing client to disconnect and return to menu.");
-
-        TargetDisconnect(connectionToClient);
-
+        Debug.Log("[Server] Client died. Kicking to Main Menu.");
+        RpcDisableCharacter();
+        TargetDisconnect(connectionToClient); 
         NetworkServer.Destroy(gameObject);
     }
-    [Server]
 
     [TargetRpc]
     private void TargetDisconnect(NetworkConnection target)
     {
-        Debug.Log("[Client] died. Showing loading screen and disconnecting.");
+        Debug.Log("[Client] died completely. Showing loading screen and disconnecting.");
 
         if (GameUIManager.Instance != null)
         {
-            GameUIManager.Instance.ShowLoadingPanel();
-        }
-
-        if (Mirror.NetworkManager.singleton != null)
-        {
-            Mirror.NetworkManager.singleton.StopClient();
+            GameUIManager.Instance.TriggerDisconnectSequence();
         }
     }
 
@@ -166,8 +171,8 @@ public class PlayerHealthManager : NetworkBehaviour
 
         if (TryGetComponent(out Rigidbody rb))
         {
-            rb.isKinematic = true; 
-            rb.detectCollisions = false; 
+            rb.isKinematic = true;
+            rb.detectCollisions = false;
         }
 
         if (TryGetComponent(out JUTPS.PhysicsScripts.AdvancedRagdollController ragdoll))

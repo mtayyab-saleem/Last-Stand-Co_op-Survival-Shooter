@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 420460}
   - component: {fileID: 3359106}
   - component: {fileID: 2340508}
-  - component: {fileID: 6469574}
+  - component: {fileID: 6326279189333519332}
   m_Layer: 0
   m_Name: Struct_Pole_B_LOD1
   m_TagString: Untagged
@@ -62,6 +62,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -83,12 +85,14 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &6469574
-MeshCollider:
+--- !u!136 &6326279189333519332
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -105,10 +109,11 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: a01ba4ce8ab06a74480aef96f0c99085, type: 3}
+  serializedVersion: 2
+  m_Radius: 0.25379136
+  m_Height: 12.458046
+  m_Direction: 1
+  m_Center: {x: -0.02622598, y: 6.220157, z: 0.023527758}
 --- !u!1 &164532
 GameObject:
   m_ObjectHideFlags: 0
@@ -177,7 +182,7 @@ GameObject:
   - component: {fileID: 467772}
   - component: {fileID: 3323636}
   - component: {fileID: 2309364}
-  - component: {fileID: 6441736}
+  - component: {fileID: 5812320783033039197}
   m_Layer: 0
   m_Name: Struct_Pole_B_LOD0
   m_TagString: Untagged
@@ -228,6 +233,8 @@ MeshRenderer:
   m_RayTracingAccelStructBuildFlagsOverride: 0
   m_RayTracingAccelStructBuildFlags: 1
   m_SmallMeshCulling: 1
+  m_ForceMeshLod: -1
+  m_MeshLodSelectionBias: 0
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
@@ -249,12 +256,14 @@ MeshRenderer:
   m_AutoUVMaxDistance: 0.5
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
+  m_GlobalIlluminationMeshLod: 0
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 0
+  m_MaskInteraction: 0
   m_AdditionalVertexStreams: {fileID: 0}
---- !u!64 &6441736
-MeshCollider:
+--- !u!136 &5812320783033039197
+CapsuleCollider:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
@@ -271,7 +280,8 @@ MeshCollider:
   m_IsTrigger: 0
   m_ProvidesContacts: 0
   m_Enabled: 1
-  serializedVersion: 5
-  m_Convex: 0
-  m_CookingOptions: 30
-  m_Mesh: {fileID: 4300000, guid: a01ba4ce8ab06a74480aef96f0c99085, type: 3}
+  serializedVersion: 2
+  m_Radius: 0.25379136
+  m_Height: 12.458046
+  m_Direction: 1
+  m_Center: {x: -0.02622598, y: 6.220157, z: 0.023527758}
