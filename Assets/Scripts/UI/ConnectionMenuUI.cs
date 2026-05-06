@@ -1,4 +1,5 @@
 using UnityEngine;
+using System.Collections;
 using System.Collections.Generic;
 using Mirror;
 using Mirror.Discovery;
@@ -15,9 +16,13 @@ public class ConnectionMenuUI : MonoBehaviour
     [SerializeField] private ButtonManager refreshButton;
     [SerializeField] private ButtonManager backButton;
 
-    private NetworkDiscovery _networkDiscovery;
+    [Header("Discovery Settings")]
+    [Tooltip("How often (seconds) to automatically re-scan for new servers while the panel is open.")]
+    [SerializeField] private float autoRefreshInterval = 5f;
 
-    // Tracks servers to prevent duplicate buttons from appearing in the list
+    private NetworkDiscovery _networkDiscovery;
+    private Coroutine _autoRefreshCoroutine;
+
     private Dictionary<long, GameObject> _foundServers = new Dictionary<long, GameObject>();
 
     private void Start()
@@ -29,22 +34,27 @@ public class ConnectionMenuUI : MonoBehaviour
     {
         InitializeDiscovery();
         StartDiscoverySearch();
+
+        if (_autoRefreshCoroutine != null) StopCoroutine(_autoRefreshCoroutine);
+        _autoRefreshCoroutine = StartCoroutine(PeriodicDiscoveryRefresh());
     }
 
     private void OnDisable()
     {
-        if (_networkDiscovery != null)
+        if (_autoRefreshCoroutine != null)
         {
-            _networkDiscovery.StopDiscovery();
+            StopCoroutine(_autoRefreshCoroutine);
+            _autoRefreshCoroutine = null;
         }
+
+        if (_networkDiscovery != null)
+            _networkDiscovery.StopDiscovery();
     }
 
     private void InitializeDiscovery()
     {
         if (Mirror.NetworkManager.singleton != null)
-        {
             _networkDiscovery = Mirror.NetworkManager.singleton.GetComponent<NetworkDiscovery>();
-        }
 
         if (_networkDiscovery != null)
         {
@@ -65,26 +75,19 @@ public class ConnectionMenuUI : MonoBehaviour
 
     private void StartDiscoverySearch()
     {
-        if (serverListView == null || serverListView.itemParent == null) return;
+        InitializeDiscovery();
 
-        foreach (Transform child in serverListView.itemParent)
+        if (serverListView != null && serverListView.itemParent != null)
         {
-            Destroy(child.gameObject);
+            foreach (Transform child in serverListView.itemParent)
+                Destroy(child.gameObject);
+            _foundServers.Clear();
         }
-        _foundServers.Clear();
 
-        // Restart Mirror Discovery
         if (_networkDiscovery != null)
         {
-            try
-            {
-                _networkDiscovery.StopDiscovery();
-                Invoke(nameof(ExecuteStartDiscovery), 0.1f);
-            }
-            catch (System.Exception e)
-            {
-                Debug.LogError("[ConnectionMenuUI] Failed to restart discovery: " + e.Message);
-            }
+            _networkDiscovery.StopDiscovery();
+            Invoke(nameof(ExecuteStartDiscovery), 0.15f);
         }
     }
 
@@ -93,7 +96,63 @@ public class ConnectionMenuUI : MonoBehaviour
         if (this.gameObject.activeInHierarchy && _networkDiscovery != null && !NetworkServer.active)
         {
             _networkDiscovery.StartDiscovery();
-            Debug.Log("[ConnectionMenuUI] Scanning for LAN Servers...");
+            Debug.Log("[ConnectionMenuUI] Scanning for LAN servers...");
+        }
+    }
+
+    private IEnumerator PeriodicDiscoveryRefresh()
+    {
+        while (true)
+        {
+            yield return new WaitForSeconds(autoRefreshInterval);
+
+            if (!this.gameObject.activeInHierarchy) yield break;
+            if (NetworkServer.active) yield break;
+
+            // Re-fetch in case reference went stale after a disconnect
+            InitializeDiscovery();
+            if (_networkDiscovery == null) continue;
+
+            // --- Stop phase (no yield inside, so try-catch is legal) ---
+            bool stopped = TryStopDiscovery();
+            if (!stopped) continue;
+
+            // --- Yield is OUTSIDE try-catch (C# requirement) ---
+            yield return new WaitForSeconds(0.15f);
+
+            // --- Start phase (no yield inside, so try-catch is legal) ---
+            TryStartDiscovery();
+        }
+    }
+
+    // Separate helper so try-catch wraps only non-yield code
+    private bool TryStopDiscovery()
+    {
+        try
+        {
+            _networkDiscovery.StopDiscovery();
+            return true;
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("[ConnectionMenuUI] StopDiscovery failed: " + e.Message);
+            return false;
+        }
+    }
+
+    // Separate helper so try-catch wraps only non-yield code
+    private void TryStartDiscovery()
+    {
+        if (!this.gameObject.activeInHierarchy || NetworkServer.active) return;
+
+        try
+        {
+            _networkDiscovery.StartDiscovery();
+            Debug.Log("[ConnectionMenuUI] Auto-refreshed server discovery.");
+        }
+        catch (System.Exception e)
+        {
+            Debug.LogWarning("[ConnectionMenuUI] StartDiscovery failed: " + e.Message);
         }
     }
 
@@ -103,40 +162,35 @@ public class ConnectionMenuUI : MonoBehaviour
         if (serverListView == null || serverListView.itemPreset == null) return;
 
         GameObject newItem = Instantiate(serverListView.itemPreset, serverListView.itemParent);
-
-        // Format the display host's IP 
         string serverName = info.EndPoint.Address.ToString();
 
-        // Configure Button
         ButtonManager btnManager = newItem.GetComponent<ButtonManager>();
         if (btnManager != null)
         {
             btnManager.buttonText = serverName;
             if (btnManager.normalText != null) btnManager.normalText.text = serverName;
-
             btnManager.onClick.RemoveAllListeners();
             btnManager.onClick.AddListener(() => ConnectToFoundServer(info));
-
             btnManager.UpdateUI();
         }
 
-        // Register the server 
         _foundServers.Add(info.serverId, newItem);
     }
 
     private void ConnectToFoundServer(ServerResponse info)
     {
-        if (_networkDiscovery != null)
+        if (_autoRefreshCoroutine != null)
         {
-            _networkDiscovery.StopDiscovery();
+            StopCoroutine(_autoRefreshCoroutine);
+            _autoRefreshCoroutine = null;
         }
+
+        if (_networkDiscovery != null) _networkDiscovery.StopDiscovery();
 
         GameUIManager.Instance.ShowLoadingPanel();
 
         if (Mirror.NetworkManager.singleton != null)
-        {
             Mirror.NetworkManager.singleton.StartClient(info.uri);
-        }
     }
 
     private void OnBackClick()

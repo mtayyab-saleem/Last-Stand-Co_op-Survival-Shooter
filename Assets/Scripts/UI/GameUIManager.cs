@@ -1,5 +1,8 @@
 using UnityEngine;
 using System.Collections;
+using Mirror;        
+using Mirror.Discovery;  
+
 
 /// <summary>
 /// The central router for all UI panels. 
@@ -19,7 +22,7 @@ public class GameUIManager : MonoBehaviour
 
     private void Awake()
     {
-        Application.targetFrameRate = 60;
+        //Application.targetFrameRate = 60;
         if (Instance == null) 
         {
             Instance = this;
@@ -74,16 +77,41 @@ public class GameUIManager : MonoBehaviour
         if (_loadingPanel) _loadingPanel.SetActive(true);
     }
 
+    private bool isDisconnecting = false;
+
     public void TriggerDisconnectSequence()
     {
+        if (isDisconnecting) return;
+        isDisconnecting = true;
         StartCoroutine(DisconnectSequence());
     }
 
-    private System.Collections.IEnumerator DisconnectSequence()
+    private IEnumerator DisconnectSequence()
     {
         ShowLoadingPanel();
+
+        if (Mirror.NetworkManager.singleton != null)
+        {
+            var discovery = Mirror.NetworkManager.singleton.GetComponent<Mirror.Discovery.NetworkDiscovery>();
+            if (discovery != null)
+            {
+                discovery.StopDiscovery();
+            }
+
+            if (Mirror.NetworkServer.active && Mirror.NetworkClient.isConnected)
+            {
+                Mirror.NetworkManager.singleton.StopHost();
+            }
+            else if (Mirror.NetworkClient.isConnected)
+            {
+                Mirror.NetworkManager.singleton.StopClient();
+            }
+        }
+
         yield return new WaitForSeconds(2.5f);
+
         ShowMainMenu();
+        isDisconnecting = false; 
         Debug.Log("Disconnected from Host: Returned to Main Menu via Loading.");
     }
 }

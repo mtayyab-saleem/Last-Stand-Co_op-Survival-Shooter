@@ -23,8 +23,19 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (!isLocalPlayer)
         {
             foreach (var s in scriptsToDisable) s.enabled = false;
+            if (TryGetComponent(out Rigidbody rb))
+            {
+                rb.isKinematic = true;      // Physics engine ko calculation se rokna
+                rb.useGravity = false;      // Gravity ka bojh hatana
+                rb.interpolation = RigidbodyInterpolation.None; // Interpolation CPU khati hai
+            }
 
-            if (TryGetComponent(out Rigidbody rb)) rb.isKinematic = true;
+            // Main Collider ko Trigger kar dein ya band kar dein
+            if (TryGetComponent(out CapsuleCollider col))
+            {
+                col.isTrigger = true; // Takkar ki physics calculation khatam
+            }
+            //if (TryGetComponent(out Rigidbody rb)) rb.isKinematic = true;
             gameObject.tag = "Untagged";
 
             if (playerAnimator != null)
@@ -90,9 +101,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
 
         if (isLocalPlayer)
         {
-            if (GameUIManager.Instance != null)
+            if (!NetworkClient.isConnected)
             {
-                GameUIManager.Instance.TriggerDisconnectSequence();
+                Debug.Log("[PlayerNetworkSetup] Connection lost. Returning to Main Menu.");
+                if (GameUIManager.Instance != null)
+                {
+                    GameUIManager.Instance.TriggerDisconnectSequence();
+                }
             }
         }
     }
