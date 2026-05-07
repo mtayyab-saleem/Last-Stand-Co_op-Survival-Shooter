@@ -8587,7 +8587,7 @@ MonoBehaviour:
   Force: 10
   TheresGroundBelow: 0
   GroundCheckRadius: 0.1
-  LastBodyPositionY: 0
+  LastBodyPositionY: -4.614608
   NewAnimationBodyPosition: {x: 0, y: 0, z: 0}
   Animation_Y_BodyPosition: 0
 --- !u!114 &3489979222139667187
@@ -9186,7 +9186,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 3447100696
+  _assetId: 1388483345
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
@@ -9280,7 +9280,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0
   juController: {fileID: 3489979222139667187}
-  _animator: {fileID: 6990835895164698112}
+  characterAnimator: {fileID: 0}
   juHealth: {fileID: 3489979222139667189}
 --- !u!1 &4422377306144402532
 GameObject:
@@ -10162,7 +10162,7 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 6439621718914296383}
   serializedVersion: 2
-  m_LocalRotation: {x: -0.039714564, y: 0.0000054498323, z: -0.000057821733, w: 0.9992111}
+  m_LocalRotation: {x: 0.7069847, y: -0.000046515604, z: -0.000046499546, w: -0.70722884}
   m_LocalPosition: {x: -6.275513e-12, y: 0.2567711, z: -0.019898938}
   m_LocalScale: {x: 1, y: 0.99999994, z: 1}
   m_ConstrainProportionsScale: 0

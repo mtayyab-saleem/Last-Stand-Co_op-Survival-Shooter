@@ -8056,6 +8056,7 @@ GameObject:
   - component: {fileID: 3489979222139667197}
   - component: {fileID: 3489979222139667187}
   - component: {fileID: 3489979222139667189}
+  - component: {fileID: 544104742654782266}
   - component: {fileID: 3489979222139667082}
   - component: {fileID: 3489979222139667080}
   - component: {fileID: 7719652078972149915}
@@ -8685,6 +8686,27 @@ MonoBehaviour:
     m_PersistentCalls:
       m_Calls: []
   IsDead: 0
+--- !u!114 &544104742654782266
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4372868026506870464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b14e47765b621724f99e7ce7bd1602c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  JUFootPlacer: {fileID: 3489979222139667186, guid: 39b6cb0e70c180c46a6b9d30b4432ddb, type: 3}
+  RootBone: {fileID: 2171437106769882719, guid: 39b6cb0e70c180c46a6b9d30b4432ddb, type: 3}
+  RootBoneSpineLean: 1
+  RootBoneSpineMovement: 1
+  RootBoneLeanIntensity: 30
+  RootBoneLeanSpeed: 8
+  RootBoneDownMovementIntensity: 0.5
+  BlockForwardLeanWeight: 2
+  AxisToLean: 0
 --- !u!114 &3489979222139667082
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8877,7 +8899,9 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
+  playerName: Unknown Player
   isReady: 0
+  isGameHost: 0
   teamID: -1
   isAlive: 1
 --- !u!1 &4422377306144402532
