@@ -517,7 +517,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 294.3, y: 49.7}
+  m_AnchoredPosition: {x: 294.30005, y: 49.69995}
   m_SizeDelta: {x: 0, y: 55}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &42829245
@@ -6462,7 +6462,7 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  currentMode: 0
+  currentMode: 2
   canHostStart: 0
   maxPlayers: 4
 --- !u!4 &1374394499
