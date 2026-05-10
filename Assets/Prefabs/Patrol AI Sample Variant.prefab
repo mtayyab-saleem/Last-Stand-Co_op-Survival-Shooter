@@ -80,6 +80,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Patrol AI Sample Variant
       objectReference: {fileID: 0}
+    - target: {fileID: 4698248226047294672, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5038022646650537860, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
       propertyPath: m_ConnectedAnchor.x
       value: -0.00000020116197
@@ -140,6 +144,22 @@ PrefabInstance:
       propertyPath: GroundLayer.m_Bits
       value: 1
       objectReference: {fileID: 0}
+    - target: {fileID: 5616813433819115195, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
+      propertyPath: anim
+      value: 
+      objectReference: {fileID: 3550571265663869363}
+    - target: {fileID: 5616813433819115195, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
+      propertyPath: WhatIsWall.m_Bits
+      value: 33
+      objectReference: {fileID: 0}
+    - target: {fileID: 5616813433819115195, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
+      propertyPath: WhatIsGround.m_Bits
+      value: 33
+      objectReference: {fileID: 0}
+    - target: {fileID: 5616813433819115195, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
+      propertyPath: StepCorrectionMask.m_Bits
+      value: 33
+      objectReference: {fileID: 0}
     - target: {fileID: 5616813433819115196, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
       propertyPath: SensorLayerMask.m_Bits
       value: 1
@@ -189,3 +209,8 @@ PrefabInstance:
     m_AddedGameObjects: []
     m_AddedComponents: []
   m_SourcePrefab: {fileID: 100100000, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
+--- !u!95 &3550571265663869363 stripped
+Animator:
+  m_CorrespondingSourceObject: {fileID: 2060532785032330256, guid: 2c47228f0b0be98428dd75e3735fb33c, type: 3}
+  m_PrefabInstance: {fileID: 3305169781094571427}
+  m_PrefabAsset: {fileID: 0}

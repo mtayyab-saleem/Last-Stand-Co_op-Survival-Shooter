@@ -6729,8 +6729,6 @@ MonoBehaviour:
   - {fileID: 7346440188774909425}
   - {fileID: 301774508074914531}
   - {fileID: 5982716162599059056}
-  objectsToDisable: []
-  ForceMobileMode: 1
   playerAnimator: {fileID: 6136937444760093290}
 --- !u!1 &713329793129382301
 GameObject:
