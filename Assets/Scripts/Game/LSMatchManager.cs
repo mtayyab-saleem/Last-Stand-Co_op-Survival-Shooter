@@ -16,12 +16,10 @@ public class LSMatchManager : NetworkBehaviour
 
     [Header("Lobby Settings")]
     [Tooltip("Maximum players allowed in the match (Host + Clients)")]
-    public int maxPlayers = 4; // Yahan se aap isko 8 ya jitna chahein kar sakte hain
+    public int maxPlayers = 4; 
 
-    // Match ka status track karne ke liye
     private bool hasMatchStarted = false;
 
-    // A synchronized list of all players currently in the lobby/game
     public readonly SyncList<LSPlayer> players = new SyncList<LSPlayer>();
 
     void Awake()
@@ -36,7 +34,6 @@ public class LSMatchManager : NetworkBehaviour
     {
         players.Callback += OnPlayersListChanged;
 
-        // Host ka selected mode uthayein
         int savedMode = PlayerPrefs.GetInt("HostSelectedMode", 0);
         currentMode = (GameMode)savedMode;
     }
@@ -49,16 +46,15 @@ public class LSMatchManager : NetworkBehaviour
             players.Add(player);
         }
 
-        // --- MAIN FIX: Pehla player jo list mein aayega, wo pakka Host hoga ---
         if (players.Count == 1)
         {
             player.isGameHost = true;
-            player.isReady = true; // Host hamesha ready hoga
+            player.isReady = true;
         }
         else
         {
             player.isGameHost = false;
-            player.isReady = false; // Client start mein Not Ready hoga
+            player.isReady = false;
         }
 
         UpdateReadyState();

@@ -20,6 +20,8 @@ public class PlayerHealthManager : NetworkBehaviour
     public bool netIsDead = false;
 
     private LSPlayer _playerData;
+    [Header("Power-Ups")]
+    public GameObject[] powerUpPrefabs;
 
     void Awake()
     {
@@ -60,7 +62,10 @@ public class PlayerHealthManager : NetworkBehaviour
                 }
                 else
                 {
-                    CmdTakeEnvironmentDamage(difference);
+                    if (difference >= 24f)
+                    {
+                        CmdTakeEnvironmentDamage(difference);
+                    }
                 }
             }
         }
@@ -76,6 +81,15 @@ public class PlayerHealthManager : NetworkBehaviour
             var targetScript = target.GetComponent<PlayerHealthManager>();
             if (targetScript != null)
             {
+                var targetPlayer = target.GetComponent<LSPlayer>();
+
+                if (_playerData != null && targetPlayer != null)
+                {
+                    if (_playerData.teamID == targetPlayer.teamID && _playerData.teamID != -1)
+                    {
+                        return;
+                    }
+                }
                 targetScript.ServerApplyDamage(amount);
             }
         }
@@ -104,9 +118,10 @@ public class PlayerHealthManager : NetworkBehaviour
 
         if (netHealth <= 0)
         {
+            gameObject.tag = "Untagged";
             netIsDead = true;
             if (_playerData != null) _playerData.isAlive = false; // Mark dead for team logic
-
+            SpawnRandomPowerUp();
             if (isLocalPlayer)
             {
                 Invoke(nameof(HostDeathSequence), 3f);
@@ -125,7 +140,21 @@ public class PlayerHealthManager : NetworkBehaviour
             _juHealth.CheckHealthState();
         }
     }
+    [Server]
+    private void SpawnRandomPowerUp()
+    {
+        if (powerUpPrefabs == null || powerUpPrefabs.Length == 0) return;
 
+        int randomIndex = Random.Range(0, powerUpPrefabs.Length);
+        GameObject selectedPrefab = powerUpPrefabs[randomIndex];
+
+        if (selectedPrefab != null)
+        {
+            Vector3 spawnPosition = transform.position + (Vector3.up * 0.5f);
+            GameObject spawnedPowerUp = Instantiate(selectedPrefab, spawnPosition, Quaternion.identity);
+            NetworkServer.Spawn(spawnedPowerUp);
+        }
+    }
     [Server]
     private void HostDeathSequence()
     {

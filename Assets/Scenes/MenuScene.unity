@@ -7234,9 +7234,9 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 295797627}
-  - component: {fileID: 295797630}
   - component: {fileID: 295797624}
   - component: {fileID: 295797629}
+  - component: {fileID: 295797630}
   m_Layer: 0
   m_Name: Network Components
   m_TagString: Untagged
@@ -7318,9 +7318,9 @@ MonoBehaviour:
   m_GameObject: {fileID: 295797623}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 8aab4c8111b7c411b9b92cf3dbc5bd4e, type: 3}
+  m_Script: {fileID: 11500000, guid: 1fe7dac520d86554382e3cb61f8e2b67, type: 3}
   m_Name: 
-  m_EditorClassIdentifier: Mirror::Mirror.NetworkManager
+  m_EditorClassIdentifier: Assembly-CSharp::LSNetworkManager
   dontDestroyOnLoad: 1
   runInBackground: 1
   headlessStartMode: 0
@@ -7329,7 +7329,7 @@ MonoBehaviour:
   offlineScene: Assets/Scenes/MenuScene.unity
   onlineScene: Assets/Scenes/LobbyScene.unity
   offlineSceneLoadDelay: 0
-  transport: {fileID: 0}
+  transport: {fileID: 295797624}
   networkAddress: localhost
   maxConnections: 100
   disconnectInactiveConnections: 0
@@ -7338,7 +7338,9 @@ MonoBehaviour:
   playerPrefab: {fileID: 4372868026506870464, guid: a8d292ae92daf174385475e154c1a575, type: 3}
   autoCreatePlayer: 1
   playerSpawnMethod: 0
-  spawnPrefabs: []
+  spawnPrefabs:
+  - {fileID: 6687682940110421504, guid: ffe33e61e1c3ec747980c21eca8c0d07, type: 3}
+  - {fileID: 3516352575337148050, guid: 06143f21cd4cee942b3a3d6a0427ddcb, type: 3}
   exceptionsDisconnect: 1
   snapshotSettings:
     bufferTimeMultiplier: 2

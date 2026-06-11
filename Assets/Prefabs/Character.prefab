@@ -8068,7 +8068,6 @@ GameObject:
   - component: {fileID: 4290107145203711557}
   - component: {fileID: -260641199741599781}
   - component: {fileID: -246710878101784484}
-  - component: {fileID: 6351797336739770596}
   m_Layer: 9
   m_Name: Character
   m_TagString: Player
@@ -8732,19 +8731,7 @@ MonoBehaviour:
   BloodHitParticle: {fileID: 3377176041485713299, guid: f5973a37858ed07439978e742b77a3af, type: 3}
   OnDeath:
     m_PersistentCalls:
-      m_Calls:
-      - m_Target: {fileID: 6351797336739770596}
-        m_TargetAssemblyTypeName: JUTPS.Utilities.JUAutoInstantiate, Assembly-CSharp
-        m_MethodName: InstantiatePrefab
-        m_Mode: 1
-        m_Arguments:
-          m_ObjectArgument: {fileID: 0}
-          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-          m_IntArgument: 0
-          m_FloatArgument: 0
-          m_StringArgument: 
-          m_BoolArgument: 0
-        m_CallState: 2
+      m_Calls: []
   IsDead: 0
 --- !u!114 &544104742654782266
 MonoBehaviour:
@@ -8926,6 +8913,9 @@ MonoBehaviour:
   _juHealth: {fileID: 3489979222139667189}
   netHealth: 400
   netIsDead: 0
+  powerUpPrefabs:
+  - {fileID: 3516352575337148050, guid: 06143f21cd4cee942b3a3d6a0427ddcb, type: 3}
+  - {fileID: 6687682940110421504, guid: ffe33e61e1c3ec747980c21eca8c0d07, type: 3}
 --- !u!114 &-260641199741599781
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -8942,7 +8932,7 @@ MonoBehaviour:
   syncMode: 0
   syncInterval: 0.1
   juController: {fileID: 3489979222139667187}
-  characterAnimator: {fileID: 0}
+  characterAnimator: {fileID: 6990835895164698112}
   juHealth: {fileID: 3489979222139667189}
 --- !u!114 &-246710878101784484
 MonoBehaviour:
@@ -8959,40 +8949,11 @@ MonoBehaviour:
   syncDirection: 0
   syncMode: 0
   syncInterval: 0
-  playerName: Unknown Player
+  playerName: NewPlayer
   isReady: 0
   isGameHost: 0
   teamID: -1
   isAlive: 1
---- !u!114 &6351797336739770596
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 4372868026506870464}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 0096f6e233501104390d9b289f66a017, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::JUTPS.Utilities.JUAutoInstantiate
-  Prefab: {fileID: 0}
-  StartInstantiateOnAwake: 1
-  TimeToSpawn: 2
-  Repeat: 0
-  RepeatingTime: 1
-  InstanceLifeTime: -1
-  SwitchToRandomInstantiate: 0
-  PrefabsToInstantiate: []
-  SpawnArea: {x: 0, y: 0, z: 0}
-  PositionOffset: {x: 0, y: 0, z: 0}
-  RandomRotation: 1
-  Quantity: 1
-  InstancesLimit: 32
-  EmptyInstantiatePorcentage: 0
-  OnInstantiate:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!1 &4422377306144402532
 GameObject:
   m_ObjectHideFlags: 0

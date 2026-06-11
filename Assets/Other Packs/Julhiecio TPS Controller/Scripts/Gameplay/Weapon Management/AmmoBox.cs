@@ -1,4 +1,5 @@
 ﻿using UnityEngine;
+using Mirror;
 namespace JUTPS.WeaponSystem
 {
 
@@ -36,7 +37,7 @@ namespace JUTPS.WeaponSystem
                     }
                     GameObject fx = Instantiate(Effect, transform.position, transform.rotation);
                     Destroy(fx, 5);
-                    Destroy(this.gameObject, 0.1f);
+                    if (NetworkServer.active) NetworkServer.Destroy(this.gameObject);
                 }
             }
         }
