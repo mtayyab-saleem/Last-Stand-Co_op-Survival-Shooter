@@ -2,8 +2,8 @@ using JUTPS;
 using JUTPS.FX;
 using Mirror;
 using UnityEngine;
-using UnityEngine.SceneManagement; 
-using System.Linq; 
+using UnityEngine.SceneManagement;
+using System.Linq;
 
 [RequireComponent(typeof(JUHealth))]
 public class PlayerHealthManager : NetworkBehaviour
@@ -26,7 +26,7 @@ public class PlayerHealthManager : NetworkBehaviour
     void Awake()
     {
         if (_juHealth == null) _juHealth = GetComponent<JUHealth>();
-        _playerData = GetComponent<LSPlayer>(); 
+        _playerData = GetComponent<LSPlayer>();
     }
 
     public override void OnStartLocalPlayer()
@@ -85,6 +85,7 @@ public class PlayerHealthManager : NetworkBehaviour
 
                 if (_playerData != null && targetPlayer != null)
                 {
+                    // Tayyab's check is preserved here
                     if (_playerData.teamID == targetPlayer.teamID && _playerData.teamID != -1)
                     {
                         return;
@@ -106,22 +107,25 @@ public class PlayerHealthManager : NetworkBehaviour
     [Server]
     public void ServerApplyDamage(float amount)
     {
-        // 1. NO DAMAGE IN LOBBY SCENE
         if (SceneManager.GetActiveScene().name == "LobbyScene") return;
 
         if (netIsDead) return;
 
         netHealth -= amount;
-
-        // Clamp health to prevent negative values
         netHealth = Mathf.Clamp(netHealth, 0, _juHealth.MaxHealth);
 
         if (netHealth <= 0)
         {
             gameObject.tag = "Untagged";
             netIsDead = true;
-            if (_playerData != null) _playerData.isAlive = false; // Mark dead for team logic
+            if (_playerData != null) _playerData.isAlive = false;
+
+            // Tayyab ki PowerUp logic intact hai
             SpawnRandomPowerUp();
+
+            // --- HUMARA ADD KIYA GAYA CODE: Win Check Trigger ---
+            if (LSMatchManager.Instance != null) LSMatchManager.Instance.CheckWinCondition();
+
             if (isLocalPlayer)
             {
                 Invoke(nameof(HostDeathSequence), 3f);
@@ -132,7 +136,6 @@ public class PlayerHealthManager : NetworkBehaviour
             }
         }
 
-        // Apply on the server 
         _juHealth.Health = netHealth;
 
         if (netIsDead)
@@ -140,6 +143,7 @@ public class PlayerHealthManager : NetworkBehaviour
             _juHealth.CheckHealthState();
         }
     }
+
     [Server]
     private void SpawnRandomPowerUp()
     {
@@ -155,6 +159,7 @@ public class PlayerHealthManager : NetworkBehaviour
             NetworkServer.Spawn(spawnedPowerUp);
         }
     }
+
     [Server]
     private void HostDeathSequence()
     {
@@ -167,7 +172,7 @@ public class PlayerHealthManager : NetworkBehaviour
     {
         Debug.Log("[Server] Client died. Kicking to Main Menu.");
         RpcDisableCharacter();
-        TargetDisconnect(connectionToClient); 
+        TargetDisconnect(connectionToClient);
         NetworkServer.Destroy(gameObject);
     }
 
@@ -223,6 +228,7 @@ public class PlayerHealthManager : NetworkBehaviour
             health.enabled = false;
         }
     }
+
     private void OnServerHealthChanged(float oldHealth, float newHealth)
     {
         _juHealth.Health = newHealth;
@@ -241,7 +247,6 @@ public class PlayerHealthManager : NetworkBehaviour
         {
             _juHealth.Health = 0;
             _juHealth.CheckHealthState();
-
         }
     }
 }
