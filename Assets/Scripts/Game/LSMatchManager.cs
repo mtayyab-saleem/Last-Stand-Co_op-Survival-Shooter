@@ -1,211 +1,3 @@
-//using UnityEngine;
-//using Mirror;
-//using Mirror.Discovery; // Discovery ke liye
-//using System.Collections.Generic;
-//using System.Linq;
-
-//public class LSMatchManager : NetworkBehaviour
-//{
-//    public static LSMatchManager Instance;
-
-//    public enum GameMode { Solo, Duo, Squad }
-
-//    [Header("Match Settings")]
-//    [SyncVar(hook = nameof(OnModeChanged))] public GameMode currentMode = GameMode.Solo;
-//    [SyncVar(hook = nameof(OnHostStartChanged))] public bool canHostStart = false;
-
-//    [Header("Lobby Settings")]
-//    [Tooltip("Maximum players allowed in the match (Host + Clients)")]
-//    public int maxPlayers = 4; // Yahan se aap isko 8 ya jitna chahein kar sakte hain
-
-//    // Match ka status track karne ke liye
-//    private bool hasMatchStarted = false;
-
-//    // A synchronized list of all players currently in the lobby/game
-//    public readonly SyncList<LSPlayer> players = new SyncList<LSPlayer>();
-
-//    void Awake()
-//    {
-//        if (Instance == null) Instance = this;
-//        else Destroy(gameObject);
-
-//        DontDestroyOnLoad(gameObject);
-//    }
-
-//    public override void OnStartServer()
-//    {
-//        players.Callback += OnPlayersListChanged;
-
-//        // Host ka selected mode uthayein
-//        int savedMode = PlayerPrefs.GetInt("HostSelectedMode", 0);
-//        currentMode = (GameMode)savedMode;
-//    }
-
-//    [Server]
-//    public void RegisterPlayer(LSPlayer player)
-//    {
-//        if (!players.Contains(player))
-//        {
-//            players.Add(player);
-//        }
-
-//        // --- MAIN FIX: Pehla player jo list mein aayega, wo pakka Host hoga ---
-//        if (players.Count == 1)
-//        {
-//            player.isGameHost = true;
-//            player.isReady = true; // Host hamesha ready hoga
-//        }
-//        else
-//        {
-//            player.isGameHost = false;
-//            player.isReady = false; // Client start mein Not Ready hoga
-//        }
-
-//        UpdateReadyState();
-//        CheckDiscoveryState();
-//        RpcRefreshUI();
-//    }
-
-//    [Server]
-//    public void UpdateReadyState()
-//    {
-//        int readyClients = 0;
-//        int totalClients = 0;
-
-//        foreach (var p in players)
-//        {
-//            // Ab hum isServer ki bajaye apna isGameHost check kar rahe hain
-//            if (!p.isGameHost)
-//            {
-//                totalClients++;
-//                if (p.isReady) readyClients++;
-//            }
-//            else
-//            {
-//                p.isReady = true; // Make sure host is strictly ready
-//            }
-//        }
-
-//        if (currentMode == GameMode.Solo && totalClients == 0)
-//        {
-//            canHostStart = true;
-//        }
-//        else
-//        {
-//            canHostStart = (totalClients > 0 && readyClients == totalClients);
-//        }
-
-//        RpcRefreshUI();
-//    }
-
-//    [Server]
-//    public void UnregisterPlayer(LSPlayer player)
-//    {
-//        if (players.Contains(player))
-//        {
-//            players.Remove(player);
-//        }
-//        UpdateReadyState();
-//        CheckDiscoveryState(); // Player chala gaya toh discovery wapas on
-//        RpcRefreshUI();
-//    }
-
-//    [Server]
-//    private void CheckDiscoveryState()
-//    {
-//        // Agar match start ho chuka hai, toh discovery kabhi on nahi hogi
-//        if (hasMatchStarted) return;
-
-//        var discovery = FindFirstObjectByType<NetworkDiscovery>();
-//        if (discovery == null) return;
-
-//        if (players.Count >= maxPlayers)
-//        {
-//            // Lobby full ho gayi! Discovery band karo
-//            discovery.StopDiscovery();
-//            Debug.Log("[LSMatchManager] Lobby is Full. Discovery Stopped.");
-//        }
-//        else
-//        {
-//            // Space baqi hai! Discovery ko restart karo taake players join kar sakein
-//            discovery.StopDiscovery();
-//            discovery.AdvertiseServer();
-//            Debug.Log("[LSMatchManager] Space available. Discovery Advertising...");
-//        }
-//    }
-
-
-
-//    [Server]
-//    public void StartMatch()
-//    {
-//        if (!canHostStart) return;
-
-//        // Match start hone ka flag on kar diya
-//        hasMatchStarted = true;
-
-//        // Discovery pakki band
-//        var discovery = FindFirstObjectByType<NetworkDiscovery>();
-//        if (discovery != null) discovery.StopDiscovery();
-
-//        AssignTeams();
-
-//        NetworkManager.singleton.ServerChangeScene("GameScene");
-//    }
-
-//    [Server]
-//    private void AssignTeams()
-//    {
-//        // Players ko completely random mix kar do
-//        var shuffledPlayers = players.OrderBy(x => Random.value).ToList();
-
-//        // Har mode ki team size limit kya hai?
-//        int teamSizeLimit = 1; // Solo = 1 player
-//        if (currentMode == GameMode.Duo) teamSizeLimit = 2; // Duo = 2 players
-//        else if (currentMode == GameMode.Squad) teamSizeLimit = 4; // Squad = 4 players
-
-//        for (int i = 0; i < shuffledPlayers.Count; i++)
-//        {
-//            // Yeh formula automatically players ko teams mein divide kar dega based on team limits.
-//            // Agar limit 4 hai aur i=0,1,2,3 toh answer 0 aayega (Team 0).
-//            // Jab i=4,5,6 hoga toh answer 1 aayega (Team 1).
-//            shuffledPlayers[i].teamID = i / teamSizeLimit;
-//        }
-//    }
-
-//    // --- UI Update Hooks ---
-
-//    private void OnPlayersListChanged(SyncList<LSPlayer>.Operation op, int index, LSPlayer oldItem, LSPlayer newItem)
-//    {
-//        if (isClient) UpdateLocalUI();
-//    }
-
-//    private void OnModeChanged(GameMode oldMode, GameMode newMode) { if (isClient) UpdateLocalUI(); }
-//    private void OnHostStartChanged(bool oldVal, bool newVal) { if (isClient) UpdateLocalUI(); }
-
-//    [ClientRpc]
-//    private void RpcRefreshUI()
-//    {
-//        UpdateLocalUI();
-//    }
-
-//    [Client]
-//    public void UpdateLocalUI()
-//    {
-//        if (LobbyUIManager.Instance == null) return;
-
-//        bool isHost = isServer;
-//        var localPlayer = NetworkClient.localPlayer?.GetComponent<LSPlayer>();
-
-//        List<LSPlayer> allPlayers = new List<LSPlayer>();
-//        foreach (var p in players) allPlayers.Add(p);
-
-//        LobbyUIManager.Instance.RefreshLobbyUI(isHost, localPlayer, allPlayers, (int)currentMode, canHostStart);
-//    }
-//}
-
-
-
 using UnityEngine;
 using Mirror;
 using Mirror.Discovery;
@@ -230,6 +22,7 @@ public class LSMatchManager : NetworkBehaviour
 
     public readonly SyncList<LSPlayer> players = new SyncList<LSPlayer>();
 
+    // Memory dictionary to safely store and restore Team IDs when changing scenes
     public readonly Dictionary<int, int> connectionToTeam = new Dictionary<int, int>();
 
     void Awake()
@@ -258,7 +51,7 @@ public class LSMatchManager : NetworkBehaviour
     {
         if (!players.Contains(player)) players.Add(player);
 
-        // Sirf Lobby mein Start hone se pehle Host/Ready set karein
+        // Only enforce Host and Ready states while still in the Lobby
         if (!hasMatchStarted)
         {
             if (players.Count == 1)
@@ -273,7 +66,7 @@ public class LSMatchManager : NetworkBehaviour
             }
         }
 
-        // --- MAIN FIX: Scene change ke baad naye player object ko purani Team ID wapas restore karein ---
+        // Restore the preserved Team ID to the newly spawned player object after a scene change
         if (player.connectionToClient != null && connectionToTeam.ContainsKey(player.connectionToClient.connectionId))
         {
             player.teamID = connectionToTeam[player.connectionToClient.connectionId];
@@ -360,36 +153,87 @@ public class LSMatchManager : NetworkBehaviour
         var shuffledPlayers = players.OrderBy(x => Random.value).ToList();
         int totalPlayers = shuffledPlayers.Count;
 
-        connectionToTeam.Clear(); // Purana match data clear karein
+        // Clear previous match memory to prevent data overlap
+        connectionToTeam.Clear();
 
         if (currentMode == GameMode.Solo)
         {
             for (int i = 0; i < totalPlayers; i++)
             {
                 shuffledPlayers[i].teamID = i;
-                connectionToTeam[shuffledPlayers[i].connectionToClient.connectionId] = i; // Save to memory
+                connectionToTeam[shuffledPlayers[i].connectionToClient.connectionId] = i;
             }
         }
         else if (currentMode == GameMode.Duo)
         {
-            int numberOfTeams = Mathf.CeilToInt((float)totalPlayers / 2f);
+            // FIX: Sequential bucket filling. Player 1 & 2 = Team 0. Player 3 & 4 = Team 1.
             for (int i = 0; i < totalPlayers; i++)
             {
-                int assignedTeam = i % numberOfTeams;
+                int assignedTeam = i / 2;
                 shuffledPlayers[i].teamID = assignedTeam;
-                connectionToTeam[shuffledPlayers[i].connectionToClient.connectionId] = assignedTeam; // Save to memory
+                connectionToTeam[shuffledPlayers[i].connectionToClient.connectionId] = assignedTeam;
             }
         }
         else if (currentMode == GameMode.Squad)
         {
+            // FIX: If only 3 or 4 players join, they all become Team 0. If 5+ join, it distributes fairly.
             int numberOfTeams = Mathf.CeilToInt((float)totalPlayers / 4f);
             for (int i = 0; i < totalPlayers; i++)
             {
                 int assignedTeam = i % numberOfTeams;
                 shuffledPlayers[i].teamID = assignedTeam;
-                connectionToTeam[shuffledPlayers[i].connectionToClient.connectionId] = assignedTeam; // Save to memory
+                connectionToTeam[shuffledPlayers[i].connectionToClient.connectionId] = assignedTeam;
             }
         }
+    }
+
+    // Called by the server whenever a player dies to check if the match is over
+    [Server]
+    public void CheckWinCondition()
+    {
+        if (!hasMatchStarted) return;
+
+        HashSet<int> aliveTeams = new HashSet<int>();
+
+        foreach (var p in players)
+        {
+            if (p != null && p.isAlive)
+            {
+                aliveTeams.Add(p.teamID);
+            }
+        }
+
+        if (aliveTeams.Count == 1)
+        {
+            int winningTeamID = aliveTeams.First();
+            Debug.Log($"[Victory] Match Over! Team {winningTeamID} is the last team standing!");
+            RpcAnnounceWinner(winningTeamID);
+            EndMatchSequence();
+        }
+        else if (aliveTeams.Count == 0)
+        {
+            Debug.Log("[Victory] Match Over! Draw. No one survived.");
+            RpcAnnounceWinner(-1);
+            EndMatchSequence();
+        }
+    }
+
+    [ClientRpc]
+    private void RpcAnnounceWinner(int winningTeamID)
+    {
+        var localPlayer = NetworkClient.localPlayer?.GetComponent<LSPlayer>();
+        if (localPlayer == null) return;
+
+        if (winningTeamID == -1) Debug.Log("MATCH DRAW! Everyone died.");
+        else if (localPlayer.teamID == winningTeamID) Debug.Log("VICTORY! You are the last team standing!");
+        else Debug.Log("DEFEAT! Another team won the match.");
+    }
+
+    [Server]
+    private void EndMatchSequence()
+    {
+        hasMatchStarted = false;
+        Debug.Log("[LSMatchManager] Match has officially ended.");
     }
 
     public override void OnStopClient()
