@@ -22,8 +22,11 @@ public class LSMatchManager : NetworkBehaviour
 
     public readonly SyncList<LSPlayer> players = new SyncList<LSPlayer>();
 
-    // Memory dictionary to safely store and restore Team IDs when changing scenes
+    // Memory dictionaries to safely store data when changing scenes
     public readonly Dictionary<int, int> connectionToTeam = new Dictionary<int, int>();
+
+    // Stores the host connection ID to prevent host reassignment issues
+    private int hostConnectionId = -1;
 
     void Awake()
     {
@@ -51,19 +54,27 @@ public class LSMatchManager : NetworkBehaviour
     {
         if (!players.Contains(player)) players.Add(player);
 
-        // Only enforce Host and Ready states while still in the Lobby
-        if (!hasMatchStarted)
+        // Lock the Host Connection ID the first time the host enters the lobby
+        if (!hasMatchStarted && players.Count == 1 && hostConnectionId == -1)
         {
-            if (players.Count == 1)
+            if (player.connectionToClient != null)
             {
-                player.isGameHost = true;
-                player.isReady = true;
+                hostConnectionId = player.connectionToClient.connectionId;
             }
-            else
-            {
-                player.isGameHost = false;
-                player.isReady = false;
-            }
+        }
+
+        // Reassign the Host status strictly based on the saved connection ID
+        if (player.connectionToClient != null && player.connectionToClient.connectionId == hostConnectionId)
+        {
+            player.isGameHost = true;
+            player.isReady = true;
+            Debug.Log($"[LSMatchManager] Player '{player.playerName}' recognized and set as HOST.");
+        }
+        else
+        {
+            player.isGameHost = false;
+            if (!hasMatchStarted) player.isReady = false;
+            Debug.Log($"[LSMatchManager] Player '{player.playerName}' recognized as CLIENT.");
         }
 
         // Restore the preserved Team ID to the newly spawned player object after a scene change
@@ -153,7 +164,6 @@ public class LSMatchManager : NetworkBehaviour
         var shuffledPlayers = players.OrderBy(x => Random.value).ToList();
         int totalPlayers = shuffledPlayers.Count;
 
-        // Clear previous match memory to prevent data overlap
         connectionToTeam.Clear();
 
         if (currentMode == GameMode.Solo)
@@ -166,7 +176,6 @@ public class LSMatchManager : NetworkBehaviour
         }
         else if (currentMode == GameMode.Duo)
         {
-            // FIX: Sequential bucket filling. Player 1 & 2 = Team 0. Player 3 & 4 = Team 1.
             for (int i = 0; i < totalPlayers; i++)
             {
                 int assignedTeam = i / 2;
@@ -176,7 +185,6 @@ public class LSMatchManager : NetworkBehaviour
         }
         else if (currentMode == GameMode.Squad)
         {
-            // FIX: If only 3 or 4 players join, they all become Team 0. If 5+ join, it distributes fairly.
             int numberOfTeams = Mathf.CeilToInt((float)totalPlayers / 4f);
             for (int i = 0; i < totalPlayers; i++)
             {
@@ -187,7 +195,6 @@ public class LSMatchManager : NetworkBehaviour
         }
     }
 
-    // Called by the server whenever a player dies to check if the match is over
     [Server]
     public void CheckWinCondition()
     {
@@ -272,5 +279,23 @@ public class LSMatchManager : NetworkBehaviour
         foreach (var p in players) allPlayers.Add(p);
 
         LobbyUIManager.Instance.RefreshLobbyUI(isHost, localPlayer, allPlayers, (int)currentMode, canHostStart);
+
+        // ==============================================================
+        // CORE FIX: Prevent Raycast interaction and blood effects on teammates
+        // ==============================================================
+        if (localPlayer != null)
+        {
+            foreach (var p in players)
+            {
+                // Skip self
+                if (p == null || p.gameObject == localPlayer.gameObject) continue;
+
+                // Evaluate if the evaluated player shares the same team ID
+                bool isTeammate = (currentMode != GameMode.Solo) && (p.teamID != -1) && (p.teamID == localPlayer.teamID);
+
+                // Apply the Ignore Raycast layer state
+                p.SetAsTeammate(isTeammate);
+            }
+        }
     }
 }
