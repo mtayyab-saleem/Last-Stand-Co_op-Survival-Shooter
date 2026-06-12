@@ -1,5 +1,6 @@
-﻿using UnityEngine;
-using JUTPS;
+﻿using JUTPS;
+using Mirror;
+using UnityEngine;
 
 namespace JUTPS.PowerUps
 {
@@ -25,7 +26,7 @@ namespace JUTPS.PowerUps
 
                     GameObject fx = Instantiate(Effect, transform.position, transform.rotation);
                     Destroy(fx, 5);
-                    Destroy(this.gameObject, 0.1f);
+                    if (NetworkServer.active) NetworkServer.Destroy(this.gameObject);
                 }
             }
         }

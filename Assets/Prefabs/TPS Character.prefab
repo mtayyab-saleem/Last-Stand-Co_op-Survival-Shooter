@@ -9,7 +9,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6979541218032647082}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandRing2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -196,7 +196,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3670610451511770434}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandPinky3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -228,7 +228,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8162655003557461490}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandThumb3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -310,7 +310,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1807318129279831087}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandMiddle2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -342,7 +342,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8260549995426248724}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandMiddle4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -465,7 +465,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4222529069189783965}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandThumb4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -496,7 +496,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1726605013829415649}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandIndex3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -528,7 +528,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1859115063872376857}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandPinky1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -560,7 +560,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7208490545565033263}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandMiddle3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -592,7 +592,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 211610929068727695}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandPinky4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -623,7 +623,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8298290811500355853}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: Neck
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -990,7 +990,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1259359074762000834}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: Spine
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -1116,11 +1116,10 @@ GameObject:
   - component: {fileID: 3579882250592893361}
   - component: {fileID: 7160803026846811495}
   - component: {fileID: 1336765806075808698}
+  - component: {fileID: 148544058310429938}
   - component: {fileID: 7695430973541195185}
   - component: {fileID: 4083602446301578813}
   - component: {fileID: 5226821272895316340}
-  - component: {fileID: 6762908314736660975}
-  - component: {fileID: 7481279759855939330}
   - component: {fileID: 6859070336950978369}
   - component: {fileID: 1873614888960845549}
   - component: {fileID: 6019094268352041127}
@@ -1130,13 +1129,13 @@ GameObject:
   - component: {fileID: 3423817715279214598}
   - component: {fileID: 2530047887398013102}
   - component: {fileID: 2910452178569864660}
-  - component: {fileID: 5258454656849541743}
-  - component: {fileID: 7595642006114330965}
-  - component: {fileID: 4161513953118060337}
   - component: {fileID: 7423853692264033901}
-  m_Layer: 9
+  - component: {fileID: 3789332446064508636}
+  - component: {fileID: 1196093663615721252}
+  - component: {fileID: 1636773657532243820}
+  m_Layer: 0
   m_Name: TPS Character
-  m_TagString: Player
+  m_TagString: Enemy
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
@@ -1231,7 +1230,7 @@ CapsuleCollider:
   m_Enabled: 1
   serializedVersion: 2
   m_Radius: 0.4
-  m_Height: 1.72
+  m_Height: 1.7
   m_Direction: 1
   m_Center: {x: 0, y: 0.85, z: 0}
 --- !u!82 &1336765806075808698
@@ -1331,6 +1330,65 @@ AudioSource:
     m_PreInfinity: 2
     m_PostInfinity: 2
     m_RotationOrder: 4
+--- !u!114 &148544058310429938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1990694457497469173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: d7c27a9858ede104ab3691df82417943, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JUTPS.AI.PatrolAI
+  character: {fileID: 0}
+  CurrentWayPointToFollow: 0
+  PathToDestination: []
+  Destination: {x: 0, y: 0, z: 0}
+  WaypointPath: {fileID: 0}
+  DistanceToFinishOnePoint: 1
+  CheckNearestPointOnPath: 1
+  OnEndPath: 0
+  OnStartPath:
+    m_PersistentCalls:
+      m_Calls: []
+  OnFollowing:
+    m_PersistentCalls:
+      m_Calls: []
+  OnEnded:
+    m_PersistentCalls:
+      m_Calls: []
+  TargetTags:
+  - Player
+  - Distractable
+  - Enemy
+  FieldOfView:
+    Radious: 15
+    Angle: 227
+  SensorLayerMask:
+    serializedVersion: 2
+    m_Bits: 1
+  StartRunningAtDistance: 8
+  StopDistance: 5
+  AttackAtDistance: 15
+  AimUpOffset: 1
+  LookTargetSpeed: 6
+  AttackDuration: 1
+  MinTimeToAttack: 0.5
+  MaxTimeToAttack: 3
+  _OnFollowWaypoint:
+    m_PersistentCalls:
+      m_Calls: []
+  _OnFollowAIPath:
+    m_PersistentCalls:
+      m_Calls: []
+  _OnSeeTarget:
+    m_PersistentCalls:
+      m_Calls: []
+  _OnStopSeeingTarget:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!208 &7695430973541195185
 NavMeshObstacle:
   m_ObjectHideFlags: 0
@@ -1341,12 +1399,12 @@ NavMeshObstacle:
   m_Enabled: 1
   serializedVersion: 3
   m_Shape: 1
-  m_Extents: {x: 0.2, y: 0.2, z: 0.2}
-  m_MoveThreshold: 0
+  m_Extents: {x: 0.5, y: 0.5, z: 0.5}
+  m_MoveThreshold: 0.1
   m_Carve: 1
   m_CarveOnlyStationary: 0
   m_Center: {x: 0, y: 0, z: 0}
-  m_TimeToStationary: 0
+  m_TimeToStationary: 0.5
 --- !u!114 &4083602446301578813
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1359,7 +1417,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: bd3a90835420dd44ca72e32a3ab2d133, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  UpdateOnBodyItemsVisibility: 1
+  UpdateOnBodyItemsVisibility: 0
   DisableAllItemsOnStart: 1
   IsALoot: 0
   HoldableItensRightHand:
@@ -1429,10 +1487,10 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 0
   CheckerOffset: {x: 0, y: 0.2, z: 0}
-  CheckerRadious: 3
+  CheckerRadious: 1
   UseDefaultInputToPickUp: 1
   AutoEquipPickedUpItems: 1
-  HoldTimeToPickUp: 0.2
+  HoldTimeToPickUp: 0.3
   ItemToPickUp: {fileID: 0}
   ItemsAround: []
   WeaponsRightHand: []
@@ -1457,78 +1515,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c1571549826a8de4ea21dc78474448f9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  IsPlayer: 1
+  IsPlayer: 0
   UseOldInputSystem: 0
-  JuTPSCharacter: {fileID: 0}
-  ItemToEquipOnStart: -1
-  EnableNextAndPreviousWeaponSwitch: 1
+  JuTPSCharacter: {fileID: 3456858282881446615}
+  ItemToEquipOnStart: 1
+  EnableNextAndPreviousWeaponSwitch: 0
   CustomNextWeaponKeyCode: 0
   CustomPreviousWeaponKeycode: 0
-  EnableAlphaNumericWeaponSwitch: 1
-  EnableMouseScrollWeaponSwitch: 1
+  EnableAlphaNumericWeaponSwitch: 0
+  EnableMouseScrollWeaponSwitch: 0
   ScrollThreshold: 0.1
---- !u!114 &6762908314736660975
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1990694457497469173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 945aee53f47930a488ae796b0af5fb9f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Enabled: 1
-  FootPlacer: 1
-  GroundLayer:
-    serializedVersion: 2
-    m_Bits: 1
-  SpineLean: 1
-  LeanDirection: 0
-  ForwardLeanAxis: 0
-  SidesLeanAxis: 2
-  InvertForwardLean: 0
-  InvertSideLean: 0
---- !u!114 &7481279759855939330
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1990694457497469173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 5238e6384da25284e8adadb2e9544db5, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  _startVehicle: {fileID: 0}
-  EnterVehiclesEnabled: 1
-  ExitVehiclesEnabled: 1
-  DisableCharacterOnEnter: 0
-  DelayToReenableAction: 0.2
-  UseDefaultInputs: 1
-  CheckNearVehicles:
-    Layer:
-      serializedVersion: 2
-      m_Bits: 65541
-    AvoidObstacles: 1
-    EnterVehiclesAreaTag: VehicleArea
-    CheckRange: 2
-    AutoCheck: 1
-    AutoCheckInterval: 0.5
-  MaxVehicleSpeedToEnter: 3
-  MaxVehicleSpeedToExit: 1000
-  MaxCharacterSpeedToEnter: 1
-  GroundLayer:
-    serializedVersion: 2
-    m_Bits: 1
-  OnEnterVehicle:
-    m_PersistentCalls:
-      m_Calls: []
-  OnExitVehicle:
-    m_PersistentCalls:
-      m_Calls: []
 --- !u!114 &6859070336950978369
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1541,7 +1537,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b14e47765b621724f99e7ce7bd1602c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  JUFootPlacer: {fileID: 0}
+  JUFootPlacer: {fileID: 6019094268352041127}
   RootBone: {fileID: 1259359074762000834}
   RootBoneSpineLean: 1
   RootBoneSpineMovement: 1
@@ -1562,7 +1558,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9e4c0b46aa90a2448a4767ed100b53de, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  audioSource: {fileID: 0}
+  audioSource: {fileID: 1336765806075808698}
   FootstepAudioClips:
   - SurfaceTag: Untagged
     AudioClips:
@@ -1617,7 +1613,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   BlockBodyPositioning: 0
   EnableFootPlacement: 1
-  AdvancedMode: 1
+  AdvancedMode: 0
   GroundLayers:
     serializedVersion: 2
     m_Bits: 0
@@ -1680,18 +1676,18 @@ MonoBehaviour:
   DirectionTransform: {fileID: 0}
   DesiredDirection: {x: 0, y: 0, z: 0}
   LocomotionMode: 0
-  SetRigidbodyVelocity: 1
-  FireModeMaxTime: 1.5
-  Speed: 3
+  SetRigidbodyVelocity: 0
+  FireModeMaxTime: 1
+  Speed: 2.04
   WalkSpeed: 0.5
   CrouchSpeed: 0.5
-  RunSpeed: 1.5
-  SprintingSpeedMax: 3
+  RunSpeed: 1.9
+  SprintingSpeedMax: 4
   SprintingAcceleration: 2
   SprintingDeceleration: 0.6
-  RotationSpeed: 5
+  RotationSpeed: 4
   JumpForce: 3
-  StoppingSpeed: 2
+  StoppingSpeed: 0.8
   AirInfluenceControll: 0.5
   MaxWalkableAngle: 45
   CurvedMovement: 1
@@ -1755,24 +1751,24 @@ MonoBehaviour:
         m_Calls: []
   WhatIsGround:
     serializedVersion: 2
-    m_Bits: 71937
+    m_Bits: 33
   GroundCheckRadius: 0.1
   GroundCheckHeighOfsset: 0.1
   GroundCheckSize: 0.5
   WhatIsWall:
     serializedVersion: 2
-    m_Bits: 0
+    m_Bits: 33
   WallRayHeight: 1
   WallRayDistance: 0.6
-  EnableStepCorrection: 1
+  EnableStepCorrection: 0
   UpStepSpeed: 4
   StepCorrectionMask:
     serializedVersion: 2
-    m_Bits: 71681
+    m_Bits: 33
   FootstepHeight: 0.54
   ForwardStepOffset: 0.502
   StepHeight: 0.059
-  EnableUngroundedStepUp: 1
+  EnableUngroundedStepUp: 0
   UngroundedStepUpSpeed: 4
   UngroundedStepUpRayDistance: 0.1
   StoppingTimeOnStepPosition: 0.5
@@ -1815,7 +1811,7 @@ MonoBehaviour:
   WeaponInUseLeftHand: {fileID: 0}
   MeleeWeaponInUseRightHand: {fileID: 0}
   MeleeWeaponInUseLeftHand: {fileID: 0}
-  AimMode: 1
+  AimMode: 0
   FireModeWalkSpeed: 0.5
   FireModeRunSpeed: 1.3
   FireModeCrouchSpeed: 0.5
@@ -1858,7 +1854,7 @@ MonoBehaviour:
   WallAHead: 0
   IsWeaponSwitching: 0
   InverseKinematics: 1
-  IsArtificialIntelligence: 0
+  IsArtificialIntelligence: 1
   UseDefaultControllerInput: 1
   AutoRun: 1
   WalkOnRunButton: 0
@@ -1895,10 +1891,34 @@ MonoBehaviour:
   Health: 400
   MaxHealth: 400
   BloodScreenEffect: 1
-  BloodHitParticle: {fileID: 3377176041485713299, guid: f5973a37858ed07439978e742b77a3af, type: 3}
+  BloodHitParticle: {fileID: 6079834135112903994, guid: 62ac816a3081b684092e03f0ec31a51c, type: 3}
   OnDeath:
     m_PersistentCalls:
-      m_Calls: []
+      m_Calls:
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: JUTPS.Utilities.AutoDestroy, Assembly-CSharp
+        m_MethodName: TimedDestroyObject
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
+      - m_Target: {fileID: 0}
+        m_TargetAssemblyTypeName: JUTPS.Utilities.JUAutoInstantiate, Assembly-CSharp
+        m_MethodName: InstantiatePrefab
+        m_Mode: 1
+        m_Arguments:
+          m_ObjectArgument: {fileID: 0}
+          m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+          m_IntArgument: 0
+          m_FloatArgument: 0
+          m_StringArgument: 
+          m_BoolArgument: 0
+        m_CallState: 2
   IsDead: 0
 --- !u!114 &8184875547308475742
 MonoBehaviour:
@@ -2058,7 +2078,7 @@ MonoBehaviour:
   RagdollDrag: 0.5
   RagdollWhenPressKeyG: 0
   ViewHumanBodyBones: 0
-  ViewBodyPhysics: 1
+  ViewBodyPhysics: 0
   ViewBodyDirection: 0
   FilterByBoneLayer: 1
 --- !u!114 &2530047887398013102
@@ -2073,7 +2093,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e15c793f59fe2864ba14d900aef179d8, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  HeadDamageIntensity: 5
+  HeadDamageIntensity: 3
   TorsoDamageIntensity: 1
   LegsDamageIntensity: 0.8
   ArmsDamageIntensity: 0.5
@@ -2102,108 +2122,6 @@ MonoBehaviour:
   OnFalling:
     m_PersistentCalls:
       m_Calls: []
---- !u!114 &5258454656849541743
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1990694457497469173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 488f7c24132cdf1418b0255398c8c3d3, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CapsuleToResize: {fileID: 7160803026846811495}
-  HeightOffset: 0.73
-  ProneAndRollCenterY: 0.38
-  CenterOffset: {x: 0, y: 0, z: 0}
---- !u!114 &7595642006114330965
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1990694457497469173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4f96242ea5200de41a524b1b321a045f, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  CoverTriggerTag: CoverTrigger
-  CurrentCoverTrigger: {fileID: 0}
-  EnableCover: 1
-  AutoMode: 0
-  SneakSpeed: 1
-  RotationSpeed: 10
-  CrouchedSneakSpeed: 1.3
-  CornerPositionOffset: 0.5
-  WallOffsetPosition: 0
-  WallOffsetPositionOnFireMode: 0.2
-  CoverAnimatorParameter: Cover
-  CameraRightOffset: 1
-  SwitchSideSpeed: 8
-  SpineInclination: -7
-  LeftWeaponInclinationIntensity: 5
-  RightWeaponInclinationIntensity: 2.5
-  LeanAxis: {x: 0, y: 0, z: 1}
-  IsCovering: 0
-  IsCrouchCover: 0
-  IsLeftSide: 1
-  OnWallEdge: 0
-  FireModeDurationInCover: 0.3
-  OnCover:
-    m_PersistentCalls:
-      m_Calls: []
-  OnExitCover:
-    m_PersistentCalls:
-      m_Calls: []
---- !u!114 &4161513953118060337
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1990694457497469173}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 77a8566d0b5dccc46b35de86f87c9c0c, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  Actions:
-  - EventName: Activate Ragdoll
-    Input: <Keyboard>/g
-    targetInput:
-      m_Name: 
-      m_Type: 0
-      m_ExpectedControlType: 
-      m_Id: 
-      m_Processors: 
-      m_Interactions: 
-      m_SingletonActionBindings: []
-      m_Flags: 0
-    OnInputEnter:
-      m_PersistentCalls:
-        m_Calls:
-        - m_Target: {fileID: 3423817715279214598}
-          m_TargetAssemblyTypeName: JUTPS.PhysicsScripts.AdvancedRagdollController,
-            Assembly-CSharp
-          m_MethodName: Fall
-          m_Mode: 1
-          m_Arguments:
-            m_ObjectArgument: {fileID: 0}
-            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
-            m_IntArgument: 0
-            m_FloatArgument: 0
-            m_StringArgument: 
-            m_BoolArgument: 0
-          m_CallState: 2
-    OnInputPerformed:
-      m_PersistentCalls:
-        m_Calls: []
-    OnInputUp:
-      m_PersistentCalls:
-        m_Calls: []
 --- !u!114 &7423853692264033901
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -2217,6 +2135,75 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   AudioSource: {fileID: 1336765806075808698}
+--- !u!114 &3789332446064508636
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1990694457497469173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc6deb64f70ce214dbaea92026b75c35, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::JUTPS.Utilities.JUCharacterSettingsDrawer
+  DestroyOnStartGame: 0
+  PlayerController: {fileID: 3456858282881446615}
+  VisualizationSettings:
+    ResourcesPath: 
+    GizmosColor: {r: 0, g: 0, b: 0, a: 0.5}
+    WireGizmosColor: {r: 0.9, g: 0.4, b: 0.2, a: 0.5}
+    StepVisualizerMesh: {fileID: 0}
+  StepCorrection: 0
+  GroundCheck: 0
+  WallCheck: 1
+--- !u!114 &1196093663615721252
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1990694457497469173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8b28f181aaac6b448995bcd0df949895, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  SecondsToDestroy: 5
+  DestroyOnStart: 0
+--- !u!114 &1636773657532243820
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1990694457497469173}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0096f6e233501104390d9b289f66a017, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: 
+  Prefab: {fileID: 0}
+  StartInstantiateOnAwake: 0
+  TimeToSpawn: 2
+  Repeat: 0
+  RepeatingTime: 1
+  InstanceLifeTime: 15
+  SwitchToRandomInstantiate: 1
+  PrefabsToInstantiate:
+  - {fileID: 6687682940110421504, guid: f0feff2f4bd13aa4c8e09fdee06d883f, type: 3}
+  - {fileID: 3516352575337148050, guid: 07db9bf568242044f9211ec0cd24c092, type: 3}
+  - {fileID: 3516352575337148050, guid: 07db9bf568242044f9211ec0cd24c092, type: 3}
+  - {fileID: 6687682940110421504, guid: f0feff2f4bd13aa4c8e09fdee06d883f, type: 3}
+  SpawnArea: {x: 0, y: 0, z: 0}
+  PositionOffset: {x: 0, y: 0.5, z: 0}
+  RandomRotation: 0
+  Quantity: 1
+  InstancesLimit: 32
+  EmptyInstantiatePorcentage: 30
+  OnInstantiate:
+    m_PersistentCalls:
+      m_Calls: []
 --- !u!1 &2142662679927247181
 GameObject:
   m_ObjectHideFlags: 0
@@ -2226,7 +2213,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7977428541755018842}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandThumb4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2258,7 +2245,7 @@ GameObject:
   m_Component:
   - component: {fileID: 3471435714730413771}
   - component: {fileID: 3407099047617110739}
-  m_Layer: 14
+  m_Layer: 0
   m_Name: Spot Light
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2354,7 +2341,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1926842176426588701}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandRing4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2385,7 +2372,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1123060557780803325}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandPinky4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2416,7 +2403,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2939144575851067665}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandRing3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2448,7 +2435,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6591981707575683753}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2493,7 +2480,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4064622168948264951}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandThumb2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2525,7 +2512,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4455008250915599797}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandIndex1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2647,7 +2634,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2091016003651488607}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandMiddle4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2768,7 +2755,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4172339649890050737}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightShoulder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -2804,7 +2791,7 @@ GameObject:
   - component: {fileID: 6934097359478288062}
   - component: {fileID: 5665740607702123655}
   - component: {fileID: 4718983090990709777}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftUpLeg
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -3103,7 +3090,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 3165025837064711430}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightToeBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3224,7 +3211,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4510413171824801189}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftFoot
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -3257,7 +3244,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6088021632654585343}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandIndex4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -3550,7 +3537,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2808570344842635337}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandThumb1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8604,7 +8591,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2205258439844055588}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandMiddle1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8667,7 +8654,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7942679225150712231}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandPinky1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8699,7 +8686,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4302037927431738237}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftToeBase
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -8734,7 +8721,7 @@ GameObject:
   - component: {fileID: 8291476572268460047}
   - component: {fileID: 6610549920695259901}
   - component: {fileID: 836767900650574340}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftForeArm
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -8882,7 +8869,7 @@ GameObject:
   - component: {fileID: 1482491456877273594}
   - component: {fileID: 6831506318552215330}
   - component: {fileID: 4919507598462047259}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftLeg
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -9026,7 +9013,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 2823603302050697971}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandIndex2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9139,7 +9126,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 235377370358847179}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandMiddle3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9174,7 +9161,7 @@ GameObject:
   - component: {fileID: 5153007816060317224}
   - component: {fileID: 9191962185801793099}
   - component: {fileID: 8619444856350670040}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: Hips
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -9276,7 +9263,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4824124560587572991}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightFoot
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -9313,7 +9300,7 @@ GameObject:
   - component: {fileID: 8451383386793454235}
   - component: {fileID: 8618017925987754057}
   - component: {fileID: 380393081509428671}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftArm
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -9456,7 +9443,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 381630619429890143}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandIndex4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9491,7 +9478,7 @@ GameObject:
   - component: {fileID: 2587218223939978069}
   - component: {fileID: 6373887875444962998}
   - component: {fileID: 19049819473395779}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightLeg
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -9635,7 +9622,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1023722955084245665}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandIndex2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9667,7 +9654,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7130074013766465505}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandPinky2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9699,7 +9686,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 6612191335211339076}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandThumb1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9885,7 +9872,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8205924831397305122}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHand
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9923,7 +9910,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5461340340778367498}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandThumb2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9955,7 +9942,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1051044904065199293}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandRing1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -9987,7 +9974,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8571651715107286925}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandRing3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10019,7 +10006,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4876694488590659776}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandIndex3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10051,7 +10038,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 392279476427351604}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandThumb3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10083,7 +10070,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1614683948995349689}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandIndex1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10115,7 +10102,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 8727728897007005939}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandMiddle2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10151,7 +10138,7 @@ GameObject:
   - component: {fileID: 4785443945818219033}
   - component: {fileID: 1876675607901868119}
   - component: {fileID: 4593547748296010642}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightForeArm
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -10299,7 +10286,7 @@ GameObject:
   - component: {fileID: 896923160577089407}
   - component: {fileID: 3722801581272652502}
   - component: {fileID: 5005988242641274751}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightUpLeg
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -10643,7 +10630,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4729531597783275747}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandRing2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10729,7 +10716,7 @@ GameObject:
   - component: {fileID: 2195776229840654482}
   - component: {fileID: 374469914358988882}
   - component: {fileID: 7631277768274891164}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: Head
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -10870,7 +10857,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5966004799907899847}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandPinky3
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -10906,7 +10893,7 @@ GameObject:
   - component: {fileID: 7982716698072023763}
   - component: {fileID: 1566130378633772806}
   - component: {fileID: 3925272862400802265}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightArm
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -11049,7 +11036,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 5910690013959872715}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: RightHandRing1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11081,7 +11068,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 206974385945810703}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandMiddle1
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11117,7 +11104,7 @@ GameObject:
   - component: {fileID: 4544319446291215747}
   - component: {fileID: 8622534512266028253}
   - component: {fileID: 5895467891280520475}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: Spine1
   m_TagString: Skin
   m_Icon: {fileID: 0}
@@ -11315,7 +11302,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 4759144714900324519}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandPinky2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11347,7 +11334,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 587784823167418573}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftShoulder
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11497,7 +11484,7 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 7386703751593393372}
-  m_Layer: 15
+  m_Layer: 0
   m_Name: LeftHandRing4
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11530,7 +11517,7 @@ GameObject:
   - component: {fileID: 1285097900070759470}
   - component: {fileID: 8498883643220827678}
   - component: {fileID: 4632854202577260642}
-  m_Layer: 14
+  m_Layer: 0
   m_Name: Foot Armor
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -11676,6 +11663,10 @@ PrefabInstance:
     - target: {fileID: 3349917300126915435, guid: 31354f2fc9735834d855e7ec008a1cc2, type: 3}
       propertyPath: m_Name
       value: P226
+      objectReference: {fileID: 0}
+    - target: {fileID: 3349917300126915435, guid: 31354f2fc9735834d855e7ec008a1cc2, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4348445531186067569, guid: 31354f2fc9735834d855e7ec008a1cc2, type: 3}
       propertyPath: m_LocalPosition.x
@@ -12170,6 +12161,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: SNIPER M82
       objectReference: {fileID: 0}
+    - target: {fileID: 2930857990971156363, guid: 12ee8c7845ee649429e2f2a3886c056d, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 6467831754146836544, guid: 12ee8c7845ee649429e2f2a3886c056d, type: 3}
       propertyPath: m_IsKinematic
       value: 1
@@ -12338,6 +12333,10 @@ PrefabInstance:
     - target: {fileID: 6620032343166823715, guid: dbff4f001c46b2447a88eaecdd12bbf6, type: 3}
       propertyPath: m_Name
       value: HitBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 6620032343166823715, guid: dbff4f001c46b2447a88eaecdd12bbf6, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2504160735544334013, guid: dbff4f001c46b2447a88eaecdd12bbf6, type: 3}
@@ -12516,6 +12515,10 @@ PrefabInstance:
     - target: {fileID: 6620032343166823715, guid: dbff4f001c46b2447a88eaecdd12bbf6, type: 3}
       propertyPath: m_Name
       value: HitBox
+      objectReference: {fileID: 0}
+    - target: {fileID: 6620032343166823715, guid: dbff4f001c46b2447a88eaecdd12bbf6, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents:
     - {fileID: 2504160735544334013, guid: dbff4f001c46b2447a88eaecdd12bbf6, type: 3}
@@ -12715,6 +12718,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: P226 Dual
       objectReference: {fileID: 0}
+    - target: {fileID: 5522025127296107316, guid: 280e114e844adfb47bddec8bcab103ac, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects:
@@ -12820,6 +12827,14 @@ PrefabInstance:
       propertyPath: m_Name
       value: BaseballBat
       objectReference: {fileID: 0}
+    - target: {fileID: 2960658994057386622, guid: 8908fcaa0ad536743b86aeb5d88313ec, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 3436047379334269437, guid: 8908fcaa0ad536743b86aeb5d88313ec, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4475961060358741029, guid: 8908fcaa0ad536743b86aeb5d88313ec, type: 3}
       propertyPath: m_IsKinematic
       value: 1
@@ -12868,6 +12883,10 @@ PrefabInstance:
     serializedVersion: 3
     m_TransformParent: {fileID: 6591981707575683753}
     m_Modifications:
+    - target: {fileID: 3486969843458483587, guid: 6a288f1be7ce7e64a87b2cdfffc373ca, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4851121866228179361, guid: 6a288f1be7ce7e64a87b2cdfffc373ca, type: 3}
       propertyPath: ItemModelInBody
       value: 
@@ -12928,9 +12947,17 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 179.998
       objectReference: {fileID: 0}
+    - target: {fileID: 7064699835138387283, guid: 6a288f1be7ce7e64a87b2cdfffc373ca, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7694087063687549685, guid: 6a288f1be7ce7e64a87b2cdfffc373ca, type: 3}
       propertyPath: m_Name
       value: FlashLight
+      objectReference: {fileID: 0}
+    - target: {fileID: 7694087063687549685, guid: 6a288f1be7ce7e64a87b2cdfffc373ca, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -13030,6 +13057,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Helmet Armor
       objectReference: {fileID: 0}
+    - target: {fileID: 6422226532506703103, guid: 1daa00ae97ed45a4985b8836e647d59f, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
@@ -13071,6 +13102,10 @@ PrefabInstance:
     - target: {fileID: 2699567156601855460, guid: 21944e43693201f46a01a25ae54686d3, type: 3}
       propertyPath: m_Name
       value: UMP
+      objectReference: {fileID: 0}
+    - target: {fileID: 2699567156601855460, guid: 21944e43693201f46a01a25ae54686d3, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 3331848617611806558, guid: 21944e43693201f46a01a25ae54686d3, type: 3}
       propertyPath: m_RootOrder
@@ -13416,6 +13451,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Granade
       objectReference: {fileID: 0}
+    - target: {fileID: 4377956503516340196, guid: 674922e14aa387f45934fd2fb86d8500, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 4952640030114786735, guid: 674922e14aa387f45934fd2fb86d8500, type: 3}
       propertyPath: m_IsKinematic
       value: 1
@@ -13535,6 +13574,10 @@ PrefabInstance:
       propertyPath: m_Name
       value: Benelli M4
       objectReference: {fileID: 0}
+    - target: {fileID: 5649899735864999517, guid: adb104378856a7748abb638ce946bec0, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 7206143403383268185, guid: adb104378856a7748abb638ce946bec0, type: 3}
       propertyPath: m_IsKinematic
       value: 1
@@ -13604,6 +13647,10 @@ PrefabInstance:
     - target: {fileID: 113353383498147195, guid: 00d6a4c994033214b8094882e33624c2, type: 3}
       propertyPath: m_Name
       value: Chest Armor
+      objectReference: {fileID: 0}
+    - target: {fileID: 113353383498147195, guid: 00d6a4c994033214b8094882e33624c2, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 4149660459875782956, guid: 00d6a4c994033214b8094882e33624c2, type: 3}
       propertyPath: m_RootOrder
@@ -13929,6 +13976,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5143966286223321236, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5143966286223321327, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
       propertyPath: ShowHitMarker
       value: 1
@@ -13948,6 +13999,10 @@ PrefabInstance:
     - target: {fileID: 5450028195864811944, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
       propertyPath: m_Name
       value: Katana
+      objectReference: {fileID: 0}
+    - target: {fileID: 5450028195864811944, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14048,6 +14103,10 @@ PrefabInstance:
       propertyPath: m_LocalEulerAnglesHint.z
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 5143966286223321236, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
+      propertyPath: m_Layer
+      value: 0
+      objectReference: {fileID: 0}
     - target: {fileID: 5143966286223321327, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
       propertyPath: ShowHitMarker
       value: 1
@@ -14071,6 +14130,10 @@ PrefabInstance:
     - target: {fileID: 5450028195864811944, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
       propertyPath: m_Name
       value: Katana
+      objectReference: {fileID: 0}
+    - target: {fileID: 5450028195864811944, guid: 36f9432f4096a1e40b04a3bf5b254b4d, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
@@ -14206,6 +14269,10 @@ PrefabInstance:
     - target: {fileID: 5522025127296107316, guid: 280e114e844adfb47bddec8bcab103ac, type: 3}
       propertyPath: m_Name
       value: P226 Dual
+      objectReference: {fileID: 0}
+    - target: {fileID: 5522025127296107316, guid: 280e114e844adfb47bddec8bcab103ac, type: 3}
+      propertyPath: m_Layer
+      value: 0
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
