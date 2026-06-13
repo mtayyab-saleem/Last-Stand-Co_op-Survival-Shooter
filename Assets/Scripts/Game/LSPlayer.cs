@@ -11,7 +11,9 @@ public class LSPlayer : NetworkBehaviour
     [SyncVar(hook = nameof(OnTeamIDChanged))] public int teamID = -1;
     [SyncVar] public bool isAlive = true;
 
+    // Memory for original states
     private Dictionary<Transform, int> originalLayers = new Dictionary<Transform, int>();
+    private Dictionary<Transform, string> originalTags = new Dictionary<Transform, string>();
     private bool isInitialized = false;
 
     public override void OnStartClient()
@@ -19,9 +21,8 @@ public class LSPlayer : NetworkBehaviour
         base.OnStartClient();
         Invoke(nameof(SaveOriginalStates), 1.5f);
 
-        // NAYA SYSTEM: Har 0.5 seconds baad yeh background check chalega
-        // Taake game mein agar aap naya weapon (talwar/gun) uthayen, toh wo bhi teammate ko ignore kare
-        InvokeRepeating(nameof(EnforceAAAFriendlyFire), 2f, 0.5f);
+        // Background loop: Har 0.2 sec baad block confirm karega
+        InvokeRepeating(nameof(EnforceFriendlyFire), 2f, 0.2f);
     }
 
     private void SaveOriginalStates()
@@ -29,14 +30,14 @@ public class LSPlayer : NetworkBehaviour
         foreach (Transform t in GetComponentsInChildren<Transform>(true))
         {
             originalLayers[t] = t.gameObject.layer;
+            originalTags[t] = t.gameObject.tag;
         }
         isInitialized = true;
     }
 
     public override void OnStartLocalPlayer()
     {
-        string myName = PlayerPrefs.GetString("PlayerName", "Player " + Random.Range(1000, 9999));
-        CmdSetPlayerName(myName);
+        CmdSetPlayerName(PlayerPrefs.GetString("PlayerName", "Player " + Random.Range(1000, 9999)));
     }
 
     public override void OnStartServer()
@@ -58,8 +59,10 @@ public class LSPlayer : NetworkBehaviour
         if (LSMatchManager.Instance != null) LSMatchManager.Instance.UpdateReadyState();
     }
 
-    // THE PROFESSIONAL FIX: DEEP PHYSICS COLLISION BYPASS
-    private void EnforceAAAFriendlyFire()
+    // ==========================================
+    // THE PERFECT AAA FIX: SOLID BODY & ZERO EFFECTS
+    // ==========================================
+    private void EnforceFriendlyFire()
     {
         if (!isClient || !isInitialized || isLocalPlayer) return;
 
@@ -70,33 +73,53 @@ public class LSPlayer : NetworkBehaviour
                               (this.teamID != -1) &&
                               (this.teamID == localPlayer.teamID);
 
-            // STEP 1: TALWAR AUR MUKKAY (Melee) KI PHYSICS BLOCK KARNA
-            Collider[] localColliders = localPlayer.GetComponentsInChildren<Collider>(true);
             Collider[] teammateColliders = this.GetComponentsInChildren<Collider>(true);
 
-            foreach (var lCol in localColliders)
+            int ignoreLayer = 2; // Ignore Raycast (Goli block karne ke liye)
+            string ignoreTag = "Untagged"; // Blood effect block karne ke liye
+
+            foreach (var tCol in teammateColliders)
             {
-                foreach (var tCol in teammateColliders)
+                if (tCol == null) continue;
+                Transform t = tCol.transform;
+
+                if (isTeammate)
                 {
-                    if (lCol != null && tCol != null)
+                    // 1. LAYER & TAG FIX (Taake raycast aur JUTPS hit tag detect na kare)
+                    // Physics.IgnoreCollision yahan use nahi kiya taake body 100% solid rahe
+                    if (t.gameObject.layer != ignoreLayer) t.gameObject.layer = ignoreLayer;
+                    if (t.gameObject.tag != ignoreTag) t.gameObject.tag = ignoreTag;
+
+                    // 2. HITBOX KILLER (Sirf damage/hitbox scripts ko turn off kar rahe hain)
+                    MonoBehaviour[] scripts = tCol.GetComponents<MonoBehaviour>();
+                    foreach (var script in scripts)
                     {
-                        // Unity engine ko directly order de diya ke Local Player aur Teammate ki kisi cheez ko physical touch mat do
-                        Physics.IgnoreCollision(lCol, tCol, isTeammate);
+                        if (script == null) continue;
+                        string sName = script.GetType().Name.ToLower();
+
+                        if (sName.Contains("hitbox") || sName.Contains("damage") || sName.Contains("health"))
+                        {
+                            script.enabled = false;
+                        }
                     }
                 }
-            }
-
-            // STEP 2: GUNS AUR BULLETS (Raycast) KO BLOCK KARNA
-            int ignoreLayer = 2; // Unity's Ignore Raycast Layer
-            foreach (var kvp in originalLayers)
-            {
-                Transform t = kvp.Key;
-                if (t != null)
+                else
                 {
-                    int targetLayer = isTeammate ? ignoreLayer : kvp.Value;
-                    if (t.gameObject.layer != targetLayer)
+                    // Dushman hai toh sab wapas ON kar do
+                    if (originalLayers.ContainsKey(t) && t.gameObject.layer != originalLayers[t])
+                        t.gameObject.layer = originalLayers[t];
+                    if (originalTags.ContainsKey(t) && t.gameObject.tag != originalTags[t])
+                        t.gameObject.tag = originalTags[t];
+
+                    MonoBehaviour[] scripts = tCol.GetComponents<MonoBehaviour>();
+                    foreach (var script in scripts)
                     {
-                        t.gameObject.layer = targetLayer;
+                        if (script == null) continue;
+                        string sName = script.GetType().Name.ToLower();
+                        if (sName.Contains("hitbox") || sName.Contains("damage") || sName.Contains("health"))
+                        {
+                            script.enabled = true;
+                        }
                     }
                 }
             }
@@ -107,5 +130,9 @@ public class LSPlayer : NetworkBehaviour
     private void OnReadyChanged(bool oldReady, bool newReady) { UpdateUI(); }
     private void OnHostStateChanged(bool oldState, bool newState) { UpdateUI(); }
     private void OnTeamIDChanged(int oldID, int newID) { UpdateUI(); }
-    private void UpdateUI() { if (LSMatchManager.Instance != null) LSMatchManager.Instance.UpdateLocalUI(); }
+
+    private void UpdateUI()
+    {
+        if (LSMatchManager.Instance != null) LSMatchManager.Instance.UpdateLocalUI();
+    }
 }
