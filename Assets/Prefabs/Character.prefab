@@ -1106,7 +1106,7 @@ RectTransform:
   m_AnchorMin: {x: 0.5, y: 0.5}
   m_AnchorMax: {x: 0.5, y: 0.5}
   m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 100, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &4246256876414363614
 CanvasRenderer:
@@ -1163,7 +1163,7 @@ MonoBehaviour:
   m_faceColor:
     serializedVersion: 2
     rgba: 4294967295
-  m_fontSize: 34.5
+  m_fontSize: 18
   m_fontSizeBase: 36
   m_fontWeight: 400
   m_enableAutoSizing: 1
@@ -7666,7 +7666,7 @@ RectTransform:
   m_AnchorMin: {x: 0, y: 0}
   m_AnchorMax: {x: 0, y: 0}
   m_AnchoredPosition: {x: 0, y: 2.1}
-  m_SizeDelta: {x: 200, y: 50}
+  m_SizeDelta: {x: 100, y: 25}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!223 &2724243080473881481
 Canvas:
@@ -9209,9 +9209,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 7ec96b269ca9bc34a92fdf03d043dfde, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::PlayerNameplate
-  nameplateCanvas: {fileID: 2724243080473881481}
   nameText: {fileID: 5654524461768902362}
-  playerScript: {fileID: -246710878101784484}
+  targetPlayer: {fileID: 0}
 --- !u!1 &4422377306144402532
 GameObject:
   m_ObjectHideFlags: 0

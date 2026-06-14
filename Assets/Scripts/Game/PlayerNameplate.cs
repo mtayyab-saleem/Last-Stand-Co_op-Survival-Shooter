@@ -1,66 +1,64 @@
 using UnityEngine;
-using TMPro; // TextMeshPro ke 
+using TMPro;
 using Mirror;
 
 public class PlayerNameplate : MonoBehaviour
 {
-    [Header("UI References")]
-    public Canvas nameplateCanvas;
     public TextMeshProUGUI nameText;
+    public LSPlayer targetPlayer;
 
-    [Header("Player Reference")]
-    public LSPlayer playerScript;
-
-    private Camera mainCamera;
-
-    void Start()
+    // Hides the text at start to prevent the default white text from showing
+    void Awake()
     {
-        mainCamera = Camera.main;
-        if (playerScript == null) playerScript = GetComponentInParent<LSPlayer>();
+        if (nameText != null)
+        {
+            nameText.gameObject.SetActive(false);
+        }
     }
 
-    void LateUpdate()
+    // Checks team affiliation to show (Green) or hide the nameplate completely
+    void Update()
     {
-        if (playerScript == null || nameText == null || nameplateCanvas == null) return;
+        if (targetPlayer == null || nameText == null || NetworkClient.localPlayer == null) return;
 
-        // 1. Nameplate ko hamesha Camera ki taraf face karwana (Billboard effect)
-        if (mainCamera == null) mainCamera = Camera.main;
-        if (mainCamera != null)
+        LSPlayer localPlayer = NetworkClient.localPlayer.GetComponent<LSPlayer>();
+        if (localPlayer == null) return;
+
+        // Never show your own nameplate
+        if (targetPlayer.isLocalPlayer)
         {
-            nameplateCanvas.transform.LookAt(nameplateCanvas.transform.position + mainCamera.transform.rotation * Vector3.forward, mainCamera.transform.rotation * Vector3.up);
+            nameText.gameObject.SetActive(false);
+            return;
         }
 
-        // 2. Local Player ka data check karna
-        var localPlayer = NetworkClient.localPlayer?.GetComponent<LSPlayer>();
-        if (localPlayer != null && LSMatchManager.Instance != null)
+        // Teammate rule: Not Solo mode, valid team ID, and matching team IDs
+        bool isTeammate = (LSMatchManager.Instance != null &&
+                           LSMatchManager.Instance.currentMode != LSMatchManager.GameMode.Solo) &&
+                          (targetPlayer.teamID != -1) &&
+                          (targetPlayer.teamID == localPlayer.teamID);
+
+        // Apply visual logic
+        if (isTeammate)
         {
-            // Naam update karna
-            nameText.text = playerScript.playerName;
+            // If teammate: Show UI, set name, make it Green
+            nameText.gameObject.SetActive(true);
+            nameText.text = targetPlayer.playerName;
+            nameText.color = Color.green;
+        }
+        else
+        {
+            // If enemy or solo mode: Completely hide the UI
+            nameText.gameObject.SetActive(false);
+        }
+    }
 
-            // Check karna ke kya yeh samne wala player mera teammate hai?
-            bool isTeammate = (LSMatchManager.Instance.currentMode != LSMatchManager.GameMode.Solo) &&
-                              (playerScript.teamID != -1) &&
-                              (playerScript.teamID == localPlayer.teamID);
-
-            // 3. Color aur Visibility set karna
-            if (playerScript.isLocalPlayer)
-            {
-                // Apna naam khud ko nahi dikhana
-                nameplateCanvas.gameObject.SetActive(false);
-            }
-            else
-            {
-                nameplateCanvas.gameObject.SetActive(true);
-
-                if (isTeammate)
-                {
-                    nameText.color = Color.green; // Teammate Hara
-                }
-                else
-                {
-                    nameText.color = Color.red; // Dushman Laal
-                }
-            }
+    // Rotates the nameplate to always face the local camera
+    void LateUpdate()
+    {
+        if (nameText.gameObject.activeInHierarchy && Camera.main != null)
+        {
+            transform.LookAt(transform.position + Camera.main.transform.rotation * Vector3.forward,
+                             Camera.main.transform.rotation * Vector3.up);
         }
     }
 }
