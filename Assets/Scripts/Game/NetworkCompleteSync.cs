@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Mirror;
 using JUTPS;
 using JUTPS.JUInputSystem;
@@ -54,7 +54,17 @@ public class NetworkCompleteSync : NetworkBehaviour
     }
 
     [Header("Network Synchronized State")]
-    [SyncVar] private CharacterSyncState netState;
+    [SyncVar] private float netHorizontal;
+    [SyncVar] private float netVertical;
+    [SyncVar] private bool netIsRunning;
+    [SyncVar] private bool netIsCrouched;
+    [SyncVar] private bool netIsProne;
+    [SyncVar] private bool netIsAiming;
+    [SyncVar] private bool netIsFiringMode;
+    [SyncVar] private bool netIsJumping;
+    [SyncVar] private bool netIsGrounded;
+    [SyncVar] private bool netIsItemEquipped;
+    [SyncVar] private bool netIsDead;
     [SyncVar] private Vector3 netLookPosition;
 
     // Dual-wield weapon synchronization hooks
@@ -63,6 +73,9 @@ public class NetworkCompleteSync : NetworkBehaviour
 
     private CharacterSyncState lastSentState;
     private Vector3 lastSentLookPos;
+
+    private float lastSyncTime;
+    private const float SYNC_INTERVAL = 0.05f; // 20 updates per second
 
     private void Awake()
     {
@@ -121,12 +134,13 @@ public class NetworkCompleteSync : NetworkBehaviour
         bool stateChanged = currentState.HasChanged(lastSentState);
         bool lookChanged = Vector3.Distance(currentLookPos, lastSentLookPos) > 0.1f;
 
-        if (stateChanged || lookChanged)
+        if ((stateChanged || lookChanged) && Time.time - lastSyncTime >= SYNC_INTERVAL)
         {
             CmdUpdateMovementState(currentState, currentLookPos);
 
             lastSentState = currentState;
             lastSentLookPos = currentLookPos;
+            lastSyncTime = Time.time;
         }
 
         HandleLocalInputActions();
@@ -162,28 +176,39 @@ public class NetworkCompleteSync : NetworkBehaviour
     private void ProcessRemotePlayer()
     {
         // Apply synchronized state to the remote avatar using JUTPS built-in methods
-        juController.SetMoveInput(netState.horizontal, netState.vertical);
+        juController.SetMoveInput(netHorizontal, netVertical);
 
-        juController.IsRunning = netState.isRunning;
-        juController.IsCrouched = netState.isCrouched;
-        juController.IsProne = netState.isProne;
-        juController.IsAiming = netState.isAiming;
-        juController.FiringMode = netState.isFiringMode;
-        juController.IsJumping = netState.isJumping;
-        juController.IsGrounded = netState.isGrounded;
-        juController.IsItemEquiped = netState.isItemEquipped;
+        juController.IsRunning = netIsRunning;
+        juController.IsCrouched = netIsCrouched;
+        juController.IsProne = netIsProne;
+        juController.IsAiming = netIsAiming;
+        juController.FiringMode = netIsFiringMode;
+        juController.IsJumping = netIsJumping;
+        juController.IsGrounded = netIsGrounded;
+        juController.IsItemEquiped = netIsItemEquipped;
         juController.LookAtPosition = netLookPosition;
 
-        if (characterAnimator != null && characterAnimator.GetBool(ANIM_DIE) != netState.isDead)
+        if (characterAnimator != null && characterAnimator.GetBool(ANIM_DIE) != netIsDead)
         {
-            characterAnimator.SetBool(ANIM_DIE, netState.isDead);
+            characterAnimator.SetBool(ANIM_DIE, netIsDead);
         }
     }
 
-    [Command]
+    [Command(channel = Channels.Unreliable)]
     private void CmdUpdateMovementState(CharacterSyncState newState, Vector3 newLookPosition)
     {
-        netState = newState;
+        netHorizontal = newState.horizontal;
+        netVertical = newState.vertical;
+        netIsRunning = newState.isRunning;
+        netIsCrouched = newState.isCrouched;
+        netIsProne = newState.isProne;
+        netIsAiming = newState.isAiming;
+        netIsFiringMode = newState.isFiringMode;
+        netIsJumping = newState.isJumping;
+        netIsGrounded = newState.isGrounded;
+        netIsItemEquipped = newState.isItemEquipped;
+        netIsDead = newState.isDead;
+
         netLookPosition = newLookPosition;
     }
 
