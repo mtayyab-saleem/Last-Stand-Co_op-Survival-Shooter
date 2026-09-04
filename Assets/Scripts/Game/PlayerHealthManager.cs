@@ -4,6 +4,7 @@ using Mirror;
 using UnityEngine;
 using UnityEngine.SceneManagement; 
 using System.Linq; 
+using System.Collections.Generic;
 
 [RequireComponent(typeof(JUHealth))]
 public class PlayerHealthManager : NetworkBehaviour
@@ -23,6 +24,8 @@ public class PlayerHealthManager : NetworkBehaviour
     [Header("Power-Ups")]
     public GameObject[] powerUpPrefabs;
 
+    private static readonly Dictionary<GameObject, (PlayerHealthManager health, LSPlayer player)> ServerPlayerCache = new Dictionary<GameObject, (PlayerHealthManager, LSPlayer)>();
+
     void Awake()
     {
         if (_juHealth == null) _juHealth = GetComponent<JUHealth>();
@@ -38,6 +41,16 @@ public class PlayerHealthManager : NetworkBehaviour
     {
         netHealth = _juHealth.Health;
         netIsDead = _juHealth.IsDead;
+        ServerPlayerCache[gameObject] = (this, _playerData);
+    }
+
+    public override void OnStopServer()
+    {
+        if (ServerPlayerCache.ContainsKey(gameObject))
+        {
+            ServerPlayerCache.Remove(gameObject);
+        }
+        base.OnStopServer();
     }
 
     [Command]
@@ -48,11 +61,25 @@ public class PlayerHealthManager : NetworkBehaviour
 
         if (target != null)
         {
-            var targetScript = target.GetComponent<PlayerHealthManager>();
+            PlayerHealthManager targetScript = null;
+            LSPlayer targetPlayer = null;
+
+            if (ServerPlayerCache.TryGetValue(target, out var cache))
+            {
+                targetScript = cache.health;
+                targetPlayer = cache.player;
+            }
+            else
+            {
+                targetScript = target.GetComponent<PlayerHealthManager>();
+                if (targetScript != null)
+                {
+                    targetPlayer = target.GetComponent<LSPlayer>();
+                }
+            }
+
             if (targetScript != null)
             {
-                var targetPlayer = target.GetComponent<LSPlayer>();
-
                 // Friendly fire validation
                 if (_playerData != null && targetPlayer != null)
                 {

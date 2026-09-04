@@ -21,6 +21,7 @@ public class LSMatchManager : NetworkBehaviour
     private bool hasMatchStarted = false;
 
     public readonly SyncList<LSPlayer> players = new SyncList<LSPlayer>();
+    private NetworkDiscovery networkDiscovery;
 
     void Awake()
     {
@@ -28,6 +29,7 @@ public class LSMatchManager : NetworkBehaviour
         else Destroy(gameObject);
 
         DontDestroyOnLoad(gameObject);
+        networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
     }
 
     public override void OnStartServer()
@@ -112,20 +114,20 @@ public class LSMatchManager : NetworkBehaviour
         // Agar match start ho chuka hai, toh discovery kabhi on nahi hogi
         if (hasMatchStarted) return;
 
-        var discovery = FindFirstObjectByType<NetworkDiscovery>();
-        if (discovery == null) return;
+        if (networkDiscovery == null) networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
+        if (networkDiscovery == null) return;
 
         if (players.Count >= maxPlayers)
         {
             // Lobby full ho gayi! Discovery band karo
-            discovery.StopDiscovery();
+            networkDiscovery.StopDiscovery();
             Debug.Log("[LSMatchManager] Lobby is Full. Discovery Stopped.");
         }
         else
         {
             // Space baqi hai! Discovery ko restart karo taake players join kar sakein
-            discovery.StopDiscovery();
-            discovery.AdvertiseServer();
+            networkDiscovery.StopDiscovery();
+            networkDiscovery.AdvertiseServer();
             Debug.Log("[LSMatchManager] Space available. Discovery Advertising...");
         }
     }
@@ -141,8 +143,8 @@ public class LSMatchManager : NetworkBehaviour
         hasMatchStarted = true;
 
         // Discovery pakki band
-        var discovery = FindFirstObjectByType<NetworkDiscovery>();
-        if (discovery != null) discovery.StopDiscovery();
+        if (networkDiscovery == null) networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
+        if (networkDiscovery != null) networkDiscovery.StopDiscovery();
 
         AssignTeams();
 
