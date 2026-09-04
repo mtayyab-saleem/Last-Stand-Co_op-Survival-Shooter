@@ -1,4 +1,4 @@
-﻿using System;
+using System;
 using System.Linq;
 using UnityEngine;
 using JUTPS.FX;
@@ -293,6 +293,22 @@ namespace JUTPS
                 {
                     if (!bodyPart.Health.IsDead && realDamage > 0)
                         HitMarkerEffect.HitCheck(bodyPart.transform.tag, point, realDamage);
+                }
+            }
+
+            // >>> MIRROR NETWORKING: Send authoritative damage to server for Melee/Hitboxes
+            bool isHitLocalPlayerDamager = false;
+            if (transform.root.TryGetComponent(out Mirror.NetworkIdentity rootIdentity))
+            {
+                isHitLocalPlayerDamager = rootIdentity.isLocalPlayer;
+            }
+
+            if (isHitLocalPlayerDamager)
+            {
+                var targetPlayer = collider.GetComponentInParent<PlayerHealthManager>();
+                if (targetPlayer != null && PlayerHealthManager.LocalInstance != null)
+                {
+                    PlayerHealthManager.LocalInstance.CmdShootTarget(targetPlayer.gameObject, realDamage);
                 }
             }
 

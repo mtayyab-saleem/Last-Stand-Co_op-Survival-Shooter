@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using JUTPS.FX;
 using JUTPS.ArmorSystem;
 
@@ -135,6 +135,14 @@ namespace JUTPS.WeaponSystem
 			if (col.gameObject.tag != "Bullet")
 			{
 				float RealDamage = BulletDamage;
+				
+				// >>> MIRROR NETWORKING: Check if the shooter is the local player
+				bool isHitLocalPlayerWeapon = false;
+				if (Owner != null && Owner.TryGetComponent(out Mirror.NetworkIdentity ownerIdentity))
+				{
+					isHitLocalPlayerWeapon = ownerIdentity.isLocalPlayer;
+				}
+
 				//Check Character and Bones Layers
 				if (col.gameObject.layer == 15 || col.gameObject.layer == 9)
 				{
@@ -164,6 +172,16 @@ namespace JUTPS.WeaponSystem
 					if (col.gameObject.TryGetComponent(out JUHealth health))
 					{
 						health.DoDamage(BulletDamage);
+					}
+				}
+
+				// >>> MIRROR NETWORKING: Send damage to server
+				if (isHitLocalPlayerWeapon)
+				{
+					var targetPlayer = col.gameObject.GetComponentInParent<PlayerHealthManager>();
+					if (targetPlayer != null && PlayerHealthManager.LocalInstance != null)
+					{
+						PlayerHealthManager.LocalInstance.CmdShootTarget(targetPlayer.gameObject, RealDamage);
 					}
 				}
 

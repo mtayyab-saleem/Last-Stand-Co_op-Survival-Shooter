@@ -40,41 +40,11 @@ public class PlayerHealthManager : NetworkBehaviour
         netIsDead = _juHealth.IsDead;
     }
 
-    void Update()
-    {
-        if (!isClient) return;
-
-        if (Mathf.Abs(_juHealth.Health - netHealth) > 0.01f)
-        {
-            float difference = netHealth - _juHealth.Health;
-
-            _juHealth.Health = netHealth;
-            _juHealth.IsDead = netIsDead;
-
-            if (difference > 0)
-            {
-                if (!isLocalPlayer)
-                {
-                    if (LocalInstance != null)
-                    {
-                        LocalInstance.CmdDealDamage(this.gameObject, difference);
-                    }
-                }
-                else
-                {
-                    if (difference >= 24f)
-                    {
-                        CmdTakeEnvironmentDamage(difference);
-                    }
-                }
-            }
-        }
-    }
-
     [Command]
-    public void CmdDealDamage(GameObject target, float amount)
+    public void CmdShootTarget(GameObject target, float weaponDamage)
     {
-        if (amount <= 0 || amount > MAX_ALLOWED_DAMAGE) return;
+        // Server-side validation
+        if (weaponDamage <= 0 || weaponDamage > MAX_ALLOWED_DAMAGE) return;
 
         if (target != null)
         {
@@ -83,6 +53,7 @@ public class PlayerHealthManager : NetworkBehaviour
             {
                 var targetPlayer = target.GetComponent<LSPlayer>();
 
+                // Friendly fire validation
                 if (_playerData != null && targetPlayer != null)
                 {
                     if (_playerData.teamID == targetPlayer.teamID && _playerData.teamID != -1)
@@ -90,7 +61,9 @@ public class PlayerHealthManager : NetworkBehaviour
                         return;
                     }
                 }
-                targetScript.ServerApplyDamage(amount);
+                
+                // Process shot and apply damage directly
+                targetScript.ServerApplyDamage(weaponDamage);
             }
         }
     }
