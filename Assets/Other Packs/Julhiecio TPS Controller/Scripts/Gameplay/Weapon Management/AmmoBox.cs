@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Mirror;
 namespace JUTPS.WeaponSystem
 {
@@ -11,33 +11,44 @@ namespace JUTPS.WeaponSystem
         public GameObject Effect;
         [Header("Weapon ID")]
         public string WeaponName = "AnyWeapon";
+
+        private bool isCollectible = false;
+
+        void Start()
+        {
+            Invoke(nameof(EnablePickup), 0.5f);
+        }
+
+        void EnablePickup()
+        {
+            isCollectible = true;
+        }
+
         void OnTriggerEnter(Collider other)
         {
+            if (!isCollectible) return;
+
             if (other.gameObject.tag == "Player")
             {
-                var pl = other.GetComponent<JUCharacterController>();
-                if (pl.IsItemEquiped)
+                var netSetup = other.GetComponent<PlayerNetworkSetup>();
+                if (netSetup != null && netSetup.isLocalPlayer)
                 {
+                    var juHealth = other.GetComponent<JUHealth>();
+                    if (juHealth != null && juHealth.IsDead) return;
+
+                    var pl = other.GetComponent<JUCharacterController>();
+                    if (pl == null || !pl.IsItemEquiped) return;
                     if (pl.WeaponInUseLeftHand == null && pl.WeaponInUseRightHand == null) return;
 
-                    if (pl.WeaponInUseRightHand != null)
+                    // Play effect locally immediately
+                    if (Effect != null)
                     {
-                        if (pl.WeaponInUseRightHand.ItemName == WeaponName) pl.WeaponInUseRightHand.TotalBullets += pl.WeaponInUseLeftHand == null ? AmmoCount : AmmoCount / 2;
+                        GameObject fx = Instantiate(Effect, transform.position, transform.rotation);
+                        Destroy(fx, 5);
                     }
-                    if (pl.WeaponInUseLeftHand != null)
-                    {
-                        if (pl.WeaponInUseLeftHand.ItemName == WeaponName) pl.WeaponInUseLeftHand.TotalBullets += pl.WeaponInUseRightHand == null ? AmmoCount : AmmoCount / 2;
-                    }
-                    if (WeaponName == "AnyWeapon")
-                    {
-                        if (pl.WeaponInUseRightHand != null)
-                            pl.WeaponInUseRightHand.TotalBullets += pl.WeaponInUseLeftHand == null ? AmmoCount : AmmoCount / 2;
-                        if (pl.WeaponInUseLeftHand != null)
-                            pl.WeaponInUseLeftHand.TotalBullets += pl.WeaponInUseRightHand == null ? AmmoCount : AmmoCount / 2;
-                    }
-                    GameObject fx = Instantiate(Effect, transform.position, transform.rotation);
-                    Destroy(fx, 5);
-                    if (NetworkServer.active) NetworkServer.Destroy(this.gameObject);
+
+                    // Request server to apply ammo and destroy the object
+                    netSetup.CmdCollectPowerup(this.gameObject);
                 }
             }
         }

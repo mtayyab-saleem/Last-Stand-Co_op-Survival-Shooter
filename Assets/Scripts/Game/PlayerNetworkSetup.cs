@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using Mirror;
 using JUTPS.CameraSystems;
 using JUTPS;
@@ -108,6 +108,77 @@ public class PlayerNetworkSetup : NetworkBehaviour
                 {
                     GameUIManager.Instance.TriggerDisconnectSequence();
                 }
+            }
+        }
+    }
+
+    [Command]
+    public void CmdCollectPowerup(GameObject powerup)
+    {
+        if (powerup == null) return;
+
+        // Health PowerUp Logic
+        var healthPowerUp = powerup.GetComponent<JUTPS.PowerUps.HealthPowerUp>();
+        if (healthPowerUp != null)
+        {
+            var healthManager = GetComponent<PlayerHealthManager>();
+            if (healthManager != null)
+            {
+                var juHealth = GetComponent<JUHealth>();
+                if (juHealth != null && healthManager.netHealth < juHealth.MaxHealth)
+                {
+                    healthManager.netHealth += healthPowerUp.HealthToAdd;
+                    healthManager.netHealth = Mathf.Clamp(healthManager.netHealth, 0, juHealth.MaxHealth);
+                    juHealth.Health = healthManager.netHealth;
+                }
+            }
+            NetworkServer.Destroy(powerup);
+            return;
+        }
+
+        // Ammo PowerUp Logic
+        var ammoBox = powerup.GetComponent<JUTPS.WeaponSystem.AmmoBox>();
+        if (ammoBox != null)
+        {
+            var pl = GetComponent<JUCharacterController>();
+            if (pl != null && pl.IsItemEquiped)
+            {
+                // Apply on server so Host gets it, and sync to client if needed
+                if (pl.WeaponInUseRightHand != null)
+                {
+                    if (pl.WeaponInUseRightHand.ItemName == ammoBox.WeaponName || ammoBox.WeaponName == "AnyWeapon")
+                        pl.WeaponInUseRightHand.TotalBullets += pl.WeaponInUseLeftHand == null ? ammoBox.AmmoCount : ammoBox.AmmoCount / 2;
+                }
+                if (pl.WeaponInUseLeftHand != null)
+                {
+                    if (pl.WeaponInUseLeftHand.ItemName == ammoBox.WeaponName || ammoBox.WeaponName == "AnyWeapon")
+                        pl.WeaponInUseLeftHand.TotalBullets += pl.WeaponInUseRightHand == null ? ammoBox.AmmoCount : ammoBox.AmmoCount / 2;
+                }
+
+                TargetApplyAmmo(connectionToClient, ammoBox.AmmoCount, ammoBox.WeaponName);
+            }
+            NetworkServer.Destroy(powerup);
+            return;
+        }
+    }
+
+    [TargetRpc]
+    private void TargetApplyAmmo(NetworkConnection target, int ammoCount, string weaponName)
+    {
+        if (isServer) return; // Host already applied it on server
+
+        var pl = GetComponent<JUCharacterController>();
+        if (pl != null && pl.IsItemEquiped)
+        {
+            if (pl.WeaponInUseRightHand != null)
+            {
+                if (pl.WeaponInUseRightHand.ItemName == weaponName || weaponName == "AnyWeapon")
+                    pl.WeaponInUseRightHand.TotalBullets += pl.WeaponInUseLeftHand == null ? ammoCount : ammoCount / 2;
+            }
+            if (pl.WeaponInUseLeftHand != null)
+            {
+                if (pl.WeaponInUseLeftHand.ItemName == weaponName || weaponName == "AnyWeapon")
+                    pl.WeaponInUseLeftHand.TotalBullets += pl.WeaponInUseRightHand == null ? ammoCount : ammoCount / 2;
             }
         }
     }
