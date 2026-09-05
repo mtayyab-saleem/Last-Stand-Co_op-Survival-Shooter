@@ -20,7 +20,7 @@ public class ConnectionMenuUI : MonoBehaviour
     [Tooltip("How often (seconds) to automatically re-scan for new servers while the panel is open.")]
     [SerializeField] private float autoRefreshInterval = 5f;
 
-    private NetworkDiscovery _networkDiscovery;
+    private CustomNetworkDiscovery _networkDiscovery;
     private Coroutine _autoRefreshCoroutine;
 
     private Dictionary<long, GameObject> _foundServers = new Dictionary<long, GameObject>();
@@ -54,7 +54,7 @@ public class ConnectionMenuUI : MonoBehaviour
     private void InitializeDiscovery()
     {
         if (Mirror.NetworkManager.singleton != null)
-            _networkDiscovery = Mirror.NetworkManager.singleton.GetComponent<NetworkDiscovery>();
+            _networkDiscovery = Mirror.NetworkManager.singleton.GetComponent<CustomNetworkDiscovery>();
 
         if (_networkDiscovery != null)
         {
@@ -63,7 +63,7 @@ public class ConnectionMenuUI : MonoBehaviour
         }
         else
         {
-            Debug.LogError("[ConnectionMenuUI] NetworkDiscovery component missing on Mirror NetworkManager!");
+            Debug.LogError("[ConnectionMenuUI] CustomNetworkDiscovery component missing on Mirror NetworkManager!");
         }
     }
 
@@ -156,13 +156,14 @@ public class ConnectionMenuUI : MonoBehaviour
         }
     }
 
-    private void OnServerFound(ServerResponse info)
+    private void OnServerFound(DiscoveryResponse info)
     {
         if (_foundServers.ContainsKey(info.serverId)) return;
         if (serverListView == null || serverListView.itemPreset == null) return;
 
         GameObject newItem = Instantiate(serverListView.itemPreset, serverListView.itemParent);
-        string serverName = info.EndPoint.Address.ToString();
+        
+        string serverName = string.IsNullOrEmpty(info.lobbyName) ? info.EndPoint.Address.ToString() : info.lobbyName;
 
         ButtonManager btnManager = newItem.GetComponent<ButtonManager>();
         if (btnManager != null)
@@ -177,7 +178,7 @@ public class ConnectionMenuUI : MonoBehaviour
         _foundServers.Add(info.serverId, newItem);
     }
 
-    private void ConnectToFoundServer(ServerResponse info)
+    private void ConnectToFoundServer(DiscoveryResponse info)
     {
         if (_autoRefreshCoroutine != null)
         {

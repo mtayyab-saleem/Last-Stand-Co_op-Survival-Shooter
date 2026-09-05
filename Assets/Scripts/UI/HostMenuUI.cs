@@ -6,7 +6,7 @@ using Michsky.MUIP;
 public class HostMenuUI : MonoBehaviour
 {
     [Header("Network Components")]
-    [SerializeField] private NetworkDiscovery networkDiscovery;
+    [SerializeField] private CustomNetworkDiscovery networkDiscovery;
 
     [Header("Host Controls")]
     [SerializeField] private ButtonManager hostMatchButton;
@@ -93,7 +93,7 @@ public class HostMenuUI : MonoBehaviour
     private System.Collections.IEnumerator StartHostSequence()
     {
         // --- Step 1: Stop any lingering discovery/network from a previous session ---
-        NetworkDiscovery discovery = GetDiscovery();
+        CustomNetworkDiscovery discovery = GetDiscovery();
         if (discovery != null) discovery.StopDiscovery();
 
         // Stop an already-running host cleanly before starting again.
@@ -132,12 +132,12 @@ public class HostMenuUI : MonoBehaviour
     /// Returns the NetworkDiscovery, preferring the serialized reference but
     /// falling back to a live lookup so stale Inspector refs don't break reconnects.
     /// </summary>
-    private NetworkDiscovery GetDiscovery()
+    private CustomNetworkDiscovery GetDiscovery()
     {
         if (networkDiscovery != null) return networkDiscovery;
 
         if (Mirror.NetworkManager.singleton != null)
-            networkDiscovery = Mirror.NetworkManager.singleton.GetComponent<NetworkDiscovery>();
+            networkDiscovery = Mirror.NetworkManager.singleton.GetComponent<CustomNetworkDiscovery>();
 
         return networkDiscovery;
     }

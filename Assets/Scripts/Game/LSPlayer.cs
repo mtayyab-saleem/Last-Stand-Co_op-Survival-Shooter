@@ -13,10 +13,23 @@ public class LSPlayer : NetworkBehaviour
     [SyncVar] public int teamID = -1;
     [SyncVar] public bool isAlive = true;
 
+    [SerializeField] private PlayerProfileSO playerProfile;
+
+    public static LSPlayer LocalInstance { get; private set; }
+
     public override void OnStartLocalPlayer()
     {
-        // Sirf local player apna naam set karega
-        string myName = PlayerPrefs.GetString("PlayerName", "Player " + Random.Range(1000, 9999));
+        LocalInstance = this;
+
+        // Automatically create and load the profile if it wasn't assigned in the Inspector
+        if (playerProfile == null)
+        {
+            playerProfile = ScriptableObject.CreateInstance<PlayerProfileSO>();
+        }
+        
+        playerProfile.LoadProfile();
+        string myName = playerProfile.playerName;
+        
         CmdSetPlayerName(myName);
     }
 

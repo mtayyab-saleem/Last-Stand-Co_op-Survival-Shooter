@@ -7,6 +7,7 @@ public class SettingsMenuUI : MonoBehaviour
     [Header("Settings Controls")]
     [SerializeField] private ButtonManager backButton;
     [SerializeField] private TMP_InputField playerNameInput; // Inspector mein UI Input Field yahan drag karein
+    [SerializeField] private PlayerProfileSO playerProfile;
 
     private void Start()
     {
@@ -15,7 +16,14 @@ public class SettingsMenuUI : MonoBehaviour
         // Agar input field hai, toh pehle se save naam usme dikhayein
         if (playerNameInput != null)
         {
-            playerNameInput.text = PlayerPrefs.GetString("PlayerName", "Player " + Random.Range(1000, 9999));
+            if (playerProfile == null)
+            {
+                playerProfile = ScriptableObject.CreateInstance<PlayerProfileSO>();
+            }
+            
+            playerProfile.LoadProfile();
+            playerNameInput.text = playerProfile.playerName;
+            
             // Jab player type kar ke enter kare/bahar click kare, toh save kar lein
             playerNameInput.onEndEdit.AddListener(SavePlayerName);
         }
@@ -25,9 +33,20 @@ public class SettingsMenuUI : MonoBehaviour
     {
         if (!string.IsNullOrEmpty(newName))
         {
-            PlayerPrefs.SetString("PlayerName", newName);
-            PlayerPrefs.Save();
+            if (playerProfile == null)
+            {
+                playerProfile = ScriptableObject.CreateInstance<PlayerProfileSO>();
+            }
+            
+            playerProfile.playerName = newName;
+            playerProfile.SaveProfile();
             Debug.Log("Player Name Saved: " + newName);
+
+            // Dynamically sync across the network if we are connected
+            if (LSPlayer.LocalInstance != null)
+            {
+                LSPlayer.LocalInstance.CmdSetPlayerName(newName);
+            }
         }
     }
 
