@@ -34,6 +34,9 @@ public class LSMatchManager : NetworkBehaviour
 
     public override void OnStartServer()
     {
+        players.Clear(); // Force clean slate in case old client data remained
+
+        players.Callback -= OnPlayersListChanged;
         players.Callback += OnPlayersListChanged;
 
         int savedMode = PlayerPrefs.GetInt("HostSelectedMode", 0);
@@ -192,12 +195,44 @@ public class LSMatchManager : NetworkBehaviour
     {
         if (LobbyUIManager.Instance == null) return;
 
-        bool isHost = isServer;
+        // Forcefully evaluate actual network state to prevent Identity Crisis
+        bool isHost = NetworkServer.active;
         var localPlayer = NetworkClient.localPlayer?.GetComponent<LSPlayer>();
 
         List<LSPlayer> allPlayers = new List<LSPlayer>();
-        foreach (var p in players) allPlayers.Add(p);
+        foreach (var p in players)
+        {
+            if (p == null) continue;
+            allPlayers.Add(p);
+        }
 
         LobbyUIManager.Instance.RefreshLobbyUI(isHost, localPlayer, allPlayers, (int)currentMode, canHostStart);
+    }
+
+    public override void OnStopServer()
+    {
+        players.Clear();
+        hasMatchStarted = false;
+        canHostStart = false;
+        
+        if (LobbyUIManager.Instance != null)
+        {
+            LobbyUIManager.Instance.ResetUI();
+        }
+        
+        base.OnStopServer();
+    }
+
+    public override void OnStopClient()
+    {
+        hasMatchStarted = false;
+        canHostStart = false;
+        
+        if (LobbyUIManager.Instance != null)
+        {
+            LobbyUIManager.Instance.ResetUI();
+        }
+        
+        base.OnStopClient();
     }
 }

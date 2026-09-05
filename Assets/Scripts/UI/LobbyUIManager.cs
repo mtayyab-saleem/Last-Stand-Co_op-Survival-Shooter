@@ -26,6 +26,20 @@ public class LobbyUIManager : MonoBehaviour
         if (Instance == null) Instance = this;
     }
 
+    private void OnDestroy()
+    {
+        if (Instance == this) Instance = null;
+    }
+
+    private void OnEnable()
+    {
+        // When the lobby is opened, forcefully refresh their UI role to match actual network state
+        if (LSMatchManager.Instance != null)
+        {
+            LSMatchManager.Instance.UpdateLocalUI();
+        }
+    }
+
     private void Start()
     {
         SetupButtons();
@@ -63,8 +77,8 @@ public class LobbyUIManager : MonoBehaviour
     public void RefreshLobbyUI(bool isLocalPlayerHost, LSPlayer localPlayer, List<LSPlayer> allPlayers, int gameModeInt, bool canHostStart)
     {
         // 1. Toggle correct control panels
-        hostControlsPanel.SetActive(isLocalPlayerHost);
-        clientControlsPanel.SetActive(!isLocalPlayerHost);
+        if (hostControlsPanel != null) hostControlsPanel.SetActive(isLocalPlayerHost);
+        if (clientControlsPanel != null) clientControlsPanel.SetActive(!isLocalPlayerHost);
 
         // 2. Update Mode Text (Assuming 0=Solo, 1=Duo, 2=Squad based on your HostMenuUI)
         if (modeText != null)
@@ -100,6 +114,20 @@ public class LobbyUIManager : MonoBehaviour
         RefreshPlayerList(allPlayers);
     }
 
+    public void ResetUI()
+    {
+        if (playerListView != null)
+        {
+            playerListView.listItems.Clear();
+            playerListView.InitializeItems();
+        }
+
+        if (hostControlsPanel != null) hostControlsPanel.SetActive(false);
+        if (clientControlsPanel != null) clientControlsPanel.SetActive(false);
+        
+        gameObject.SetActive(false); // Hides the lobby panel itself
+    }
+
     private void RefreshPlayerList(List<LSPlayer> allPlayers)
     {
         if (playerListView == null) return;
@@ -109,6 +137,7 @@ public class LobbyUIManager : MonoBehaviour
         for (int i = 0; i < allPlayers.Count; i++)
         {
             var player = allPlayers[i];
+            if (player == null) continue;
 
             ListView.ListItem newItem = new ListView.ListItem();
             newItem.itemTitle = player.playerName;

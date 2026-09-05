@@ -74,7 +74,7 @@ public class NetworkCompleteSync : NetworkBehaviour
     private CharacterSyncState lastSentState;
     private Vector3 lastSentLookPos;
 
-    private float lastSyncTime;
+    private float lastStateSyncTime;
     private const float SYNC_INTERVAL = 0.05f; // 20 updates per second
 
     private void Awake()
@@ -134,13 +134,13 @@ public class NetworkCompleteSync : NetworkBehaviour
         bool stateChanged = currentState.HasChanged(lastSentState);
         bool lookChanged = Vector3.Distance(currentLookPos, lastSentLookPos) > 0.1f;
 
-        if ((stateChanged || lookChanged) && Time.time - lastSyncTime >= SYNC_INTERVAL)
+        if ((stateChanged || lookChanged) && Time.time - lastStateSyncTime >= SYNC_INTERVAL)
         {
             CmdUpdateMovementState(currentState, currentLookPos);
 
             lastSentState = currentState;
             lastSentLookPos = currentLookPos;
-            lastSyncTime = Time.time;
+            lastStateSyncTime = Time.time;
         }
 
         HandleLocalInputActions();

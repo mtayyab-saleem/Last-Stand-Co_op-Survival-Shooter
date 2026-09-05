@@ -90,6 +90,20 @@ public class GameUIManager : MonoBehaviour
     {
         ShowLoadingPanel();
 
+        // Immediate Visual & Data Cleanup
+        if (LobbyUIManager.Instance != null)
+        {
+            LobbyUIManager.Instance.ResetUI();
+        }
+        
+        if (LSMatchManager.Instance != null)
+        {
+            if (Mirror.NetworkServer.active)
+            {
+                LSMatchManager.Instance.players.Clear();
+            }
+        }
+
         if (Mirror.NetworkManager.singleton != null)
         {
             var discovery = Mirror.NetworkManager.singleton.GetComponent<Mirror.Discovery.NetworkDiscovery>();
@@ -98,6 +112,7 @@ public class GameUIManager : MonoBehaviour
                 discovery.StopDiscovery();
             }
 
+            // Correct Mirror Shutdown Sequence
             if (Mirror.NetworkServer.active && Mirror.NetworkClient.isConnected)
             {
                 Mirror.NetworkManager.singleton.StopHost();
