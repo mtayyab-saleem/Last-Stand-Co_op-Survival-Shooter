@@ -160,6 +160,10 @@ namespace JUTPS
                     return;
             }
 
+            // Ignore teammates before collision state, damage, hit marker, sound or particles.
+            if (FriendlyFireUtility.IsSameTeam(transform.gameObject, other.gameObject))
+                return;
+
             IsColliding = true;
             DoDamage(other, point, normal, Damage, HitParticlesList, HitSoundsAudioSource);
             Invoke(nameof(DisableCollidedState), 0.1f);
@@ -185,9 +189,13 @@ namespace JUTPS
 
                 if (AllCollidersToIgnore.Contains(hitCollider))
                     continue;
-                
+
                 if (TagsToDamage.Contains(hitCollider.tag))
                 {
+                    // Ignore teammates before collision state, damage, hit marker, sound or particles.
+                    if (FriendlyFireUtility.IsSameTeam(transform.gameObject, hitCollider.gameObject))
+                        continue;
+
                     IsColliding = true;
                     _oldHit = hitCollider;
                     DoDamage(hitCollider, hits[i].point, hits[i].normal, Damage, HitParticlesList, HitSoundsAudioSource);
@@ -271,6 +279,10 @@ namespace JUTPS
 
         public void DoDamage(Collider collider, Vector3 point, Vector3 normal, float damage, SurfaceAudiosWithFX[] hitParticles, AudioSource hitAudioSource)
         {
+            // Safety check for any direct calls to DoDamage.
+            if (FriendlyFireUtility.IsSameTeam(transform.gameObject, collider.gameObject))
+                return;
+
             DamageableBodyPart bodyPart = collider.GetComponentInChildren<DamageableBodyPart>();
             float realDamage = damage;
 

@@ -2,8 +2,8 @@ using JUTPS;
 using JUTPS.FX;
 using Mirror;
 using UnityEngine;
-using UnityEngine.SceneManagement; 
-using System.Linq; 
+using UnityEngine.SceneManagement;
+using System.Linq;
 using System.Collections.Generic;
 
 [RequireComponent(typeof(JUHealth))]
@@ -21,6 +21,11 @@ public class PlayerHealthManager : NetworkBehaviour
     public bool netIsDead = false;
 
     private LSPlayer _playerData;
+
+    [Header("Friendly Fire Debug")]
+    [Tooltip("Enable simple console logs for damage and team testing.")]
+    [SerializeField] private bool enableDamageDebug = true;
+
     [Header("Power-Ups")]
     public GameObject[] powerUpPrefabs;
 
@@ -29,7 +34,7 @@ public class PlayerHealthManager : NetworkBehaviour
     void Awake()
     {
         if (_juHealth == null) _juHealth = GetComponent<JUHealth>();
-        _playerData = GetComponent<LSPlayer>(); 
+        _playerData = GetComponent<LSPlayer>();
     }
 
     public override void OnStartLocalPlayer()
@@ -42,6 +47,14 @@ public class PlayerHealthManager : NetworkBehaviour
         netHealth = _juHealth.Health;
         netIsDead = _juHealth.IsDead;
         ServerPlayerCache[gameObject] = (this, _playerData);
+
+        if (enableDamageDebug && _playerData != null)
+        {
+            Debug.Log(
+                $"[DAMAGE DEBUG] Server Player Ready | " +
+                $"Player = {_playerData.playerName} | NetId = {netId} | TeamID = {_playerData.teamID}"
+            );
+        }
     }
 
     public override void OnStopServer()
@@ -56,49 +69,120 @@ public class PlayerHealthManager : NetworkBehaviour
     [Command]
     public void CmdShootTarget(GameObject target, float weaponDamage)
     {
-        // Server-side validation
-        if (weaponDamage <= 0 || weaponDamage > MAX_ALLOWED_DAMAGE) return;
-
-        if (target != null)
+        // Validate the damage value first.
+        if (weaponDamage <= 0 || weaponDamage > MAX_ALLOWED_DAMAGE)
         {
-            PlayerHealthManager targetScript = null;
-            LSPlayer targetPlayer = null;
+            if (enableDamageDebug)
+            {
+                Debug.LogWarning($"[DAMAGE DEBUG] Invalid weapon damage = {weaponDamage}");
+            }
 
-            if (ServerPlayerCache.TryGetValue(target, out var cache))
+            return;
+        }
+
+        if (target == null)
+        {
+            if (enableDamageDebug)
             {
-                targetScript = cache.health;
-                targetPlayer = cache.player;
+                Debug.LogWarning("[DAMAGE DEBUG] CmdShootTarget called with NULL target.");
             }
-            else
-            {
-                targetScript = target.GetComponent<PlayerHealthManager>();
-                if (targetScript != null)
-                {
-                    targetPlayer = target.GetComponent<LSPlayer>();
-                }
-            }
+
+            return;
+        }
+
+        PlayerHealthManager targetScript = null;
+        LSPlayer targetPlayer = null;
+
+        // Try the server cache first.
+        if (ServerPlayerCache.TryGetValue(target, out var cache))
+        {
+            targetScript = cache.health;
+            targetPlayer = cache.player;
+        }
+        else
+        {
+            targetScript = target.GetComponent<PlayerHealthManager>();
 
             if (targetScript != null)
             {
-                // Friendly fire validation
-                if (_playerData != null && targetPlayer != null)
-                {
-                    if (_playerData.teamID == targetPlayer.teamID && _playerData.teamID != -1)
-                    {
-                        return;
-                    }
-                }
-                
-                // Process shot and apply damage directly
-                targetScript.ServerApplyDamage(weaponDamage);
+                targetPlayer = target.GetComponent<LSPlayer>();
             }
         }
+
+        if (enableDamageDebug)
+        {
+            string attackerName = _playerData != null ? _playerData.playerName : "NULL";
+            int attackerTeam = _playerData != null ? _playerData.teamID : -999;
+
+            string targetName = targetPlayer != null ? targetPlayer.playerName : "NULL";
+            int targetTeam = targetPlayer != null ? targetPlayer.teamID : -999;
+
+            Debug.Log(
+                $"[DAMAGE DEBUG] CmdShootTarget CALLED | " +
+                $"Attacker = {attackerName} Team = {attackerTeam} | " +
+                $"Target = {targetName} Team = {targetTeam} | " +
+                $"Damage = {weaponDamage}"
+            );
+        }
+
+        if (targetScript == null)
+        {
+            if (enableDamageDebug)
+            {
+                Debug.LogWarning(
+                    $"[DAMAGE DEBUG] Target has no PlayerHealthManager | Target Object = {target.name}"
+                );
+            }
+
+            return;
+        }
+
+        // Friendly fire check.
+        if (_playerData != null && targetPlayer != null)
+        {
+            bool sameTeam =
+                _playerData.teamID != -1 &&
+                _playerData.teamID == targetPlayer.teamID;
+
+            if (sameTeam)
+            {
+                if (enableDamageDebug)
+                {
+                    Debug.Log(
+                        $"[DAMAGE DEBUG] FRIENDLY FIRE BLOCKED | " +
+                        $"Attacker Team = {_playerData.teamID} | Target Team = {targetPlayer.teamID}"
+                    );
+                }
+
+                // No server health damage is applied here.
+                return;
+            }
+        }
+
+        if (enableDamageDebug)
+        {
+            Debug.Log(
+                $"[DAMAGE DEBUG] ENEMY DAMAGE ALLOWED | " +
+                $"Target = {target.name} | Damage = {weaponDamage}"
+            );
+        }
+
+        // Apply valid enemy damage on the server.
+        targetScript.ServerApplyDamage(weaponDamage);
     }
 
     [Command]
     public void CmdTakeEnvironmentDamage(float amount)
     {
         if (amount <= 0 || amount > MAX_ALLOWED_DAMAGE) return;
+
+        if (enableDamageDebug)
+        {
+            Debug.Log(
+                $"[DAMAGE DEBUG] Environment Damage | Player = {gameObject.name} | " +
+                $"TeamID = {(_playerData != null ? _playerData.teamID : -1)} | Damage = {amount}"
+            );
+        }
 
         ServerApplyDamage(amount);
     }
@@ -110,6 +194,15 @@ public class PlayerHealthManager : NetworkBehaviour
         if (SceneManager.GetActiveScene().name == "LobbyScene") return;
 
         if (netIsDead) return;
+
+        if (enableDamageDebug)
+        {
+            Debug.Log(
+                $"[DAMAGE DEBUG] ServerApplyDamage | Player = {gameObject.name} | " +
+                $"TeamID = {(_playerData != null ? _playerData.teamID : -1)} | " +
+                $"Old Health = {netHealth} | Damage = {amount}"
+            );
+        }
 
         netHealth -= amount;
 
@@ -167,7 +260,7 @@ public class PlayerHealthManager : NetworkBehaviour
     {
         Debug.Log("[Server] Client died. Kicking to Main Menu.");
         RpcDisableCharacter();
-        TargetDisconnect(connectionToClient); 
+        TargetDisconnect(connectionToClient);
         NetworkServer.Destroy(gameObject);
     }
 
@@ -225,10 +318,24 @@ public class PlayerHealthManager : NetworkBehaviour
     }
     private void OnServerHealthChanged(float oldHealth, float newHealth)
     {
+        if (enableDamageDebug)
+        {
+            Debug.Log(
+                $"[DAMAGE DEBUG] Health Sync Changed | Player = {gameObject.name} | " +
+                $"TeamID = {(_playerData != null ? _playerData.teamID : -1)} | " +
+                $"Old = {oldHealth} | New = {newHealth}"
+            );
+        }
+
         _juHealth.Health = newHealth;
 
         if (isLocalPlayer && newHealth < oldHealth && !netIsDead)
         {
+            if (enableDamageDebug)
+            {
+                Debug.Log("[DAMAGE DEBUG] Blood Screen Triggered.");
+            }
+
             BloodScreen.PlayerTakingDamaged();
         }
     }

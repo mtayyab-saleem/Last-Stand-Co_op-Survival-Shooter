@@ -6464,6 +6464,7 @@ MonoBehaviour:
   syncInterval: 0
   currentMode: 0
   canHostStart: 0
+  gameModeRules: {fileID: 11400000, guid: 22cc4731eb5c2fe4386c46ad13f400c7, type: 2}
   maxPlayers: 4
 --- !u!4 &1374394499
 Transform:
