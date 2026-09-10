@@ -52,9 +52,11 @@ public class SafeZoneController : NetworkBehaviour
     public int CurrentCaseIndex => currentCaseIndex;
     public bool ZoneRunning => zoneRunning;
 
-    private void Start()
+private void Start()
     {
-        ApplyVisualRadius(startRadius);
+        // A client that joins while the zone is holding still would otherwise draw the
+        // start radius forever: the SyncVar hook only fires when the value changes.
+        ApplyVisualRadius(currentRadius > 0f ? currentRadius : startRadius);
     }
 
     public override void OnStartServer()
@@ -147,7 +149,7 @@ public class SafeZoneController : NetworkBehaviour
         Debug.Log("[SafeZone] Final case reached. Final zone damage remains active.");
     }
 
-    private void Update()
+private void Update()
     {
         if (!isServer || !zoneRunning)
             return;
@@ -157,7 +159,8 @@ public class SafeZoneController : NetworkBehaviour
         if (damageTimer < currentDamageInterval)
             return;
 
-        damageTimer = 0f;
+        // Subtract instead of zeroing so ticks do not drift on a slow frame.
+        damageTimer -= currentDamageInterval;
         ApplyOutsideZoneDamage();
     }
 

@@ -55,18 +55,46 @@ public class GameUIManager : MonoBehaviour
 
     public void ShowConnectionPanel()
     {
+        // Join Match is a popup now, so the menu behind it stays put.
+        ConnectionMenuUI popup = FindFirstObjectByType<ConnectionMenuUI>(FindObjectsInactive.Include);
+
+        if (popup != null)
+        {
+            popup.Open();
+            return;
+        }
+
         HideAllPanels();
         if (_connectionPanel) _connectionPanel.SetActive(true);
     }
 
     public void ShowHostPanel()
     {
+        // Host Match is a popup now, so the menu behind it stays put.
+        HostMenuUI popup = FindFirstObjectByType<HostMenuUI>(FindObjectsInactive.Include);
+
+        if (popup != null)
+        {
+            popup.Open();
+            return;
+        }
+
         HideAllPanels();
         if (_hostPanel) _hostPanel.SetActive(true);
     }
 
-    public void ShowSettingsPanel()
+public void ShowSettingsPanel()
     {
+        // The old name-only Setting Panel was replaced by the shared LSSettingsPanel
+        // popup, which overlays the menu instead of swapping it out entirely.
+        LSSettingsPanel panel = FindFirstObjectByType<LSSettingsPanel>(FindObjectsInactive.Include);
+
+        if (panel != null)
+        {
+            panel.Open();
+            return;
+        }
+
         HideAllPanels();
         if (_settingPanel) _settingPanel.SetActive(true);
     }
@@ -86,7 +114,7 @@ public class GameUIManager : MonoBehaviour
         StartCoroutine(DisconnectSequence());
     }
 
-    private IEnumerator DisconnectSequence()
+private IEnumerator DisconnectSequence()
     {
         ShowLoadingPanel();
 
@@ -95,12 +123,14 @@ public class GameUIManager : MonoBehaviour
         {
             LobbyUIManager.Instance.ResetUI();
         }
-        
+
         if (LSMatchManager.Instance != null)
         {
+            // SyncLists are server owned, so only the host clears them here.
             if (Mirror.NetworkServer.active)
             {
                 LSMatchManager.Instance.players.Clear();
+                LSMatchManager.Instance.lobbyPlayers.Clear();
             }
         }
 
@@ -126,7 +156,7 @@ public class GameUIManager : MonoBehaviour
         yield return new WaitForSeconds(2.5f);
 
         ShowMainMenu();
-        isDisconnecting = false; 
+        isDisconnecting = false;
         Debug.Log("Disconnected from Host: Returned to Main Menu via Loading.");
     }
 }

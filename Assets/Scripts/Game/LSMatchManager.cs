@@ -247,7 +247,6 @@ using Mirror.Discovery;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
-using System.Linq;
 
 public class LSMatchManager : NetworkBehaviour
 {
@@ -255,12 +254,19 @@ public class LSMatchManager : NetworkBehaviour
 
     public enum GameMode { Solo, Duo, Squad }
 
+    /// <summary>Team IDs cycle inside this range: 1 -> 2 -> 3 -> 4 -> 1.</summary>
+    public const int MaxTeams = 4;
+
     [Header("Match Settings")]
     [SyncVar(hook = nameof(OnModeChanged))]
     public GameMode currentMode = GameMode.Solo;
 
     [SyncVar(hook = nameof(OnHostStartChanged))]
     public bool canHostStart = false;
+
+    [Tooltip("Set once the host starts the match. New connections are rejected while this is true.")]
+    [SyncVar(hook = nameof(OnMatchStartedChanged))]
+    public bool matchStarted = false;
 
     [Header("Game Mode Rules")]
     [Tooltip("Optional rules asset. If not assigned, safe default values will be used.")]
@@ -272,16 +278,23 @@ public class LSMatchManager : NetworkBehaviour
 
     [Header("Lobby Settings")]
     [Tooltip("Maximum players allowed in the lobby (Host + Clients).")]
-    public int maxPlayers = 4;
+    public int maxPlayers = 8;
 
-    private bool hasMatchStarted = false;
-
+    /// <summary>Live player objects. The server owns this list.</summary>
     public readonly SyncList<LSPlayer> players = new SyncList<LSPlayer>();
+
+    /// <summary>
+    /// Synced view of the roster. Clients read this list and its Callback to redraw
+    /// lobby and overhead UI automatically whenever team data changes.
+    /// </summary>
+    public readonly SyncList<LobbyPlayer> lobbyPlayers = new SyncList<LobbyPlayer>();
+
     private NetworkDiscovery networkDiscovery;
 
-    // Stores the assigned team by network connection.
-    // This keeps the team ID safe when the gameplay scene loads.
+    // Team layout stored by connection ID so it survives the lobby -> gameplay scene change,
+    // where Mirror destroys and respawns every player object.
     private readonly Dictionary<int, int> savedTeamByConnection = new Dictionary<int, int>();
+    private readonly Dictionary<int, int> savedMemberIndexByConnection = new Dictionary<int, int>();
 
     private void Awake()
     {
@@ -306,10 +319,12 @@ public class LSMatchManager : NetworkBehaviour
     {
         // Start every new server session with clean match data.
         players.Clear();
+        lobbyPlayers.Clear();
         savedTeamByConnection.Clear();
+        savedMemberIndexByConnection.Clear();
 
-        players.Callback -= OnPlayersListChanged;
-        players.Callback += OnPlayersListChanged;
+        matchStarted = false;
+        canHostStart = false;
 
         // Load the mode selected by the host from the Host Menu.
         int savedMode = PlayerPrefs.GetInt("HostSelectedMode", 0);
@@ -321,46 +336,83 @@ public class LSMatchManager : NetworkBehaviour
         }
     }
 
+    public override void OnStartClient()
+    {
+        // Requirement: every client UI redraws itself from the SyncList callback.
+        lobbyPlayers.Callback -= OnLobbyPlayersChanged;
+        lobbyPlayers.Callback += OnLobbyPlayersChanged;
+
+        UpdateLocalUI();
+        LSPlayer.NotifyTeamDataChanged();
+    }
+
+    // -------------------------
+    // Roster
+    // -------------------------
+
     [Server]
     public void RegisterPlayer(LSPlayer player)
     {
+        if (player == null)
+            return;
+
         if (!players.Contains(player))
         {
             players.Add(player);
         }
 
-        // If the match already started, restore the saved team for this connection.
-        RestoreSavedTeam(player);
+        // The host is the connection that owns the server, not "whoever registered first".
+        // Registration order is not stable across the lobby -> gameplay scene change.
+        player.isGameHost = player.connectionToClient == NetworkServer.localConnection;
+        player.isReady = player.isGameHost;
 
-        // The first registered player is always the host.
-        if (players.Count == 1)
+        if (matchStarted)
         {
-            player.isGameHost = true;
-            player.isReady = true;
+            // Gameplay scene reload: put the player back on the team it already had.
+            RestoreSavedTeam(player);
         }
         else
         {
-            player.isGameHost = false;
-            player.isReady = false;
+            RebuildTeams();
         }
 
         if (enableTeamDebug)
         {
             Debug.Log(
                 $"[TEAM DEBUG] Player Registered = {player.playerName} | " +
-                $"Host = {player.isGameHost} | Total Players = {players.Count}"
+                $"Host = {player.isGameHost} | Team = {player.teamID} | " +
+                $"Slot = {player.teamMemberIndex} | Total Players = {players.Count}"
             );
         }
 
         UpdateReadyState();
         CheckDiscoveryState();
-        RpcRefreshUI();
+        PublishRoster();
     }
 
     [Server]
+    public void UnregisterPlayer(LSPlayer player)
+    {
+        if (players.Contains(player))
+        {
+            players.Remove(player);
+        }
+
+        // Teams are only reshuffled in the lobby. A running match keeps its layout.
+        if (!matchStarted)
+        {
+            RebuildTeams();
+        }
+
+        UpdateReadyState();
+        CheckDiscoveryState();
+        PublishRoster();
+    }
+
+[Server]
     public void UpdateReadyState()
     {
-        int totalPlayers = players.Count;
+        int totalPlayers = PlayerCount();
         int minimumPlayers = GetMinimumPlayersToStart();
 
         bool allClientsReady = true;
@@ -384,9 +436,7 @@ public class LSMatchManager : NetworkBehaviour
             }
         }
 
-        // Match can start only when:
-        // 1. The selected mode has enough players.
-        // 2. Every connected client is ready.
+        // Match can start only when the mode has enough players and every client is ready.
         canHostStart = totalPlayers >= minimumPlayers && allClientsReady;
 
         if (enableTeamDebug)
@@ -401,24 +451,334 @@ public class LSMatchManager : NetworkBehaviour
         RpcRefreshUI();
     }
 
+    /// <summary>Republishes the synced roster, e.g. after a player name arrives.</summary>
     [Server]
-    public void UnregisterPlayer(LSPlayer player)
+    public void RefreshRoster()
     {
-        if (players.Contains(player))
-        {
-            players.Remove(player);
-        }
-
-        UpdateReadyState();
-        CheckDiscoveryState();
-        RpcRefreshUI();
+        PublishRoster();
     }
 
     [Server]
+    private void PublishRoster()
+    {
+        lobbyPlayers.Clear();
+
+        foreach (LSPlayer player in ActiveRoster())
+        {
+            lobbyPlayers.Add(new LobbyPlayer(
+                player.netId,
+                player.playerName,
+                player.teamID,
+                player.teamMemberIndex));
+        }
+    }
+
+private List<LSPlayer> ActiveRoster()
+    {
+        List<LSPlayer> roster = new List<LSPlayer>();
+
+        foreach (LSPlayer player in players)
+        {
+            if (player != null)
+                roster.Add(player);
+        }
+
+        return roster;
+    }
+
+    /// <summary>
+    /// Live player count. players.Count also counts entries whose object was already
+    /// destroyed, so every capacity and ready check must go through here instead.
+    /// </summary>
+    private int PlayerCount()
+    {
+        int count = 0;
+
+        foreach (LSPlayer player in players)
+        {
+            if (player != null)
+                count++;
+        }
+
+        return count;
+    }
+
+    // -------------------------
+    // Teams
+    // -------------------------
+
+    /// <summary>Changes the mode on the server and rebalances the lobby immediately.</summary>
+    [Server]
+    public void SetGameMode(GameMode mode)
+    {
+        if (currentMode == mode)
+            return;
+
+        currentMode = mode;
+
+        RebuildTeams();
+        UpdateReadyState();
+        PublishRoster();
+    }
+
+    /// <summary>
+    /// Spreads every connected player evenly across the minimum number of teams the
+    /// mode needs, instead of filling the first team before starting the next one.
+    /// Squad + 6 -> 3 + 3, Squad + 7 -> 4 + 3, Duo + 7 -> 2 + 2 + 2 + 1.
+    /// </summary>
+    [Server]
+    private void RebuildTeams()
+    {
+        List<LSPlayer> roster = ActiveRoster();
+
+        savedTeamByConnection.Clear();
+        savedMemberIndexByConnection.Clear();
+
+        if (roster.Count == 0)
+            return;
+
+        int maxTeamSize = GetMaximumPlayersPerTeam();
+
+        // Fewest teams that can hold everyone without breaking the mode's team cap.
+        int teamCount = Mathf.Max(1, Mathf.CeilToInt(roster.Count / (float)maxTeamSize));
+
+        // Even split: the first (count % teamCount) teams take one extra player.
+        int baseSize = roster.Count / teamCount;
+        int remainder = roster.Count % teamCount;
+
+        int rosterIndex = 0;
+
+        for (int team = 0; team < teamCount; team++)
+        {
+            int teamSize = baseSize + (team < remainder ? 1 : 0);
+
+            for (int slot = 0; slot < teamSize; slot++)
+            {
+                LSPlayer player = roster[rosterIndex++];
+                player.teamID = team + 1;
+                player.teamMemberIndex = slot + 1;
+            }
+        }
+
+        CacheTeamLayout();
+
+        if (enableTeamDebug)
+        {
+            Debug.Log(
+                $"[TEAM DEBUG] Teams Rebuilt | Mode = {currentMode} | Players = {roster.Count} | " +
+                $"Max Team Size = {maxTeamSize} | Teams = {teamCount} | " +
+                $"Split = {DescribeTeamSizes()}"
+            );
+        }
+    }
+
+    /// <summary>
+    /// Moves a player to the next team in the 1 -> 2 -> 3 -> 4 -> 1 cycle.
+    /// A team that is already at the mode's capacity is skipped automatically.
+    /// </summary>
+    [Command(requiresAuthority = false)]
+    public void CmdCyclePlayerTeam(uint targetNetId, NetworkConnectionToClient sender = null)
+    {
+        if (matchStarted)
+            return;
+
+        LSPlayer target = FindPlayerByNetId(targetNetId);
+
+        if (target == null)
+        {
+            if (enableTeamDebug)
+                Debug.LogWarning($"[TEAM DEBUG] CycleTeam: no player with netId {targetNetId}.");
+
+            return;
+        }
+
+        // A client may only move itself. The host may move anybody.
+        bool senderIsHost = sender != null && sender == NetworkServer.localConnection;
+        bool senderOwnsTarget = sender != null && target.connectionToClient == sender;
+
+        if (!senderIsHost && !senderOwnsTarget)
+        {
+            if (enableTeamDebug)
+                Debug.LogWarning("[TEAM DEBUG] CycleTeam rejected: sender may only move its own player.");
+
+            return;
+        }
+
+        int maxTeamSize = GetMaximumPlayersPerTeam();
+        int teamRange = Mathf.Max(MaxTeams, HighestTeamId());
+
+        for (int step = 1; step <= teamRange; step++)
+        {
+            // Wraps 4 -> 1. The extra modulo keeps an unassigned (0) team ID safe.
+            int candidate = ((((target.teamID - 1 + step) % teamRange) + teamRange) % teamRange) + 1;
+
+            if (candidate == target.teamID)
+                continue;
+
+            // Team is full: skip it and try the next one.
+            if (CountTeamMembers(candidate, target) >= maxTeamSize)
+                continue;
+
+            int previousTeam = target.teamID;
+            target.teamID = candidate;
+
+            ReindexTeamMembers();
+            CacheTeamLayout();
+            PublishRoster();
+            RpcRefreshUI();
+
+            if (enableTeamDebug)
+            {
+                Debug.Log(
+                    $"[TEAM DEBUG] CycleTeam | {target.playerName} moved T{previousTeam} -> " +
+                    $"T{target.teamID} #{target.teamMemberIndex} | Split = {DescribeTeamSizes()}"
+                );
+            }
+
+            return;
+        }
+
+        if (enableTeamDebug)
+        {
+            Debug.Log($"[TEAM DEBUG] CycleTeam | {target.playerName} stayed on T{target.teamID}: every other team is full.");
+        }
+    }
+
+    /// <summary>Renumbers teamMemberIndex to 1, 2, 3, 4 inside every team.</summary>
+    [Server]
+    private void ReindexTeamMembers()
+    {
+        Dictionary<int, int> usedSlots = new Dictionary<int, int>();
+
+        foreach (LSPlayer player in ActiveRoster())
+        {
+            if (player.teamID <= 0)
+            {
+                player.teamMemberIndex = 0;
+                continue;
+            }
+
+            usedSlots.TryGetValue(player.teamID, out int slot);
+            slot++;
+
+            usedSlots[player.teamID] = slot;
+            player.teamMemberIndex = slot;
+        }
+    }
+
+    [Server]
+    private void CacheTeamLayout()
+    {
+        savedTeamByConnection.Clear();
+        savedMemberIndexByConnection.Clear();
+
+        foreach (LSPlayer player in ActiveRoster())
+        {
+            if (player.connectionToClient == null)
+                continue;
+
+            int connectionId = player.connectionToClient.connectionId;
+            savedTeamByConnection[connectionId] = player.teamID;
+            savedMemberIndexByConnection[connectionId] = player.teamMemberIndex;
+        }
+    }
+
+    [Server]
+    private void RestoreSavedTeam(LSPlayer player)
+    {
+        if (player == null || player.connectionToClient == null)
+            return;
+
+        int connectionId = player.connectionToClient.connectionId;
+
+        if (savedTeamByConnection.TryGetValue(connectionId, out int savedTeamID))
+            player.teamID = savedTeamID;
+
+        if (savedMemberIndexByConnection.TryGetValue(connectionId, out int savedSlot))
+            player.teamMemberIndex = savedSlot;
+
+        if (enableTeamDebug)
+        {
+            Debug.Log(
+                $"[TEAM DEBUG] Team Restored | Player = {player.playerName} | " +
+                $"ConnectionId = {connectionId} | Team = {player.teamID} #{player.teamMemberIndex}"
+            );
+        }
+    }
+
+    private LSPlayer FindPlayerByNetId(uint targetNetId)
+    {
+        foreach (LSPlayer player in players)
+        {
+            if (player != null && player.netId == targetNetId)
+                return player;
+        }
+
+        return null;
+    }
+
+    private int CountTeamMembers(int teamId, LSPlayer ignore)
+    {
+        int count = 0;
+
+        foreach (LSPlayer player in players)
+        {
+            if (player == null || player == ignore)
+                continue;
+
+            if (player.teamID == teamId)
+                count++;
+        }
+
+        return count;
+    }
+
+    private int HighestTeamId()
+    {
+        int highest = 0;
+
+        foreach (LSPlayer player in players)
+        {
+            if (player != null && player.teamID > highest)
+                highest = player.teamID;
+        }
+
+        return highest;
+    }
+
+    private string DescribeTeamSizes()
+    {
+        Dictionary<int, int> sizes = new Dictionary<int, int>();
+
+        foreach (LSPlayer player in ActiveRoster())
+        {
+            if (player.teamID <= 0)
+                continue;
+
+            sizes.TryGetValue(player.teamID, out int count);
+            sizes[player.teamID] = count + 1;
+        }
+
+        List<string> parts = new List<string>();
+
+        for (int team = 1; team <= HighestTeamId(); team++)
+        {
+            sizes.TryGetValue(team, out int count);
+            parts.Add($"T{team}={count}");
+        }
+
+        return string.Join(" + ", parts);
+    }
+
+    // -------------------------
+    // Match flow
+    // -------------------------
+
+[Server]
     private void CheckDiscoveryState()
     {
         // Never advertise the lobby after the match has started.
-        if (hasMatchStarted)
+        if (matchStarted)
             return;
 
         if (networkDiscovery == null)
@@ -427,7 +787,7 @@ public class LSMatchManager : NetworkBehaviour
         if (networkDiscovery == null)
             return;
 
-        if (players.Count >= maxPlayers)
+        if (PlayerCount() >= maxPlayers)
         {
             networkDiscovery.StopDiscovery();
             Debug.Log("[LSMatchManager] Lobby is full. Discovery stopped.");
@@ -455,115 +815,62 @@ public class LSMatchManager : NetworkBehaviour
             return;
         }
 
-        if (enableTeamDebug)
-        {
-            Debug.Log(
-                $"[TEAM DEBUG] Starting Match | Mode = {currentMode} | Players = {players.Count}"
-            );
-        }
+        // Final team layout, then the lobby is closed for good.
+        RebuildTeams();
+        matchStarted = true;
 
-        hasMatchStarted = true;
-
-        // Stop advertising before entering the gameplay scene.
         if (networkDiscovery == null)
             networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
 
         if (networkDiscovery != null)
             networkDiscovery.StopDiscovery();
 
-        AssignTeams();
+        // Anything that connected but never made it into the roster is dropped here,
+        // which closes the "connected exactly as the match started" race.
+        DropConnectionsOutsideMatch();
+
+        PublishRoster();
+
+        if (enableTeamDebug)
+        {
+            Debug.Log(
+                $"[TEAM DEBUG] Starting Match | Mode = {currentMode} | " +
+                $"Players = {players.Count} | Split = {DescribeTeamSizes()}"
+            );
+        }
 
         NetworkManager.singleton.ServerChangeScene("GameScene");
     }
 
     [Server]
-    private void AssignTeams()
+    private void DropConnectionsOutsideMatch()
     {
-        if (players.Count == 0)
-            return;
+        List<NetworkConnectionToClient> stale = new List<NetworkConnectionToClient>();
 
-        // Randomize players before assigning teams.
-        List<LSPlayer> shuffledPlayers = players
-            .Where(player => player != null)
-            .OrderBy(player => Random.value)
-            .ToList();
-
-        int maxTeamSize = GetMaximumPlayersPerTeam();
-
-        // Example:
-        // Squad with 9 players and max team size 4:
-        // ceil(9 / 4) = 3 teams.
-        int teamCount = Mathf.CeilToInt(shuffledPlayers.Count / (float)maxTeamSize);
-        teamCount = Mathf.Max(1, teamCount);
-
-        if (enableTeamDebug)
+        foreach (NetworkConnectionToClient connection in NetworkServer.connections.Values)
         {
-            Debug.Log(
-                $"[TEAM DEBUG] Assigning Teams | Mode = {currentMode} | " +
-                $"Players = {shuffledPlayers.Count} | Max Team Size = {maxTeamSize} | " +
-                $"Team Count = {teamCount}"
+            if (connection == null || connection == NetworkServer.localConnection)
+                continue;
+
+            if (savedTeamByConnection.ContainsKey(connection.connectionId))
+                continue;
+
+            stale.Add(connection);
+        }
+
+        foreach (NetworkConnectionToClient connection in stale)
+        {
+            Debug.LogWarning(
+                $"[LSMatchManager] Connection {connection.connectionId} arrived as the match started. Disconnecting."
             );
-        }
 
-        // Clear old team records before creating a new match setup.
-        savedTeamByConnection.Clear();
-
-        // Deal players to teams one-by-one like dealing cards.
-        // This keeps team sizes as balanced as possible.
-        for (int i = 0; i < shuffledPlayers.Count; i++)
-        {
-            LSPlayer player = shuffledPlayers[i];
-            int teamID = i % teamCount;
-
-            player.teamID = teamID;
-
-            // Save the team using the player's network connection ID.
-            // Connection ID remains the useful link when the scene changes.
-            if (player.connectionToClient != null)
-            {
-                int connectionId = player.connectionToClient.connectionId;
-                savedTeamByConnection[connectionId] = teamID;
-            }
-
-            if (enableTeamDebug)
-            {
-                int connectionId = player.connectionToClient != null
-                    ? player.connectionToClient.connectionId
-                    : -1;
-
-                Debug.Log(
-                    $"[TEAM DEBUG] Player = {player.playerName} | " +
-                    $"NetId = {player.netId} | ConnectionId = {connectionId} | TeamID = {player.teamID}"
-                );
-            }
-        }
-    }
-
-    [Server]
-    private void RestoreSavedTeam(LSPlayer player)
-    {
-        if (player == null || player.connectionToClient == null)
-            return;
-
-        int connectionId = player.connectionToClient.connectionId;
-
-        if (savedTeamByConnection.TryGetValue(connectionId, out int savedTeamID))
-        {
-            player.teamID = savedTeamID;
-
-            if (enableTeamDebug)
-            {
-                Debug.Log(
-                    $"[TEAM DEBUG] Team Restored | Player = {player.playerName} | " +
-                    $"ConnectionId = {connectionId} | TeamID = {savedTeamID}"
-                );
-            }
+            connection.Disconnect();
         }
     }
 
     private void OnSceneLoaded(Scene scene, LoadSceneMode loadMode)
     {
-        if (!NetworkServer.active || !hasMatchStarted)
+        if (!NetworkServer.active || !matchStarted)
             return;
 
         // Wait briefly so Mirror can finish moving/spawning player objects.
@@ -576,7 +883,7 @@ public class LSMatchManager : NetworkBehaviour
         yield return null;
         yield return null;
 
-        if (!NetworkServer.active || !hasMatchStarted)
+        if (!NetworkServer.active || !matchStarted)
             yield break;
 
         foreach (LSPlayer player in players)
@@ -587,41 +894,42 @@ public class LSMatchManager : NetworkBehaviour
             }
         }
 
+        PublishRoster();
+
         if (enableTeamDebug)
         {
-            Debug.Log($"[TEAM DEBUG] Team restore check completed after scene load.");
+            Debug.Log("[TEAM DEBUG] Team restore check completed after scene load.");
         }
     }
 
-    private int GetMinimumPlayersToStart()
+    // -------------------------
+    // Mode rules
+    // -------------------------
+
+private int GetMinimumPlayersToStart()
     {
-        // Use the ScriptableObject value when available.
+        int maxTeamSize = GetMaximumPlayersPerTeam();
+
+        // Two teams minimum: one full team plus one more player.
+        // Without this a Duo match of 2 or a Squad match of 4 would put everybody
+        // on one team, and friendly fire would leave nobody left to fight.
+        // Solo = 2, Duo = 3, Squad = 5.
+        int fairMinimum = maxTeamSize + 1;
+
         if (gameModeRules != null)
         {
             GameModeRulesSO.ModeRule rule = gameModeRules.GetRule(currentMode);
 
             if (rule != null)
-                return Mathf.Max(1, rule.minimumPlayersToStart);
+                return Mathf.Max(fairMinimum, rule.minimumPlayersToStart);
         }
 
-        // Safe fallback values keep the current game flow working
-        // even if the rules asset is not assigned.
-        switch (currentMode)
-        {
-            case GameMode.Duo:
-                return 2;
-
-            case GameMode.Squad:
-                return 4;
-
-            default:
-                return 1;
-        }
+        return fairMinimum;
     }
 
+    /// <summary>Solo = 1, Duo = 2, Squad = 4 unless the rules asset says otherwise.</summary>
     private int GetMaximumPlayersPerTeam()
     {
-        // Use the ScriptableObject value when available.
         if (gameModeRules != null)
         {
             GameModeRulesSO.ModeRule rule = gameModeRules.GetRule(currentMode);
@@ -630,7 +938,6 @@ public class LSMatchManager : NetworkBehaviour
                 return Mathf.Max(1, rule.maximumPlayersPerTeam);
         }
 
-        // Safe fallback values.
         switch (currentMode)
         {
             case GameMode.Duo:
@@ -648,14 +955,19 @@ public class LSMatchManager : NetworkBehaviour
     // UI Update Hooks
     // -------------------------
 
-    private void OnPlayersListChanged(
-        SyncList<LSPlayer>.Operation op,
+    private void OnLobbyPlayersChanged(
+        SyncList<LobbyPlayer>.Operation op,
         int index,
-        LSPlayer oldItem,
-        LSPlayer newItem)
+        LobbyPlayer oldItem,
+        LobbyPlayer newItem)
     {
-        if (isClient)
-            UpdateLocalUI();
+        if (!isClient)
+            return;
+
+        UpdateLocalUI();
+
+        // Wakes every PlayerOverheadUI so name plates redraw themselves.
+        LSPlayer.NotifyTeamDataChanged();
     }
 
     private void OnModeChanged(GameMode oldMode, GameMode newMode)
@@ -665,6 +977,12 @@ public class LSMatchManager : NetworkBehaviour
     }
 
     private void OnHostStartChanged(bool oldValue, bool newValue)
+    {
+        if (isClient)
+            UpdateLocalUI();
+    }
+
+    private void OnMatchStartedChanged(bool oldValue, bool newValue)
     {
         if (isClient)
             UpdateLocalUI();
@@ -715,8 +1033,11 @@ public class LSMatchManager : NetworkBehaviour
     public override void OnStopServer()
     {
         players.Clear();
+        lobbyPlayers.Clear();
         savedTeamByConnection.Clear();
-        hasMatchStarted = false;
+        savedMemberIndexByConnection.Clear();
+
+        matchStarted = false;
         canHostStart = false;
 
         if (LobbyUIManager.Instance != null)
@@ -729,8 +1050,8 @@ public class LSMatchManager : NetworkBehaviour
 
     public override void OnStopClient()
     {
-        hasMatchStarted = false;
-        canHostStart = false;
+        // SyncVars are server-owned, so nothing is written back here.
+        lobbyPlayers.Callback -= OnLobbyPlayersChanged;
 
         if (LobbyUIManager.Instance != null)
         {

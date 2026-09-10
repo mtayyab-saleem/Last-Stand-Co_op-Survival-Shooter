@@ -14,11 +14,11 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::GameModeRulesSO
   rules:
   - mode: 0
-    minimumPlayersToStart: 1
+    minimumPlayersToStart: 2
     maximumPlayersPerTeam: 1
   - mode: 1
-    minimumPlayersToStart: 2
+    minimumPlayersToStart: 3
     maximumPlayersPerTeam: 2
   - mode: 2
-    minimumPlayersToStart: 4
+    minimumPlayersToStart: 5
     maximumPlayersPerTeam: 4

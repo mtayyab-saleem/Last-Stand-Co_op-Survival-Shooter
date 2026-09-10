@@ -1,0 +1,15 @@
+{
+  "mcpServers": {
+    "UnityMCP": {
+      "type": "stdio",
+      "command": "C:\\Users\\mtayy\\.local\\bin\\uvx.exe",
+      "args": [
+        "--from",
+        "mcpforunityserver",
+        "mcp-for-unity",
+        "--default-instance",
+        "Last-Stand-Co_op-Survival-Shooter"
+      ]
+    }
+  }
+}

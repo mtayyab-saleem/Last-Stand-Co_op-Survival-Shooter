@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b23ac4efd134f0d449930a8e2fb1da71, type: 3}
+  m_Name: MusicLibrary
+  m_EditorClassIdentifier: Assembly-CSharp::MusicLibrarySO
+  tracks:
+  - sceneName: MenuScene
+    clip: {fileID: 8300000, guid: 1a91df33767df10419f231a70ebb92b9, type: 3}
+  - sceneName: LobbyScene
+    clip: {fileID: 8300000, guid: 298c58f65aae5854bb7aad65183b9cb8, type: 3}
+  - sceneName: GameScene
+    clip: {fileID: 8300000, guid: 298c58f65aae5854bb7aad65183b9cb8, type: 3}
+  trackVolume: 1
+  fadeSeconds: 1.25
+  loop: 1

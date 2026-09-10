@@ -128,7 +128,7 @@ public class LobbyUIManager : MonoBehaviour
         gameObject.SetActive(false); // Hides the lobby panel itself
     }
 
-    private void RefreshPlayerList(List<LSPlayer> allPlayers)
+private void RefreshPlayerList(List<LSPlayer> allPlayers)
     {
         if (playerListView == null) return;
 
@@ -142,16 +142,17 @@ public class LobbyUIManager : MonoBehaviour
             ListView.ListItem newItem = new ListView.ListItem();
             newItem.itemTitle = player.playerName;
 
-            // --- Column 1: Name ---
+            // --- Column 1: Name + team slot, e.g. "Ali  [T1 #2]" ---
             ListView.ListRow nameRow = new ListView.ListRow();
             nameRow.rowType = ListView.RowType.Text;
-            nameRow.rowText = player.playerName;
+            nameRow.rowText = player.teamID > 0
+                ? $"{player.playerName}  [T{player.teamID} #{player.teamMemberIndex}]"
+                : player.playerName;
             newItem.row0 = nameRow;
 
             // --- Column 2: Type (Host or Client) ---
             ListView.ListRow typeRow = new ListView.ListRow();
             typeRow.rowType = ListView.RowType.Text;
-            // YAHAN BADLAAV KIYA HAI: isGameHost lagaya hai
             typeRow.rowText = player.isGameHost ? "Host" : "Client";
             newItem.row1 = typeRow;
 
@@ -159,7 +160,6 @@ public class LobbyUIManager : MonoBehaviour
             ListView.ListRow statusRow = new ListView.ListRow();
             statusRow.rowType = ListView.RowType.Text;
 
-            // YAHAN BHI BADLAAV KIYA HAI
             if (player.isGameHost)
             {
                 statusRow.rowText = "<color=#00FF00>Ready</color>";
@@ -175,6 +175,28 @@ public class LobbyUIManager : MonoBehaviour
 
         playerListView.InitializeItems();
     }
+
+/// <summary>
+    /// Hook this to a lobby button's OnClick. Moves the local player to the next team
+    /// that still has a free slot: 1 -> 2 -> 3 -> 4 -> 1.
+    /// </summary>
+    public void CycleLocalPlayerTeam()
+    {
+        if (LSMatchManager.Instance == null) return;
+
+        LSPlayer myPlayer = NetworkClient.localPlayer != null
+            ? NetworkClient.localPlayer.GetComponent<LSPlayer>()
+            : null;
+
+        if (myPlayer == null)
+        {
+            Debug.LogWarning("Local Player not found to cycle team!");
+            return;
+        }
+
+        LSMatchManager.Instance.CmdCyclePlayerTeam(myPlayer.netId);
+    }
+
 
     private void OnClientReadyClicked()
     {

@@ -3,119 +3,209 @@ using Mirror;
 using Mirror.Discovery;
 using Michsky.MUIP;
 
+/// <summary>
+/// Host Match popup: pick a match mode and a match type, then start hosting.
+///
+/// It is a centred popup rather than a separate screen, so opening it leaves the
+/// menu behind it visible and nothing else has to be torn down.
+/// </summary>
 public class HostMenuUI : MonoBehaviour
 {
+    [Header("Panel")]
+    [Tooltip("Root object toggled on and off. Defaults to this GameObject.")]
+    [SerializeField] private GameObject panelRoot;
+
     [Header("Network Components")]
     [SerializeField] private CustomNetworkDiscovery networkDiscovery;
 
-    [Header("Host Controls")]
-    [SerializeField] private ButtonManager hostMatchButton;
-    [SerializeField] private ButtonManager backButton;
+    [Header("Buttons")]
+    [SerializeField] private ButtonManager startHostButton;
+    [SerializeField] private ButtonManager closeButton;
 
-    [Header("Map Selection")]
-    [SerializeField] private ButtonManager mapArena;
-    [SerializeField] private ButtonManager mapBattleRoyale;
+    [Header("Cards")]
+    [Tooltip("Order must match LSMatchManager.GameMode: Solo, Duo, Squad.")]
+    [SerializeField] private UISelectionCard[] modeCards;
 
-    [Header("Mode Selection")]
-    [SerializeField] private ButtonManager modeSolo;
-    [SerializeField] private ButtonManager modeDuo;
-    [SerializeField] private ButtonManager modeSquad;
+    [Tooltip("Battle Royale, Battle Arena.")]
+    [SerializeField] private UISelectionCard[] typeCards;
 
-    [Header("UI Colors")]
-    [SerializeField] private Color normalColor = new Color(0.2f, 0.2f, 0.2f, 1f);
-    [SerializeField] private Color selectedColor = new Color(0.0f, 0.8f, 0.2f, 1f);
+    private int selectedModeIndex = 0;
+    private int selectedTypeIndex = 0;
+    private bool isOpen;
 
-    private int _selectedMapIndex = -1;
-    private int _selectedModeIndex = -1;
+    public bool IsOpen { get { return isOpen; } }
+
+    private void Awake()
+    {
+        if (panelRoot == null)
+            panelRoot = gameObject;
+
+        SetupCards();
+
+        if (startHostButton != null)
+        {
+            startHostButton.onClick.RemoveListener(OnHostMatchClick);
+            startHostButton.onClick.AddListener(OnHostMatchClick);
+        }
+
+        if (closeButton != null)
+        {
+            closeButton.onClick.RemoveListener(Close);
+            closeButton.onClick.AddListener(Close);
+        }
+
+        WireBackdrop();
+    }
 
     private void Start()
     {
-        SetupButtons();
+        // Deliberately not in Awake. A panel left disabled in the scene only runs
+        // Awake when Open() switches it on, so hiding it there would instantly undo
+        // the open - which is why the first click appeared to do nothing.
+        if (!isOpen)
+            panelRoot.SetActive(false);
     }
 
-    private void OnEnable()
+    /// <summary>Clicking the dimmed area behind the window closes the popup.</summary>
+    private void WireBackdrop()
     {
-        _selectedMapIndex = -1;
-        _selectedModeIndex = -1;
-        UpdateUI();
-        ValidateHostButton();
+        Transform dim = panelRoot.transform.Find("Dim");
+        if (dim == null) return;
+
+        UnityEngine.UI.Button backdrop = dim.GetComponent<UnityEngine.UI.Button>();
+        if (backdrop == null) backdrop = dim.gameObject.AddComponent<UnityEngine.UI.Button>();
+
+        backdrop.transition = UnityEngine.UI.Selectable.Transition.None;
+        backdrop.targetGraphic = dim.GetComponent<UnityEngine.UI.Image>();
+        backdrop.onClick.RemoveAllListeners();
+        backdrop.onClick.AddListener(Close);
     }
 
-    private void SetupButtons()
+    private void SetupCards()
     {
-        if (mapArena) mapArena.onClick.AddListener(() => SelectMap(0));
-        if (mapBattleRoyale) mapBattleRoyale.onClick.AddListener(() => SelectMap(1));
+        for (int i = 0; i < modeCards.Length; i++)
+        {
+            int index = i;
+            if (modeCards[i] == null) continue;
+            modeCards[i].Button.onClick.RemoveAllListeners();
+            modeCards[i].Button.onClick.AddListener(delegate { SelectMode(index); });
+        }
 
-        if (modeSolo) modeSolo.onClick.AddListener(() => SelectMode(0));
-        if (modeDuo) modeDuo.onClick.AddListener(() => SelectMode(1));
-        if (modeSquad) modeSquad.onClick.AddListener(() => SelectMode(2));
-
-        if (hostMatchButton) hostMatchButton.onClick.AddListener(OnHostMatchClick);
-        if (backButton) backButton.onClick.AddListener(OnBackClick);
+        for (int i = 0; i < typeCards.Length; i++)
+        {
+            int index = i;
+            if (typeCards[i] == null) continue;
+            typeCards[i].Button.onClick.RemoveAllListeners();
+            typeCards[i].Button.onClick.AddListener(delegate { SelectType(index); });
+        }
     }
 
-    private void SelectMap(int index) { _selectedMapIndex = index; UpdateUI(); }
-    private void SelectMode(int index) { _selectedModeIndex = index; UpdateUI(); }
+    // -------------------------
+    // Open / close
+    // -------------------------
 
-    private void UpdateUI()
+    public void Toggle()
     {
-        if (mapArena) SetColor(mapArena, _selectedMapIndex == 0);
-        if (mapBattleRoyale) SetColor(mapBattleRoyale, _selectedMapIndex == 1);
-        if (modeSolo) SetColor(modeSolo, _selectedModeIndex == 0);
-        if (modeDuo) SetColor(modeDuo, _selectedModeIndex == 1);
-        if (modeSquad) SetColor(modeSquad, _selectedModeIndex == 2);
-        ValidateHostButton();
+        if (isOpen) Close();
+        else Open();
     }
 
-    private void SetColor(ButtonManager btn, bool isSelected)
+    public void Open()
     {
-        if (btn.normalImage != null)
-            btn.normalImage.color = isSelected ? selectedColor : normalColor;
+        if (isOpen) return;
+
+        isOpen = true;
+        panelRoot.SetActive(true);
+
+        // Start from a valid pick so Start Host is usable straight away.
+        SelectMode(Mathf.Clamp(selectedModeIndex, 0, Mathf.Max(0, modeCards.Length - 1)));
+        SelectType(Mathf.Clamp(selectedTypeIndex, 0, Mathf.Max(0, typeCards.Length - 1)));
     }
 
-    private void ValidateHostButton()
+    public void Close()
     {
-        bool isReady = (_selectedMapIndex >= 0 && _selectedModeIndex >= 0);
-        if (hostMatchButton) hostMatchButton.Interactable(isReady);
+        if (!isOpen) return;
+
+        isOpen = false;
+        panelRoot.SetActive(false);
     }
+
+    // -------------------------
+    // Selection
+    // -------------------------
+
+    public void SelectMode(int index)
+    {
+        selectedModeIndex = index;
+
+        for (int i = 0; i < modeCards.Length; i++)
+            if (modeCards[i] != null) modeCards[i].SetSelected(i == index);
+
+        RefreshStartButton();
+    }
+
+    public void SelectType(int index)
+    {
+        selectedTypeIndex = index;
+
+        for (int i = 0; i < typeCards.Length; i++)
+            if (typeCards[i] != null) typeCards[i].SetSelected(i == index);
+
+        RefreshStartButton();
+    }
+
+    private void RefreshStartButton()
+    {
+        bool ready = selectedModeIndex >= 0 && selectedTypeIndex >= 0;
+
+        if (startHostButton != null)
+            startHostButton.Interactable(ready);
+    }
+
+    // -------------------------
+    // Hosting
+    // -------------------------
 
     private void OnHostMatchClick()
     {
-        PlayerPrefs.SetInt("HostSelectedMode", _selectedModeIndex);
-        PlayerPrefs.SetInt("HostSelectedMap", _selectedMapIndex);
+        if (selectedModeIndex < 0 || selectedTypeIndex < 0)
+            return;
+
+        // LSMatchManager reads this on OnStartServer to pick the team rules.
+        PlayerPrefs.SetInt("HostSelectedMode", selectedModeIndex);
+        PlayerPrefs.SetInt("HostSelectedMap", selectedTypeIndex);
         PlayerPrefs.Save();
 
-        // Hand the coroutine to GameUIManager so it survives panel deactivation.
+        Close();
+
+        // Handed to GameUIManager so the coroutine survives this panel being hidden.
         GameUIManager.Instance.StartCoroutine(StartHostSequence());
         GameUIManager.Instance.ShowLoadingPanel();
     }
 
     private System.Collections.IEnumerator StartHostSequence()
     {
-        // --- Step 1: Stop any lingering discovery/network from a previous session ---
+        // --- Step 1: stop any lingering discovery/network from a previous session ---
         CustomNetworkDiscovery discovery = GetDiscovery();
         if (discovery != null) discovery.StopDiscovery();
 
-        // Stop an already-running host cleanly before starting again.
-        if (Mirror.NetworkServer.active)
+        if (NetworkServer.active)
         {
-            Mirror.NetworkManager.singleton.StopHost();
+            NetworkManager.singleton.StopHost();
             // Give Mirror enough time to fully tear down the previous session.
             yield return new WaitForSeconds(1.0f);
         }
 
-        // --- Step 2: Start host ---
-        if (Mirror.NetworkManager.singleton != null)
+        // --- Step 2: start host ---
+        if (NetworkManager.singleton != null)
         {
-            Mirror.NetworkManager.singleton.StartHost();
+            NetworkManager.singleton.StartHost();
             Debug.Log("[HostMenuUI] StartHost called.");
         }
 
-        // --- Step 3: Wait longer than before so Mirror's transport and discovery
-        //             internal state are fully ready on a SECOND run. ---
+        // --- Step 3: wait so Mirror's transport and discovery are fully ready ---
         yield return new WaitForSeconds(1.0f);
 
-        // Re-fetch in case the reference was invalidated by a scene reload.
         discovery = GetDiscovery();
         if (discovery != null)
         {
@@ -129,18 +219,16 @@ public class HostMenuUI : MonoBehaviour
     }
 
     /// <summary>
-    /// Returns the NetworkDiscovery, preferring the serialized reference but
-    /// falling back to a live lookup so stale Inspector refs don't break reconnects.
+    /// Prefers the serialized reference but falls back to a live lookup, so a stale
+    /// Inspector reference does not break reconnects.
     /// </summary>
     private CustomNetworkDiscovery GetDiscovery()
     {
         if (networkDiscovery != null) return networkDiscovery;
 
-        if (Mirror.NetworkManager.singleton != null)
-            networkDiscovery = Mirror.NetworkManager.singleton.GetComponent<CustomNetworkDiscovery>();
+        if (NetworkManager.singleton != null)
+            networkDiscovery = NetworkManager.singleton.GetComponent<CustomNetworkDiscovery>();
 
         return networkDiscovery;
     }
-
-    private void OnBackClick() => GameUIManager.Instance.ShowMainMenu();
 }

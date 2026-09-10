@@ -8068,6 +8068,8 @@ GameObject:
   - component: {fileID: 4290107145203711557}
   - component: {fileID: -260641199741599781}
   - component: {fileID: -246710878101784484}
+  - component: {fileID: 3349043981577625938}
+  - component: {fileID: 1057975843442981990}
   m_Layer: 9
   m_Name: Character
   m_TagString: Player
@@ -8177,7 +8179,7 @@ AudioSource:
   m_GameObject: {fileID: 4372868026506870464}
   m_Enabled: 1
   serializedVersion: 4
-  OutputAudioMixerGroup: {fileID: 0}
+  OutputAudioMixerGroup: {fileID: -8704247365151278756, guid: 824466a68fa087c47ac694a0d4a1cec3, type: 2}
   m_audioClip: {fileID: 0}
   m_Resource: {fileID: 0}
   m_PlayOnAwake: 1
@@ -8913,6 +8915,7 @@ MonoBehaviour:
   _juHealth: {fileID: 3489979222139667189}
   netHealth: 400
   netIsDead: 0
+  enableDamageDebug: 1
   powerUpPrefabs:
   - {fileID: 3516352575337148050, guid: 06143f21cd4cee942b3a3d6a0427ddcb, type: 3}
   - {fileID: 6687682940110421504, guid: ffe33e61e1c3ec747980c21eca8c0d07, type: 3}
@@ -8953,7 +8956,49 @@ MonoBehaviour:
   isReady: 0
   isGameHost: 0
   teamID: -1
+  teamMemberIndex: 0
   isAlive: 1
+  playerProfile: {fileID: 0}
+--- !u!114 &3349043981577625938
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4372868026506870464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 650a0fd3096c5ba438e9dfc415ae333e, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerOverheadUI
+  lobbyManager: {fileID: 0}
+  owner: {fileID: 0}
+  overheadCanvas: {fileID: 0}
+  label: {fileID: 0}
+  labelFont: {fileID: 11400000, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
+  worldOffset: {x: 0, y: 2.1, z: 0}
+  canvasScale: 0.005
+  canvasSize: {x: 320, y: 140}
+  fontSize: 28
+  teammateColor: {r: 0.35, g: 1, b: 0.45, a: 1}
+--- !u!114 &1057975843442981990
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4372868026506870464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 8ae9de0c73d611141ad59e4739041fb6, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerBoundary
+  edgeMargin: 20
+  maxGroundThickness: 5
+  useManualBounds: 0
+  manualMinXZ: {x: -500, y: -500}
+  manualMaxXZ: {x: 500, y: 500}
+  logBounds: 1
 --- !u!1 &4422377306144402532
 GameObject:
   m_ObjectHideFlags: 0

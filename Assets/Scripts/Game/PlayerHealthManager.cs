@@ -42,6 +42,16 @@ public class PlayerHealthManager : NetworkBehaviour
         LocalInstance = this;
     }
 
+public override void OnStopLocalPlayer()
+    {
+        // Bullet.cs and Damager.cs route damage through this static reference.
+        // Leaving it pointing at a destroyed object across a scene change is asking
+        // for trouble, so drop it as soon as the local player goes away.
+        if (LocalInstance == this)
+            LocalInstance = null;
+    }
+
+
     public override void OnStartServer()
     {
         netHealth = _juHealth.Health;
@@ -57,16 +67,21 @@ public class PlayerHealthManager : NetworkBehaviour
         }
     }
 
-    public override void OnStopServer()
+public override void OnStopServer()
     {
-        if (ServerPlayerCache.ContainsKey(gameObject))
+        ServerPlayerCache.Remove(gameObject);
+
+        // The cache is static, so an editor host restart would otherwise leak
+        // entries pointing at destroyed objects.
+        if (!NetworkServer.active)
         {
-            ServerPlayerCache.Remove(gameObject);
+            ServerPlayerCache.Clear();
         }
+
         base.OnStopServer();
     }
 
-    [Command]
+[Command]
     public void CmdShootTarget(GameObject target, float weaponDamage)
     {
         // Validate the damage value first.
@@ -137,26 +152,21 @@ public class PlayerHealthManager : NetworkBehaviour
             return;
         }
 
-        // Friendly fire check.
-        if (_playerData != null && targetPlayer != null)
+        // Server-authoritative friendly fire check. Bullets, melee damagers and this
+        // command all share one rule, so teammates can never hurt each other.
+        if (FriendlyFireUtility.IsSameTeam(gameObject, target))
         {
-            bool sameTeam =
-                _playerData.teamID != -1 &&
-                _playerData.teamID == targetPlayer.teamID;
-
-            if (sameTeam)
+            if (enableDamageDebug)
             {
-                if (enableDamageDebug)
-                {
-                    Debug.Log(
-                        $"[DAMAGE DEBUG] FRIENDLY FIRE BLOCKED | " +
-                        $"Attacker Team = {_playerData.teamID} | Target Team = {targetPlayer.teamID}"
-                    );
-                }
-
-                // No server health damage is applied here.
-                return;
+                Debug.Log(
+                    $"[DAMAGE DEBUG] FRIENDLY FIRE BLOCKED | " +
+                    $"Attacker Team = {(_playerData != null ? _playerData.teamID : 0)} | " +
+                    $"Target Team = {(targetPlayer != null ? targetPlayer.teamID : 0)}"
+                );
             }
+
+            // Damage is cancelled completely: no health change, no death, no power-up drop.
+            return;
         }
 
         if (enableDamageDebug)
@@ -340,15 +350,18 @@ public class PlayerHealthManager : NetworkBehaviour
         }
     }
 
-    private void OnDeathStateChanged(bool oldState, bool newState)
+private void OnDeathStateChanged(bool oldState, bool newState)
     {
         _juHealth.IsDead = newState;
 
         if (newState)
         {
+            // Match the server: a corpse must stop being a valid damage target on
+            // clients too, otherwise bullets keep registering hits and hit markers.
+            gameObject.tag = "Untagged";
+
             _juHealth.Health = 0;
             _juHealth.CheckHealthState();
-
         }
     }
 }

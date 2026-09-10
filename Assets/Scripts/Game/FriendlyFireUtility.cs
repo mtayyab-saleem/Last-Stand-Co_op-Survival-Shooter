@@ -7,26 +7,26 @@ using UnityEngine;
 /// </summary>
 public static class FriendlyFireUtility
 {
-    public static bool IsSameTeam(GameObject attackerObject, GameObject targetObject)
-    {
-        if (attackerObject == null || targetObject == null)
-            return false;
+public static bool IsSameTeam(GameObject attackerObject, GameObject targetObject)
+        {
+            if (attackerObject == null || targetObject == null)
+                return false;
 
-        LSPlayer attacker = attackerObject.GetComponentInParent<LSPlayer>();
-        LSPlayer target = targetObject.GetComponentInParent<LSPlayer>();
+            LSPlayer attacker = attackerObject.GetComponentInParent<LSPlayer>();
+            LSPlayer target = targetObject.GetComponentInParent<LSPlayer>();
 
-        // Non-player objects keep their normal JUTPS behaviour.
-        if (attacker == null || target == null)
-            return false;
+            // Non-player objects keep their normal JUTPS behaviour.
+            if (attacker == null || target == null)
+                return false;
 
-        // Ignore self hits too.
-        if (attacker == target)
-            return true;
+            // Ignore self hits too.
+            if (attacker == target)
+                return true;
 
-        // -1 means a team has not been assigned yet.
-        if (attacker.teamID < 0 || target.teamID < 0)
-            return false;
+            // Team IDs are 1-based. 0 or below means no team has been assigned yet.
+            if (attacker.teamID <= 0 || target.teamID <= 0)
+                return false;
 
-        return attacker.teamID == target.teamID;
-    }
+            return attacker.teamID == target.teamID;
+        }
 }
