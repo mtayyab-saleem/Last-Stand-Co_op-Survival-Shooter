@@ -38,10 +38,11 @@ public class PlayerNetworkSetup : NetworkBehaviour
             //if (TryGetComponent(out Rigidbody rb)) rb.isKinematic = true;
             gameObject.tag = "Untagged";
 
+            StripRemotePlayerCost();
+
             if (playerAnimator != null)
             {
                 playerAnimator.enabled = true;
-                Debug.Log($"Remote player animator enabled: {gameObject.name}");
             }
         }
         // LOCAL PLAYER
@@ -49,6 +50,34 @@ public class PlayerNetworkSetup : NetworkBehaviour
         {
             gameObject.tag = "Player";
             SetupLocalPlayer();
+        }
+    }
+
+    /// <summary>
+    /// Remote players only need to look right, not to light or simulate anything.
+    /// The character prefab carries a Spot Light and particle systems that are only
+    /// meaningful for the player holding the controls - with 8 players in a match
+    /// that was 8 realtime lights and 16 particle systems for no visual gain.
+    /// Renderers, animator and colliders are deliberately left alone.
+    /// </summary>
+    void StripRemotePlayerCost()
+    {
+        foreach (Light light in GetComponentsInChildren<Light>(true))
+            light.enabled = false;
+
+        foreach (ParticleSystem particles in GetComponentsInChildren<ParticleSystem>(true))
+        {
+            particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
+            if (particles.TryGetComponent(out ParticleSystemRenderer particleRenderer))
+                particleRenderer.enabled = false;
+        }
+
+        // Skinning every frame regardless of visibility is pure waste. Using the
+        // precomputed bounds lets Unity cull these meshes when off-camera.
+        foreach (SkinnedMeshRenderer skin in GetComponentsInChildren<SkinnedMeshRenderer>(true))
+        {
+            skin.updateWhenOffscreen = false;
+            skin.skinnedMotionVectors = false;
         }
     }
 

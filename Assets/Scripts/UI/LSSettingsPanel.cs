@@ -59,11 +59,10 @@ private void Awake()
         WireControls();
         WireBackdrop();
 
-        // This panel lives in every scene, so this is also where saved settings get
-        // re-applied after a scene load: the new scene's camera and audio sources
-        // pick up whatever the player chose somewhere else.
-        JUGameSettings.ApplySettings();
-        LSAudioSettings.Apply();
+        // LSSettingsRuntime owns applying settings at startup and per scene load,
+        // because this panel is authored disabled and its Awake may never run.
+        // Asking again here is harmless and covers the case where it is enabled.
+        LSSettingsRuntime.RequestApply();
     }
 
     private void Start()
@@ -170,9 +169,8 @@ public void Close()
         if (musicSwitch != null) LSAudioSettings.MusicEnabled = musicSwitch.isOn;
         if (sfxSwitch != null) LSAudioSettings.SfxEnabled = sfxSwitch.isOn;
 
-        // Push the freshly saved values at the camera in this scene.
-        JUGameSettings.ApplySettings();
-        LSAudioSettings.Apply();
+        // Push the freshly saved values at the camera and mixer in this scene.
+        LSSettingsRuntime.RequestApply();
     }
 
 private System.Collections.IEnumerator RefreshNextFrame()

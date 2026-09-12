@@ -273,8 +273,8 @@ public class LSMatchManager : NetworkBehaviour
     [SerializeField] private GameModeRulesSO gameModeRules;
 
     [Header("Debug")]
-    [Tooltip("Enable simple console logs for mode and team testing.")]
-    [SerializeField] private bool enableTeamDebug = true;
+    [Tooltip("Console logs for mode and team testing. Off by default: Debug.Log is expensive in a build.")]
+    [SerializeField] private bool enableTeamDebug = false;
 
     [Header("Lobby Settings")]
     [Tooltip("Maximum players allowed in the lobby (Host + Clients).")]

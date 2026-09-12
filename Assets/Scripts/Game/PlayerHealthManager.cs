@@ -23,8 +23,8 @@ public class PlayerHealthManager : NetworkBehaviour
     private LSPlayer _playerData;
 
     [Header("Friendly Fire Debug")]
-    [Tooltip("Enable simple console logs for damage and team testing.")]
-    [SerializeField] private bool enableDamageDebug = true;
+    [Tooltip("Console logs for damage and team testing. Off by default: this fires on every health change on every client.")]
+    [SerializeField] private bool enableDamageDebug = false;
 
     [Header("Power-Ups")]
     public GameObject[] powerUpPrefabs;

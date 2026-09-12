@@ -79,22 +79,49 @@ public static class LSAudioSettings
     }
 
     /// <summary>
-    /// Pushes the saved values into the mixer. Runs once at startup as well, so a
-    /// scene entered directly still respects what the player chose last time.
+    /// Pushes the saved values into the mixer.
+    ///
+    /// Returns false when the mixer refused them. AudioMixer.SetFloat silently fails
+    /// during the first frames after startup, before the audio system is live, so the
+    /// caller has to retry - LSSettingsRuntime owns that retry loop.
     /// </summary>
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.AfterSceneLoad)]
-    public static void Apply()
+    public static bool Apply()
     {
         AudioMixer mixer = Mixer;
 
         if (mixer == null)
         {
             Debug.LogWarning("[LSAudioSettings] GameAudioMixer not found in Resources. Volume settings are inactive.");
-            return;
+            return false;
         }
 
-        mixer.SetFloat(MusicVolumeParameter, ToDecibels(MusicEnabled ? MusicVolume : 0f));
-        mixer.SetFloat(SfxVolumeParameter, ToDecibels(SfxEnabled ? SfxVolume : 0f));
+        bool music = mixer.SetFloat(MusicVolumeParameter, ToDecibels(MusicEnabled ? MusicVolume : 0f));
+        bool sfx = mixer.SetFloat(SfxVolumeParameter, ToDecibels(SfxEnabled ? SfxVolume : 0f));
+
+        return music && sfx;
+    }
+
+    /// <summary>
+    /// True when the mixer currently holds the saved values.
+    ///
+    /// Something in Unity's audio startup resets exposed parameters after the first
+    /// frame, so callers poll this and re-Apply instead of assuming one successful
+    /// SetFloat sticks forever.
+    /// </summary>
+    public static bool IsApplied()
+    {
+        AudioMixer mixer = Mixer;
+
+        if (mixer == null)
+            return true;   // nothing to enforce
+
+        float music, sfx;
+
+        if (!mixer.GetFloat(MusicVolumeParameter, out music)) return false;
+        if (!mixer.GetFloat(SfxVolumeParameter, out sfx)) return false;
+
+        return Mathf.Abs(music - ToDecibels(MusicEnabled ? MusicVolume : 0f)) < 0.1f
+            && Mathf.Abs(sfx - ToDecibels(SfxEnabled ? SfxVolume : 0f)) < 0.1f;
     }
 
     /// <summary>

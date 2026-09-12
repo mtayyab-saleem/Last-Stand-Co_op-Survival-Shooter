@@ -25,7 +25,7 @@ public class PlayerBoundary : MonoBehaviour
     [SerializeField] private Vector2 manualMaxXZ = new Vector2(500f, 500f);
 
     [Header("Debug")]
-    [SerializeField] private bool logBounds = true;
+    [SerializeField] private bool logBounds = false;
 
     private float minX;
     private float maxX;

@@ -3375,7 +3375,7 @@ MonoBehaviour:
   runInBackground: 1
   headlessStartMode: 0
   editorAutoStart: 0
-  sendRate: 60
+  sendRate: 30
   offlineScene: Assets/Scenes/MenuScene.unity
   onlineScene: Assets/Scenes/LobbyScene.unity
   offlineSceneLoadDelay: 0

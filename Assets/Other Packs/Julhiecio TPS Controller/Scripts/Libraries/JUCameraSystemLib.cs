@@ -174,7 +174,11 @@ namespace JUTPS.CameraSystems
 			if (TargetToFollow != null) { SetCameraRotation(0, TargetToFollow.eulerAngles.y, false); }
 
 			LockMouse(LockCursor, HideCursor);
-			Time.fixedDeltaTime = 0.015f;
+
+			// JUTPS used to hardcode Time.fixedDeltaTime = 0.015f here, which runs
+			// physics at 66.7 Hz - 33% more often than Unity's own 50 Hz default, and
+			// it silently overwrote whatever the project chose. The rate is owned by
+			// LSPerformanceBootstrap now so mobile can run it lower.
 		}
 
 
