@@ -67,9 +67,10 @@ public class NetworkCompleteSync : NetworkBehaviour
     [SyncVar] private bool netIsDead;
     [SyncVar] private Vector3 netLookPosition;
 
-    // Dual-wield weapon synchronization hooks
-    [SyncVar(hook = nameof(OnRightWeaponChanged))] private int netRightWeaponID = -1;
-    [SyncVar(hook = nameof(OnLeftWeaponChanged))] private int netLeftWeaponID = -1;
+    // Reconciled every frame on remotes rather than through a hook, so a late joiner
+    // and a dropped hook both end up holding the right weapon anyway.
+    [SyncVar] private int netRightWeaponID = -1;
+    [SyncVar] private int netLeftWeaponID = -1;
 
     private CharacterSyncState lastSentState;
     private Vector3 lastSentLookPos;
@@ -188,6 +189,24 @@ public class NetworkCompleteSync : NetworkBehaviour
         juController.IsItemEquiped = netIsItemEquipped;
         juController.LookAtPosition = netLookPosition;
 
+        // Equip what the owner is holding.
+        //
+        // This used to only SetActive the matching item, which showed the correct gun
+        // but left the controller with no HoldableItemInUse reference and no grip
+        // transform - so the hand IK had nothing to reach for and remote hands never
+        // touched the weapon. SwitchToItem populates all of that, item visibility
+        // included, and PlayerAimSync turns it into an actual pose.
+        var inventory = juController.Inventory;
+
+        if (inventory != null)
+        {
+            if (inventory.CurrentRightHandItemID != netRightWeaponID)
+                juController.SwitchToItem(netRightWeaponID, true);
+
+            if (inventory.CurrentLeftHandItemID != netLeftWeaponID)
+                juController.SwitchToItem(netLeftWeaponID, false);
+        }
+
         if (characterAnimator != null && characterAnimator.GetBool(ANIM_DIE) != netIsDead)
         {
             characterAnimator.SetBool(ANIM_DIE, netIsDead);
@@ -232,35 +251,4 @@ public class NetworkCompleteSync : NetworkBehaviour
         if (characterAnimator != null) characterAnimator.SetTrigger(triggerName);
     }
 
-    #region Weapon Synchronization Hooks
-
-    private void OnRightWeaponChanged(int oldID, int newID)
-    {
-        if (isLocalPlayer || juController.Inventory == null) return;
-        UpdateWeaponVisibility(juController.Inventory.HoldableItensRightHand, newID);
-    }
-
-    private void OnLeftWeaponChanged(int oldID, int newID)
-    {
-        if (isLocalPlayer || juController.Inventory == null) return;
-        UpdateWeaponVisibility(juController.Inventory.HoldableItensLeftHand, newID);
-    }
-
-    /// <summary>
-    /// Safely enables the active weapon and disables all others in the provided item array.
-    /// </summary>
-    private void UpdateWeaponVisibility(JUHoldableItem[] items, int activeWeaponID)
-    {
-        if (items == null) return;
-
-        for (int i = 0; i < items.Length; i++)
-        {
-            if (items[i] != null && items[i].gameObject != null)
-            {
-                items[i].gameObject.SetActive(i == activeWeaponID);
-            }
-        }
-    }
-
-    #endregion
 }

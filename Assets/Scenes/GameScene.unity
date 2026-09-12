@@ -1325,6 +1325,67 @@ CanvasRenderer:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 897085794}
   m_CullTransparentMesh: 0
+--- !u!1 &914898976
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 914898977}
+  - component: {fileID: 914898978}
+  m_Layer: 0
+  m_Name: SafeZoneHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &914898977
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914898976}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1345482976}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &914898978
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 914898976}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: cc8a1ec95cb8cd54f827918b6ea5cdb2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::SafeZoneHUD
+  zone: {fileID: 1657447176}
+  statusLabel: {fileID: 0}
+  timerLabel: {fileID: 0}
+  font: {fileID: 11400000, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
+  statusFontSize: 22
+  timerFontSize: 34
+  anchoredOffset: {x: 0, y: -28}
+  zoneColor: {r: 0, g: 0.8235294, b: 1, a: 1}
+  warningColor: {r: 1, g: 0.41960785, b: 0.2901961, a: 1}
+  shrinkingText: ZONE SHRINKING
+  waitingText: NEXT ZONE IN
+  finalText: FINAL ZONE
+  outsideSuffix: '  -  GET INSIDE'
 --- !u!1 &916373711
 GameObject:
   m_ObjectHideFlags: 0
@@ -3539,6 +3600,9 @@ PrefabInstance:
     - targetCorrespondingSourceObject: {fileID: 104378148937617365, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 130788237}
+    - targetCorrespondingSourceObject: {fileID: 104378148937617365, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 914898977}
     - targetCorrespondingSourceObject: {fileID: 6987884213462821792, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 931341101}
@@ -3584,7 +3648,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &1348606863
 Transform:
   m_ObjectHideFlags: 0
@@ -3743,7 +3807,7 @@ MeshRenderer:
   m_GameObject: {fileID: 1403350440}
   m_Enabled: 1
   m_CastShadows: 0
-  m_ReceiveShadows: 1
+  m_ReceiveShadows: 0
   m_DynamicOccludee: 1
   m_StaticShadowCaster: 0
   m_MotionVectors: 1
@@ -3790,7 +3854,7 @@ MeshFilter:
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 1403350440}
-  m_Mesh: {fileID: 10206, guid: 0000000000000000e000000000000000, type: 0}
+  m_Mesh: {fileID: 4300000, guid: a4355364b270648488e864c7253cfc9c, type: 2}
 --- !u!1 &1592839061
 GameObject:
   m_ObjectHideFlags: 0
@@ -3898,7 +3962,7 @@ Transform:
   m_GameObject: {fileID: 1657447173}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 48, y: 20, z: 15}
+  m_LocalPosition: {x: 48, y: 1.2930164, z: 15}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
@@ -3941,33 +4005,33 @@ MonoBehaviour:
   zoneVisual: {fileID: 1403350441}
   zoneRing: {fileID: 1348606863}
   zoneRingDiameterAtScaleOne: 10
-  startRadius: 550
+  wallHeight: 160
+  groundY: 1.2930164
+  startRadius: 450
   cases:
-  - runDuration: 60
+  - runDuration: 30
     stopDuration: 120
-    targetRadius: 430
-    damagePerTick: 1
-    damageInterval: 2
-  - runDuration: 60
-    stopDuration: 105
-    targetRadius: 320
+    targetRadius: 280
     damagePerTick: 2
     damageInterval: 2
-  - runDuration: 60
-    stopDuration: 90
-    targetRadius: 210
-    damagePerTick: 4
+  - runDuration: 30
+    stopDuration: 60
+    targetRadius: 150
+    damagePerTick: 5
     damageInterval: 1.5
-  - runDuration: 60
-    stopDuration: 45
-    targetRadius: 100
-    damagePerTick: 8
+  - runDuration: 30
+    stopDuration: 120
+    targetRadius: 60
+    damagePerTick: 10
     damageInterval: 1
+  - runDuration: 30
+    stopDuration: 60
+    targetRadius: 1
+    damagePerTick: 20
+    damageInterval: 1
+  driftAmount: 0.85
   autoStart: 1
-  startDelay: 300
-  currentCaseIndex: -1
-  currentRadius: 0
-  zoneRunning: 0
+  startDelay: 60
 --- !u!1001 &1668009816
 PrefabInstance:
   m_ObjectHideFlags: 0

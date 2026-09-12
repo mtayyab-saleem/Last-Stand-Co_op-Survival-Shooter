@@ -54,23 +54,19 @@ public class PlayerNetworkSetup : NetworkBehaviour
     }
 
     /// <summary>
-    /// Remote players only need to look right, not to light or simulate anything.
-    /// The character prefab carries a Spot Light and particle systems that are only
-    /// meaningful for the player holding the controls - with 8 players in a match
-    /// that was 8 realtime lights and 16 particle systems for no visual gain.
-    /// Renderers, animator and colliders are deliberately left alone.
+    /// Remote players only need to look right, not to light anything.
+    /// The character prefab carries a Spot Light that is only meaningful for the player
+    /// holding the controls - with 8 players in a match that was 8 realtime lights for
+    /// no visual gain. Renderers, animator and colliders are deliberately left alone.
+    ///
+    /// Particle systems are deliberately left alone too: every one on this prefab is a
+    /// bullet shell emitter that never plays unless a shot fires it, so disabling them
+    /// saved nothing and only stopped remote players from ejecting shells.
     /// </summary>
     void StripRemotePlayerCost()
     {
         foreach (Light light in GetComponentsInChildren<Light>(true))
             light.enabled = false;
-
-        foreach (ParticleSystem particles in GetComponentsInChildren<ParticleSystem>(true))
-        {
-            particles.Stop(true, ParticleSystemStopBehavior.StopEmittingAndClear);
-            if (particles.TryGetComponent(out ParticleSystemRenderer particleRenderer))
-                particleRenderer.enabled = false;
-        }
 
         // Skinning every frame regardless of visibility is pure waste. Using the
         // precomputed bounds lets Unity cull these meshes when off-camera.

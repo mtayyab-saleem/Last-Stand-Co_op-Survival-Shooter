@@ -8070,6 +8070,8 @@ GameObject:
   - component: {fileID: -246710878101784484}
   - component: {fileID: 3349043981577625938}
   - component: {fileID: 1057975843442981990}
+  - component: {fileID: 2243061176569120447}
+  - component: {fileID: 3255174337093920841}
   m_Layer: 9
   m_Name: Character
   m_TagString: Player
@@ -8747,7 +8749,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b14e47765b621724f99e7ce7bd1602c2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  JUFootPlacer: {fileID: 3489979222139667186, guid: 39b6cb0e70c180c46a6b9d30b4432ddb, type: 3}
+  JUFootPlacer: {fileID: 0}
   RootBone: {fileID: 2171437106769882719, guid: 39b6cb0e70c180c46a6b9d30b4432ddb, type: 3}
   RootBoneSpineLean: 1
   RootBoneSpineMovement: 1
@@ -8838,7 +8840,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   sceneId: 0
-  _assetId: 0
+  _assetId: 3447100696
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
@@ -8999,6 +9001,43 @@ MonoBehaviour:
   manualMinXZ: {x: -500, y: -500}
   manualMaxXZ: {x: 500, y: 500}
   logBounds: 0
+--- !u!114 &2243061176569120447
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4372868026506870464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 08dec44ab98ead3449f263f155f5d4c2, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerAimSync
+  syncDirection: 1
+  syncMode: 0
+  syncInterval: 0.05
+  character: {fileID: 3489979222139667187}
+  sendThreshold: 1.25
+  smoothing: 18
+  ikTransitionSpeed: 15
+--- !u!114 &3255174337093920841
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 4372868026506870464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: edf4293cb8e725d40adc95cb759182ab, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::PlayerShotSync
+  syncDirection: 0
+  syncMode: 0
+  syncInterval: 0
+  character: {fileID: 3489979222139667187}
+  tracerLifetime: 3
+  muzzleFlashLifetime: 2
 --- !u!1 &4422377306144402532
 GameObject:
   m_ObjectHideFlags: 0

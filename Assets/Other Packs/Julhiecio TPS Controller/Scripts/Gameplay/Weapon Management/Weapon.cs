@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 using UnityEditor;
 using JUTPS.ItemSystem;
 
@@ -86,6 +86,12 @@ namespace JUTPS.WeaponSystem
 		public enum WeaponFireMode { Auto, SemiAuto, BoltAction, Shotgun }
 		public enum WeaponAimMode { None, CameraApproach, Scope }
 		public enum Axis { Z, X, Y }
+
+		/// <summary>
+		/// Raised right after this weapon fires. Mirror listens for it to replicate the
+		/// shot to the other clients, which cannot run Shot() themselves.
+		/// </summary>
+		public static event System.Action<Weapon> OnShotFired;
 
 		protected override void Start()
 		{
@@ -473,6 +479,11 @@ namespace JUTPS.WeaponSystem
 				//Recoil Animation
 				Invoke("WeaponRecoil", 0.06f);
 			}
+
+			// Let networking replicate this shot. Remote players have their character
+			// controller disabled, so Shot() never runs for them - without this their guns
+			// fire with no muzzle flash, no tracer and no sound on everyone else's screen.
+			if (OnShotFired != null) OnShotFired(this);
 		}
 		public void EmitBulletShell()
 		{
