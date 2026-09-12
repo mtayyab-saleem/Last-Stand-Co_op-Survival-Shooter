@@ -93,6 +93,9 @@ namespace JUTPS.WeaponSystem
 		/// </summary>
 		public static event System.Action<Weapon> OnShotFired;
 
+		/// <summary>Where the last shot actually went, spread included. Used to replay it over the network.</summary>
+		[HideInInspector] public Vector3 LastShotEndPoint;
+
 		protected override void Start()
 		{
 			base.Start();
@@ -260,6 +263,10 @@ namespace JUTPS.WeaponSystem
 			{
 				RefreshItemDependencies();
 			}
+
+			// A miss has no end point, so use the far end of its line.
+			LastShotEndPoint = ShootEnd != Vector3.zero ? ShootEnd : ShootStart + ShootDirection * Vector3.forward * 500f;
+
 			//Spawn bullet
 			var bullet = (GameObject)Instantiate(BulletPrefab, ShootStart, ShootDirection);
 			if (bullet.TryGetComponent(out Bullet _bullet))
@@ -381,6 +388,8 @@ namespace JUTPS.WeaponSystem
 					ShootDirection = Shoot_Position.forward;
 				}
 
+				LastShotEndPoint = Shoot_Position.position + ShootDirection.normalized * 500f;
+
 				// >>> Shotgun Shoots
 				for (int i = 0; i < NumberOfShotgunBulletsPerShot; i++)
 				{
@@ -395,6 +404,7 @@ namespace JUTPS.WeaponSystem
 					if (Physics.Raycast(Shoot_Position.transform.position, BulletRotationPrecision, out CrosshairHit, 500, RaycastingLayers))
 					{
 						Shoot_Position.LookAt(CrosshairHit.point);
+						LastShotEndPoint = CrosshairHit.point;
 						Debug.DrawLine(Shoot_Position.transform.position, CrosshairHit.point, Color.red);
 
 						//Spawn bullet

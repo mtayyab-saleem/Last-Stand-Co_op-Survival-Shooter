@@ -25,6 +25,20 @@ public class CustomNetworkDiscovery : NetworkDiscoveryBase<DiscoveryRequest, Dis
 
     protected override DiscoveryRequest GetRequest() => new DiscoveryRequest();
 
+    /// <summary>
+    /// A lobby that cannot be joined must not appear in anyone's server list. Checked here,
+    /// where every reply is sent, so it holds no matter who last called AdvertiseServer.
+    /// </summary>
+    protected override void ProcessClientRequest(DiscoveryRequest request, IPEndPoint endpoint)
+    {
+        LSMatchManager match = LSMatchManager.Instance;
+
+        if (match != null && (match.matchStarted || match.IsLobbyFull))
+            return;
+
+        base.ProcessClientRequest(request, endpoint);
+    }
+
     protected override DiscoveryResponse ProcessRequest(DiscoveryRequest request, IPEndPoint endpoint)
     {
         try

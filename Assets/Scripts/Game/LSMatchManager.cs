@@ -289,7 +289,7 @@ public class LSMatchManager : NetworkBehaviour
     /// </summary>
     public readonly SyncList<LobbyPlayer> lobbyPlayers = new SyncList<LobbyPlayer>();
 
-    private NetworkDiscovery networkDiscovery;
+    private CustomNetworkDiscovery networkDiscovery;
 
     // Team layout stored by connection ID so it survives the lobby -> gameplay scene change,
     // where Mirror destroys and respawns every player object.
@@ -307,8 +307,6 @@ public class LSMatchManager : NetworkBehaviour
         }
 
         DontDestroyOnLoad(gameObject);
-
-        networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
 
         // Listen for scene changes so team IDs can be restored safely.
         SceneManager.sceneLoaded -= OnSceneLoaded;
@@ -386,7 +384,6 @@ public class LSMatchManager : NetworkBehaviour
         }
 
         UpdateReadyState();
-        CheckDiscoveryState();
         PublishRoster();
     }
 
@@ -405,7 +402,6 @@ public class LSMatchManager : NetworkBehaviour
         }
 
         UpdateReadyState();
-        CheckDiscoveryState();
         PublishRoster();
     }
 
@@ -774,31 +770,11 @@ private List<LSPlayer> ActiveRoster()
     // Match flow
     // -------------------------
 
-[Server]
-    private void CheckDiscoveryState()
-    {
-        // Never advertise the lobby after the match has started.
-        if (matchStarted)
-            return;
-
-        if (networkDiscovery == null)
-            networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
-
-        if (networkDiscovery == null)
-            return;
-
-        if (PlayerCount() >= maxPlayers)
-        {
-            networkDiscovery.StopDiscovery();
-            Debug.Log("[LSMatchManager] Lobby is full. Discovery stopped.");
-        }
-        else
-        {
-            networkDiscovery.StopDiscovery();
-            networkDiscovery.AdvertiseServer();
-            Debug.Log("[LSMatchManager] Lobby has space. Discovery advertising.");
-        }
-    }
+    /// <summary>
+    /// Full lobbies are hidden from the server list by CustomNetworkDiscovery, which asks
+    /// this on every discovery request instead of the lobby restarting its advertiser.
+    /// </summary>
+    public bool IsLobbyFull => PlayerCount() >= maxPlayers;
 
     [Server]
     public void StartMatch()
@@ -819,8 +795,10 @@ private List<LSPlayer> ActiveRoster()
         RebuildTeams();
         matchStarted = true;
 
-        if (networkDiscovery == null)
-            networkDiscovery = FindFirstObjectByType<NetworkDiscovery>();
+        // Close the advertiser for the rest of the match. CustomNetworkDiscovery also
+        // refuses to answer once matchStarted is set, in case anything restarts it.
+        if (networkDiscovery == null && NetworkManager.singleton != null)
+            networkDiscovery = NetworkManager.singleton.GetComponent<CustomNetworkDiscovery>();
 
         if (networkDiscovery != null)
             networkDiscovery.StopDiscovery();

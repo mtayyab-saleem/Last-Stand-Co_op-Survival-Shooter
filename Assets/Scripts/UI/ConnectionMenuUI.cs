@@ -47,6 +47,11 @@ public class ConnectionMenuUI : MonoBehaviour
     private Coroutine _autoRefreshCoroutine;
     private readonly Dictionary<long, GameObject> _foundServers = new Dictionary<long, GameObject>();
 
+    // When each listed server last answered. Live servers answer every discovery ping
+    // (3 s), so one silent for longer than this has closed its lobby or gone away.
+    private readonly Dictionary<long, float> _lastSeen = new Dictionary<long, float>();
+    private const float StaleServerSeconds = 7f;
+
     private bool isOpen;
 
     public bool IsOpen { get { return isOpen; } }
@@ -196,6 +201,8 @@ public class ConnectionMenuUI : MonoBehaviour
             if (!isOpen) yield break;
             if (NetworkServer.active) yield break;
 
+            RemoveStaleServers();
+
             InitializeDiscovery();
             if (_networkDiscovery == null) continue;
 
@@ -248,6 +255,36 @@ public class ConnectionMenuUI : MonoBehaviour
         }
 
         _foundServers.Clear();
+        _lastSeen.Clear();
+        UpdateEmptyState();
+    }
+
+    /// <summary>
+    /// Rows for servers that stopped answering - their match started, the lobby filled
+    /// up or the host left. Without this they stayed listed until the panel was reopened.
+    /// </summary>
+    private void RemoveStaleServers()
+    {
+        List<long> stale = null;
+
+        foreach (KeyValuePair<long, float> seen in _lastSeen)
+        {
+            if (Time.unscaledTime - seen.Value > StaleServerSeconds)
+                (stale ??= new List<long>()).Add(seen.Key);
+        }
+
+        if (stale == null)
+            return;
+
+        foreach (long serverId in stale)
+        {
+            if (_foundServers.TryGetValue(serverId, out GameObject row) && row != null)
+                Destroy(row);
+
+            _foundServers.Remove(serverId);
+            _lastSeen.Remove(serverId);
+        }
+
         UpdateEmptyState();
     }
 
@@ -259,6 +296,9 @@ public class ConnectionMenuUI : MonoBehaviour
 
     private void OnServerFound(DiscoveryResponse info)
     {
+        // Every reply refreshes the timestamp, including ones for rows already listed.
+        _lastSeen[info.serverId] = Time.unscaledTime;
+
         if (_foundServers.ContainsKey(info.serverId)) return;
         if (serverListContent == null) return;
 

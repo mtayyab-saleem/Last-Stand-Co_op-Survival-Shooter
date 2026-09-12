@@ -29,6 +29,12 @@ public class PlayerHealthManager : NetworkBehaviour
     [Header("Power-Ups")]
     public GameObject[] powerUpPrefabs;
 
+    /// <summary>
+    /// Raised on the local player's client each time an enemy hit lands on it:
+    /// attacker netId, and where the attacker stood when the hit landed.
+    /// </summary>
+    public static event System.Action<uint, Vector3> LocalPlayerDamagedFrom;
+
     private static readonly Dictionary<GameObject, (PlayerHealthManager health, LSPlayer player)> ServerPlayerCache = new Dictionary<GameObject, (PlayerHealthManager, LSPlayer)>();
 
     void Awake()
@@ -177,8 +183,18 @@ public override void OnStopServer()
             );
         }
 
-        // Apply valid enemy damage on the server.
-        targetScript.ServerApplyDamage(weaponDamage);
+        // Apply valid enemy damage on the server, and tell the victim which way it came
+        // from. Only a hit that actually landed is reported - a corpse or the lobby
+        // must not flash indicators.
+        if (targetScript.ServerApplyDamage(weaponDamage))
+            targetScript.TargetDamagedFrom(netId, transform.position);
+    }
+
+    // No connection parameter: Mirror sends it to this object's owner, i.e. the victim.
+    [TargetRpc]
+    private void TargetDamagedFrom(uint attackerNetId, Vector3 attackerPosition)
+    {
+        LocalPlayerDamagedFrom?.Invoke(attackerNetId, attackerPosition);
     }
 
     [Command]
@@ -197,13 +213,14 @@ public override void OnStopServer()
         ServerApplyDamage(amount);
     }
 
+    /// <returns>True when the damage was applied.</returns>
     [Server]
-    public void ServerApplyDamage(float amount)
+    public bool ServerApplyDamage(float amount)
     {
         // 1. NO DAMAGE IN LOBBY SCENE
-        if (SceneManager.GetActiveScene().name == "LobbyScene") return;
+        if (SceneManager.GetActiveScene().name == "LobbyScene") return false;
 
-        if (netIsDead) return;
+        if (netIsDead) return false;
 
         if (enableDamageDebug)
         {
@@ -242,6 +259,8 @@ public override void OnStopServer()
         {
             _juHealth.CheckHealthState();
         }
+
+        return true;
     }
     [Server]
     private void SpawnRandomPowerUp()

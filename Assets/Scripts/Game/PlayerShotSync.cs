@@ -79,31 +79,67 @@ public class PlayerShotSync : NetworkBehaviour
         if (weapon == null || character == null || !weapon.transform.IsChildOf(transform))
             return;
 
-        CmdFire(weapon == character.WeaponInUseLeftHand);
+        Vector3 endPoint = weapon.LastShotEndPoint;
+        uint hitNetId = 0;
+        Vector3 hitLocalPoint = Vector3.zero;
+
+        // If the shot landed on a networked object - another player - send the point
+        // relative to that player instead. Everyone sees that player slightly behind
+        // where the shooter saw them, so a world position would make the tracer fly
+        // past them on every other screen even though the shot hit.
+        if (weapon.Shoot_Position != null)
+        {
+            Vector3 from = weapon.Shoot_Position.position;
+            Vector3 toEnd = endPoint - from;
+            float distance = toEnd.magnitude;
+
+            // Same origin, layers and line as the raycast inside Shot(), so it finds the
+            // same collider that shot hit.
+            if (distance > 0.01f &&
+                Physics.Raycast(from, toEnd / distance, out RaycastHit hit, distance + 0.05f, weapon.RaycastingLayers))
+            {
+                NetworkIdentity victim = hit.collider.GetComponentInParent<NetworkIdentity>();
+
+                if (victim != null && victim != netIdentity)
+                {
+                    hitNetId = victim.netId;
+                    hitLocalPoint = victim.transform.InverseTransformPoint(hit.point);
+                }
+            }
+        }
+
+        CmdFire(weapon == character.WeaponInUseLeftHand, endPoint, hitNetId, hitLocalPoint);
     }
 
     // Unreliable: a dropped shot effect is not worth retransmitting, and automatic fire
     // sends these often.
     [Command(channel = Channels.Unreliable)]
-    private void CmdFire(bool leftHand)
+    private void CmdFire(bool leftHand, Vector3 endPoint, uint hitNetId, Vector3 hitLocalPoint)
     {
-        RpcFire(leftHand);
+        RpcFire(leftHand, endPoint, hitNetId, hitLocalPoint);
     }
 
     // The owner already played its own effects inside Shot().
     [ClientRpc(includeOwner = false, channel = Channels.Unreliable)]
-    private void RpcFire(bool leftHand)
+    private void RpcFire(bool leftHand, Vector3 endPoint, uint hitNetId, Vector3 hitLocalPoint)
     {
         if (character == null)
             return;
 
         Weapon weapon = leftHand ? character.WeaponInUseLeftHand : character.WeaponInUseRightHand;
 
-        if (weapon != null)
-            PlayShotEffects(weapon);
+        if (weapon == null)
+            return;
+
+        // Land on the same spot of the victim the shooter hit, wherever that victim is
+        // on this screen. Falls back to the world point if the victim is gone here.
+        if (hitNetId != 0 && NetworkClient.spawned.TryGetValue(hitNetId, out NetworkIdentity victim) && victim != null)
+            endPoint = victim.transform.TransformPoint(hitLocalPoint);
+
+        PlayShotEffects(weapon, endPoint);
     }
 
-    private void PlayShotEffects(Weapon weapon)
+    private void PlayShotEffects(Weapon weapon, Vector3 endPoint)
     {
         Transform muzzle = weapon.Shoot_Position;
 
@@ -126,7 +162,7 @@ public class PlayerShotSync : NetworkBehaviour
             source.PlayOneShot(weapon.ShootAudio);
         }
 
-        SpawnTracer(weapon, muzzle);
+        SpawnTracer(weapon, muzzle, endPoint);
 
         // Shot() only ejects a shell for these two fire modes.
         if (weapon.FireMode == Weapon.WeaponFireMode.Auto || weapon.FireMode == Weapon.WeaponFireMode.SemiAuto)
@@ -140,15 +176,28 @@ public class PlayerShotSync : NetworkBehaviour
     /// here: it calls RecoilReaction on the scene camera controller, which every
     /// character shares, so a remote player firing would shake the local camera.
     /// </summary>
-    private void SpawnTracer(Weapon weapon, Transform muzzle)
+    private void SpawnTracer(Weapon weapon, Transform muzzle, Vector3 endPoint)
     {
         if (weapon.BulletPrefab == null)
             return;
 
-        GameObject tracer = Instantiate(weapon.BulletPrefab, muzzle.position, muzzle.rotation);
+        // Fly at the shooter's real end point, not wherever this copy of the gun happens
+        // to point - the remote gun pose is a smoothed approximation and spread is random.
+        Vector3 direction = endPoint - muzzle.position;
+        bool hasDirection = direction.sqrMagnitude > 0.0001f;
+        Quaternion rotation = hasDirection ? Quaternion.LookRotation(direction) : muzzle.rotation;
+
+        GameObject tracer = Instantiate(weapon.BulletPrefab, muzzle.position, rotation);
 
         if (tracer.TryGetComponent(out Bullet bullet))
         {
+            // Bullet moves straight to FinalPoint, exactly as it does for the shooter.
+            if (hasDirection)
+            {
+                bullet.FinalPoint = endPoint;
+                bullet.FinalPointNormal = -direction.normalized;
+            }
+
             // The shooter's own client decides what this shot hit and tells the server.
             // This copy must stay inert or the same shot would be counted twice, and
             // credited to whoever happens to be watching.

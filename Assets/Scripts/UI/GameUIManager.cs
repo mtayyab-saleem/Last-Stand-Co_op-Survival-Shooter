@@ -136,7 +136,7 @@ private IEnumerator DisconnectSequence()
 
         if (Mirror.NetworkManager.singleton != null)
         {
-            var discovery = Mirror.NetworkManager.singleton.GetComponent<Mirror.Discovery.NetworkDiscovery>();
+            var discovery = Mirror.NetworkManager.singleton.GetComponent<CustomNetworkDiscovery>();
             if (discovery != null)
             {
                 discovery.StopDiscovery();
