@@ -70,10 +70,16 @@ public class LSSettingsRuntime : MonoBehaviour
     /// <summary>Applies everything now, and schedules the next mixer verification.</summary>
     public static void RequestApply()
     {
-        // Camera sensitivity / invert are PlayerPrefs-backed and apply immediately.
-        // Deliberately called once per request, not per frame: JUGameSettings.
-        // ApplySettings also calls Screen.SetResolution, which must not run in a loop.
-        JUGameSettings.ApplySettings();
+        // Camera sensitivity / invert are PlayerPrefs-backed; JUApplyCameraSettings reads
+        // them whenever this event fires.
+        //
+        // Deliberately NOT JUGameSettings.ApplySettings(): that also re-applies JUTPS's
+        // render scale and quality level. Render scale calls Screen.SetResolution from
+        // Screen.resolutions, which on Android is the portrait panel size - the game then
+        // rendered into a 75% portrait buffer stretched over a landscape screen (blurry,
+        // stretched UI, popups cut off). And it forced quality level 1 ("PC") on phones.
+        // Neither setting is exposed in this game, so the project defaults must stand.
+        JUGameSettings.OnApplySettings?.Invoke();
 
         LSAudioSettings.Apply();
 
