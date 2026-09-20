@@ -48,7 +48,7 @@ public class PlayerHealthManager : NetworkBehaviour
         LocalInstance = this;
     }
 
-public override void OnStopLocalPlayer()
+    public override void OnStopLocalPlayer()
     {
         // Bullet.cs and Damager.cs route damage through this static reference.
         // Leaving it pointing at a destroyed object across a scene change is asking
@@ -73,7 +73,7 @@ public override void OnStopLocalPlayer()
         }
     }
 
-public override void OnStopServer()
+    public override void OnStopServer()
     {
         ServerPlayerCache.Remove(gameObject);
 
@@ -87,7 +87,7 @@ public override void OnStopServer()
         base.OnStopServer();
     }
 
-[Command]
+    [Command]
     public void CmdShootTarget(GameObject target, float weaponDamage)
     {
         // Validate the damage value first.
@@ -240,16 +240,24 @@ public override void OnStopServer()
         {
             gameObject.tag = "Untagged";
             netIsDead = true;
-            if (_playerData != null) _playerData.isAlive = false; // Mark dead for team logic
+
+            if (_playerData != null)
+            {
+                _playerData.isAlive = false; // Server-authoritative elimination state.
+
+                // Winner checks are owned by MatchTracker, not by the health script.
+                if (MatchTracker.Instance != null)
+                    MatchTracker.Instance.ServerNotifyPlayerEliminated(_playerData);
+            }
+
             SpawnRandomPowerUp();
+
+            // Host stays in GameScene after death.
+            // Non-host clients return to Main Menu after the existing 3-second death delay.
             if (isLocalPlayer)
-            {
                 Invoke(nameof(HostDeathSequence), 3f);
-            }
             else
-            {
                 Invoke(nameof(ClientDeathSequence), 3f);
-            }
         }
 
         // Apply on the server 
@@ -287,21 +295,26 @@ public override void OnStopServer()
     [Server]
     private void ClientDeathSequence()
     {
-        Debug.Log("[Server] Client died. Kicking to Main Menu.");
+        Debug.Log("[Server] Client died. Returning that client to Main Menu.");
+
+        // Show the death cleanup on every connected client first.
         RpcDisableCharacter();
-        TargetDisconnect(connectionToClient);
+
+        // Only the dead non-host client is told to disconnect.
+        if (connectionToClient != null)
+            TargetDisconnect(connectionToClient);
+
+        // Remove the dead player's network object from the running match.
         NetworkServer.Destroy(gameObject);
     }
 
     [TargetRpc]
     private void TargetDisconnect(NetworkConnection target)
     {
-        Debug.Log("[Client] died completely. Showing loading screen and disconnecting.");
+        Debug.Log("[Client] Eliminated. Returning to Main Menu.");
 
         if (GameUIManager.Instance != null)
-        {
             GameUIManager.Instance.TriggerDisconnectSequence();
-        }
     }
 
     [ClientRpc]
@@ -369,7 +382,7 @@ public override void OnStopServer()
         }
     }
 
-private void OnDeathStateChanged(bool oldState, bool newState)
+    private void OnDeathStateChanged(bool oldState, bool newState)
     {
         _juHealth.IsDead = newState;
 

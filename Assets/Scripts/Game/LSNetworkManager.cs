@@ -88,6 +88,43 @@ public class LSNetworkManager : NetworkManager
         }
     }
 
+
+    /// <summary>
+    /// Reports a real network disconnect to MatchTracker before Mirror removes the
+    /// player's object. Scene changes do not call this, so lobby -> gameplay respawns
+    /// are never mistaken for eliminations.
+    /// </summary>
+    public override void OnServerDisconnect(NetworkConnectionToClient conn)
+    {
+        LSPlayer leavingPlayer = null;
+
+        if (conn != null && conn.identity != null)
+            leavingPlayer = conn.identity.GetComponent<LSPlayer>();
+
+        // Fallback in case Mirror has already detached conn.identity.
+        if (leavingPlayer == null && conn != null && LSMatchManager.Instance != null)
+        {
+            foreach (LSPlayer player in LSMatchManager.Instance.players)
+            {
+                if (player != null && player.connectionToClient == conn)
+                {
+                    leavingPlayer = player;
+                    break;
+                }
+            }
+        }
+
+        if (LSMatchManager.Instance != null &&
+            LSMatchManager.Instance.matchStarted &&
+            MatchTracker.Instance != null &&
+            leavingPlayer != null)
+        {
+            MatchTracker.Instance.ServerNotifyPlayerDisconnected(leavingPlayer);
+        }
+
+        base.OnServerDisconnect(conn);
+    }
+
     public override void OnClientDisconnect()
     {
         base.OnClientDisconnect();
