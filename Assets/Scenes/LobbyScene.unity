@@ -8221,13 +8221,16 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 3dceec0d0b38f5141a75e7cf3c6a26c7, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::LobbyUIManager
-  hostControlsPanel: {fileID: 447100384}
-  clientControlsPanel: {fileID: 1389047674}
-  playerListView: {fileID: 538232260}
-  modeText: {fileID: 1630872247}
-  hostStartButton: {fileID: 445900667}
-  clientReadyButton: {fileID: 1371499137}
-  leaveLobbyButton: {fileID: 42829243}
+  font: {fileID: 11400000, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
+  buttonPrefab: {fileID: 1375666794650498, guid: f99269924fc18d449a9a2caaf53dc5fe, type: 3}
+  startIcon: {fileID: 21300000, guid: 12f136f851d190748b87007168cb66e8, type: 3}
+  readyIcon: {fileID: 21300000, guid: 1c1bef4b40e990c42aed6432ebd324ef, type: 3}
+  leaveIcon: {fileID: 21300002, guid: 88dca061d041a2a4596563e6a38f66c8, type: 3}
+  chevronIcon: {fileID: 21300000, guid: a75ddb2acfe03174c87f41bd9fc3f406, type: 3}
+  legacyUiRoot: {fileID: 874397475}
+  sortingOrder: 100
+  scrimStrength: 0.25
+  startExpanded: 0
 --- !u!4 &1623756360
 Transform:
   m_ObjectHideFlags: 0

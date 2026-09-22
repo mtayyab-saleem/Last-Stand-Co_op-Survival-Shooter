@@ -654,6 +654,9 @@ public class LSMatchManager : NetworkBehaviour
     // Mode rules
     // -------------------------
 
+    /// <summary>How many players this mode needs before the host can start.</summary>
+    public int MinimumPlayersToStart => GetMinimumPlayersToStart();
+
     private int GetMinimumPlayersToStart()
     {
         // Solo can start with only the host.

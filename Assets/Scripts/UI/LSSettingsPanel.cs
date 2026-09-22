@@ -3,6 +3,7 @@ using JUTPS.GameSettings;
 using Michsky.MUIP;
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
 /// Settings popup shared by the menu, lobby and gameplay scenes.
@@ -84,12 +85,31 @@ private void Awake()
         else Open();
     }
 
+    /// <summary>
+    /// Keeps the popup above everything else on screen.
+    ///
+    /// It lives on the HUD canvas, which sorts below the lobby and result screens, so
+    /// without its own sorting order it would open behind them.
+    /// </summary>
+    private void DrawOnTop()
+    {
+        if (!panelRoot.TryGetComponent(out Canvas canvas))
+        {
+            canvas = panelRoot.AddComponent<Canvas>();
+            panelRoot.AddComponent<GraphicRaycaster>();
+        }
+
+        canvas.overrideSorting = true;
+        canvas.sortingOrder = 900;
+    }
+
     public void Open()
     {
         if (isOpen) return;
 
         isOpen = true;
         panelRoot.SetActive(true);
+        DrawOnTop();
 
         if (!isActiveAndEnabled)
         {
