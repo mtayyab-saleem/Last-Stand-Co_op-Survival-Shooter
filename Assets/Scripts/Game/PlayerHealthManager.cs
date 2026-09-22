@@ -222,6 +222,11 @@ public class PlayerHealthManager : NetworkBehaviour
 
         if (netIsDead) return false;
 
+        // Once a result is decided nobody can be hurt any more: the safe zone keeps
+        // ticking in its final stage, and without this the winner could die - and be
+        // kicked to the menu - while looking at the victory screen.
+        if (MatchTracker.Instance != null && MatchTracker.Instance.MatchEnded) return false;
+
         if (enableDamageDebug)
         {
             Debug.Log(
@@ -252,12 +257,11 @@ public class PlayerHealthManager : NetworkBehaviour
 
             SpawnRandomPowerUp();
 
-            // Host stays in GameScene after death.
-            // Non-host clients return to Main Menu after the existing 3-second death delay.
-            if (isLocalPlayer)
-                Invoke(nameof(HostDeathSequence), 3f);
-            else
-                Invoke(nameof(ClientDeathSequence), 3f);
+            // Nobody is disconnected on death any more. The dead player keeps their
+            // connection and MatchResultUI shows them the result screen, which returns
+            // them to the main menu on its own timer or when they press the button.
+            // Kicking a dead host would also have ended the match for everybody else.
+            Invoke(nameof(ServerDeathCleanup), 3f);
         }
 
         // Apply on the server 
@@ -285,36 +289,11 @@ public class PlayerHealthManager : NetworkBehaviour
             NetworkServer.Spawn(spawnedPowerUp);
         }
     }
+    /// <summary>Hides the corpse everywhere a few seconds after the kill.</summary>
     [Server]
-    private void HostDeathSequence()
+    private void ServerDeathCleanup()
     {
-        Debug.Log("[Server] Host died. Enabling Free Roam.");
         RpcDisableCharacter();
-    }
-
-    [Server]
-    private void ClientDeathSequence()
-    {
-        Debug.Log("[Server] Client died. Returning that client to Main Menu.");
-
-        // Show the death cleanup on every connected client first.
-        RpcDisableCharacter();
-
-        // Only the dead non-host client is told to disconnect.
-        if (connectionToClient != null)
-            TargetDisconnect(connectionToClient);
-
-        // Remove the dead player's network object from the running match.
-        NetworkServer.Destroy(gameObject);
-    }
-
-    [TargetRpc]
-    private void TargetDisconnect(NetworkConnection target)
-    {
-        Debug.Log("[Client] Eliminated. Returning to Main Menu.");
-
-        if (GameUIManager.Instance != null)
-            GameUIManager.Instance.TriggerDisconnectSequence();
     }
 
     [ClientRpc]

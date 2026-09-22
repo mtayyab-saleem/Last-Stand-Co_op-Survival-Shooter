@@ -25,14 +25,21 @@ public class MatchTracker : NetworkBehaviour
     [SyncVar][SerializeField] private int winningTeamId = 0;
     [SyncVar][SerializeField] private string winnerPlayerName = string.Empty;
     [SyncVar][SerializeField] private string winningTeamMemberNames = string.Empty;
+    [SyncVar][SerializeField] private int alivePlayers = 0;
+    [SyncVar][SerializeField] private int aliveTeams = 0;
 
     [Header("Debug")]
-    [SerializeField] private bool enableMatchDebug = true;
+    [SerializeField] private bool enableMatchDebug = false;
 
     public bool TrackingActive => trackingActive;
     public bool MatchEnded => matchEnded;
     public int WinningTeamId => winningTeamId;
     public string WinnerPlayerName => winnerPlayerName;
+
+    /// <summary>Players still in the match, for the eliminated player's screen.</summary>
+    public int AlivePlayers => alivePlayers;
+    public int AliveTeams => aliveTeams;
+    /// <summary>Winning team members, one name per line.</summary>
     public string WinningTeamMemberNames => winningTeamMemberNames;
 
     private LSMatchManager.GameMode matchMode = LSMatchManager.GameMode.Solo;
@@ -60,7 +67,8 @@ public class MatchTracker : NetworkBehaviour
         }
         else if (Instance != this)
         {
-            Debug.LogWarning("[MATCH] Duplicate MatchTracker found. Disabling duplicate component.");
+            // Expected every time LobbyScene reloads: LSMatchManager keeps the original
+            // persistent object and destroys this new copy in its own Awake.
             enabled = false;
         }
     }
@@ -86,6 +94,8 @@ public class MatchTracker : NetworkBehaviour
         winningTeamId = 0;
         winnerPlayerName = string.Empty;
         winningTeamMemberNames = string.Empty;
+        alivePlayers = 0;
+        aliveTeams = 0;
 
         if (pendingWinnerCheck != null)
         {
@@ -110,6 +120,7 @@ public class MatchTracker : NetworkBehaviour
         }
 
         trackingActive = participants.Count > 0;
+        RefreshAliveCounts();
 
         if (enableMatchDebug)
         {
@@ -148,15 +159,18 @@ public class MatchTracker : NetworkBehaviour
         QueueWinnerCheck();
     }
 
-    /// <summary>Called only for a real Mirror connection loss, never for a scene change.</summary>
+    /// <summary>
+    /// Called only for a real Mirror connection loss, never for a scene change. Takes the
+    /// connection ID rather than the player object, which may not exist any more.
+    /// </summary>
     [Server]
-    public void ServerNotifyPlayerDisconnected(LSPlayer player)
+    public void ServerNotifyConnectionLost(int connectionId)
     {
-        if (!trackingActive || matchEnded || player == null)
+        if (!trackingActive || matchEnded)
             return;
 
-        Participant participant = CaptureParticipant(player, false);
-        if (participant == null)
+        // Connections that were never part of the match (rejected late joiners) are ignored.
+        if (!participants.TryGetValue(connectionId, out Participant participant))
             return;
 
         if (!participant.alive)
@@ -194,19 +208,36 @@ public class MatchTracker : NetworkBehaviour
             participants.Add(connectionId, participant);
         }
 
-        // Refresh display data whenever we still have the live player object.
-        participant.playerName = string.IsNullOrWhiteSpace(player.playerName)
-            ? $"Player {connectionId}"
-            : player.playerName;
-        participant.teamId = player.teamID;
-        participant.memberIndex = player.teamMemberIndex;
+        // The name may still arrive late, so it is refreshed whenever we see the player.
+        if (!string.IsNullOrWhiteSpace(player.playerName))
+            participant.playerName = player.playerName;
+        else if (string.IsNullOrWhiteSpace(participant.playerName))
+            participant.playerName = $"Player {connectionId}";
+
+        // Team and slot come from the lobby snapshot only. The GameScene player object
+        // gets its team restored after spawning, so reading it again later could record
+        // 0 and silently drop a whole team out of the winner check.
+        if (initialAlive)
+        {
+            participant.teamId = player.teamID;
+            participant.memberIndex = player.teamMemberIndex;
+        }
 
         return participant;
     }
 
     [Server]
+    private void RefreshAliveCounts()
+    {
+        alivePlayers = participants.Values.Count(p => p.alive);
+        aliveTeams = AliveTeamCount();
+    }
+
+    [Server]
     private void QueueWinnerCheck()
     {
+        RefreshAliveCounts();
+
         if (pendingWinnerCheck != null || matchEnded)
             return;
 
@@ -289,7 +320,8 @@ public class MatchTracker : NetworkBehaviour
         winnerPlayerName = winner.playerName;
         winningTeamMemberNames = winner.playerName;
 
-        Debug.Log($"[MATCH RESULT] SOLO WINNER: {winnerPlayerName}");
+        if (enableMatchDebug)
+            Debug.Log($"[MATCH RESULT] SOLO WINNER: {winnerPlayerName}");
     }
 
     [Server]
@@ -304,9 +336,11 @@ public class MatchTracker : NetworkBehaviour
             .OrderBy(p => p.memberIndex)
             .ToList();
 
-        winningTeamMemberNames = string.Join(", ", members.Select(p => p.playerName));
+        // One per line: player names can contain commas, newlines they cannot.
+        winningTeamMemberNames = string.Join("\n", members.Select(p => p.playerName));
 
-        Debug.Log($"[MATCH RESULT] TEAM {teamId} WINS | Members: {winningTeamMemberNames}");
+        if (enableMatchDebug)
+            Debug.Log($"[MATCH RESULT] TEAM {teamId} WINS | Members: {winningTeamMemberNames}");
     }
 
     [Server]
@@ -317,7 +351,8 @@ public class MatchTracker : NetworkBehaviour
         winnerPlayerName = string.Empty;
         winningTeamMemberNames = string.Empty;
 
-        Debug.Log("[MATCH RESULT] NO WINNER - all tracked players were eliminated/disconnected.");
+        if (enableMatchDebug)
+            Debug.Log("[MATCH RESULT] NO WINNER - all tracked players were eliminated/disconnected.");
     }
 
     private int AliveTeamCount()

@@ -96,30 +96,16 @@ public class LSNetworkManager : NetworkManager
     /// </summary>
     public override void OnServerDisconnect(NetworkConnectionToClient conn)
     {
-        LSPlayer leavingPlayer = null;
-
-        if (conn != null && conn.identity != null)
-            leavingPlayer = conn.identity.GetComponent<LSPlayer>();
-
-        // Fallback in case Mirror has already detached conn.identity.
-        if (leavingPlayer == null && conn != null && LSMatchManager.Instance != null)
-        {
-            foreach (LSPlayer player in LSMatchManager.Instance.players)
-            {
-                if (player != null && player.connectionToClient == conn)
-                {
-                    leavingPlayer = player;
-                    break;
-                }
-            }
-        }
-
-        if (LSMatchManager.Instance != null &&
+        // By connection ID, which MatchTracker keys participants by. The player object
+        // is often already gone here - a client can drop while GameScene is loading,
+        // before its new player is spawned - and a lookup through the object would
+        // then miss the leaver, leaving them "alive" forever so the match never ended.
+        if (conn != null &&
+            LSMatchManager.Instance != null &&
             LSMatchManager.Instance.matchStarted &&
-            MatchTracker.Instance != null &&
-            leavingPlayer != null)
+            MatchTracker.Instance != null)
         {
-            MatchTracker.Instance.ServerNotifyPlayerDisconnected(leavingPlayer);
+            MatchTracker.Instance.ServerNotifyConnectionLost(conn.connectionId);
         }
 
         base.OnServerDisconnect(conn);

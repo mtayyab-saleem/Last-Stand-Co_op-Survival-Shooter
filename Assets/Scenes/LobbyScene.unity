@@ -7047,7 +7047,7 @@ MonoBehaviour:
   winningTeamId: 0
   winnerPlayerName: 
   winningTeamMemberNames: 
-  enableMatchDebug: 1
+  enableMatchDebug: 0
 --- !u!1 &1389047674
 GameObject:
   m_ObjectHideFlags: 0

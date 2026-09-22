@@ -22,7 +22,8 @@ public class SafeZoneController : NetworkBehaviour
         Idle,       // not started yet
         Waiting,    // holding still before the next shrink
         Shrinking,  // actively closing in
-        Final       // last stage reached, damage stays on
+        Final,      // last stage reached, damage stays on
+        Ended       // match is decided: no damage, nothing drawn
     }
 
     [System.Serializable]
@@ -78,7 +79,7 @@ public class SafeZoneController : NetworkBehaviour
     [SyncVar(hook = nameof(OnRadiusChanged))]
     private float currentRadius;
 
-    [SyncVar]
+    [SyncVar(hook = nameof(OnPhaseChanged))]
     private ZonePhase phase = ZonePhase.Idle;
 
     /// <summary>NetworkTime.time at which the current phase ends. Lets each client count down alone.</summary>
@@ -139,6 +140,16 @@ public class SafeZoneController : NetworkBehaviour
             return;
 
         zoneRoutine = StartCoroutine(SafeZoneRoutine());
+    }
+
+    /// <summary>Shuts the zone down for good once the match has been decided.</summary>
+    [Server]
+    public void EndSafeZone()
+    {
+        StopSafeZone();
+
+        phase = ZonePhase.Ended;
+        ApplyVisual();
     }
 
     [Server]
@@ -257,6 +268,15 @@ public class SafeZoneController : NetworkBehaviour
         if (!isServer)
             return;
 
+        // The match is over: stop closing in, stop burning people, and take the wall
+        // away so nothing keeps damaging or distracting players on the result screen.
+        if (phase != ZonePhase.Idle && phase != ZonePhase.Ended &&
+            MatchTracker.Instance != null && MatchTracker.Instance.MatchEnded)
+        {
+            EndSafeZone();
+            return;
+        }
+
         // Only the shrink and hold stages damage; nothing happens before the match zone starts.
         if (phase != ZonePhase.Shrinking && phase != ZonePhase.Waiting && phase != ZonePhase.Final)
             return;
@@ -332,8 +352,23 @@ public class SafeZoneController : NetworkBehaviour
         ApplyVisual();
     }
 
+    private void OnPhaseChanged(ZonePhase oldPhase, ZonePhase newPhase)
+    {
+        // Only the phase tells a client the zone is gone, and it has no other hook.
+        ApplyVisual();
+    }
+
     private void ApplyVisual()
     {
+        // Only ever hides, never shows: the ring is deliberately switched off in the
+        // scene (it used to paint the whole ground blue) and must stay that way.
+        if (phase == ZonePhase.Ended)
+        {
+            if (zoneVisual != null) zoneVisual.gameObject.SetActive(false);
+            if (zoneRing != null) zoneRing.gameObject.SetActive(false);
+            return;
+        }
+
         float radius = currentRadius > 0f ? currentRadius : startRadius;
         float diameter = radius * 2f;
 

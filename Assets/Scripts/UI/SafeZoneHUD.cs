@@ -59,7 +59,7 @@ public class SafeZoneHUD : MonoBehaviour
 
         SafeZoneController.ZonePhase phase = zone.Phase;
 
-        if (phase == SafeZoneController.ZonePhase.Idle)
+        if (phase == SafeZoneController.ZonePhase.Idle || phase == SafeZoneController.ZonePhase.Ended)
         {
             SetVisible(false);
             return;
