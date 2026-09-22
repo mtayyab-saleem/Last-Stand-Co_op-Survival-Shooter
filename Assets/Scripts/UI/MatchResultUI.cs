@@ -64,7 +64,7 @@ public class MatchResultUI : MonoBehaviour
     private static readonly Color DefeatColor = new Color(0.937f, 0.267f, 0.267f, 1f);
 
     private const float WindowWidth = 1000f;
-    private const float WindowHeight = 640f;
+    private const float WindowHeight = 660f;
 
     private enum ResultState
     {
@@ -405,12 +405,13 @@ public class MatchResultUI : MonoBehaviour
         detailLabel.fontSizeMax = 20f;
         detailLabel.overflowMode = TextOverflowModes.Ellipsis;
 
+        // Stacked upwards from the bottom edge: button, countdown, mode line. Measuring
+        // both rows from the same edge keeps a fixed gap between them.
         modeLabel = NewText("Mode", window, string.Empty, 15f, 4f, MutedTextColor, TextAlignmentOptions.Center);
-        PlaceTop((RectTransform)modeLabel.transform, -484f, 30f);
+        PlaceBottom((RectTransform)modeLabel.transform, 160f, 26f);
 
         countdownLabel = NewText("Countdown", window, string.Empty, 15f, 4f, MutedTextColor, TextAlignmentOptions.Center);
-        Place((RectTransform)countdownLabel.transform, new Vector2(0f, 0f), new Vector2(1f, 0f),
-              new Vector2(0f, 116f), new Vector2(0f, 28f), new Vector2(0.5f, 0f));
+        PlaceBottom((RectTransform)countdownLabel.transform, 118f, 26f);
 
         mainMenuButton = CreateMainMenuButton(window);
 
@@ -449,7 +450,7 @@ public class MatchResultUI : MonoBehaviour
         var rect = (RectTransform)go.transform;
         rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
         rect.pivot = new Vector2(0.5f, 0f);
-        rect.anchoredPosition = new Vector2(0f, 44f);
+        rect.anchoredPosition = new Vector2(0f, 40f);
         rect.sizeDelta = new Vector2(rect.sizeDelta.x, 62f);
 
         // MUIP Manager has dynamic update on, so UIManagerButton repaints every button in
@@ -576,6 +577,16 @@ public class MatchResultUI : MonoBehaviour
         rect.pivot = pivot;
         rect.anchoredPosition = position;
         rect.sizeDelta = size;
+    }
+
+    /// <summary>Full-width row sitting this far above the parent's bottom edge.</summary>
+    private static void PlaceBottom(RectTransform rect, float y, float height)
+    {
+        rect.anchorMin = new Vector2(0f, 0f);
+        rect.anchorMax = new Vector2(1f, 0f);
+        rect.pivot = new Vector2(0.5f, 0f);
+        rect.anchoredPosition = new Vector2(0f, y);
+        rect.sizeDelta = new Vector2(0f, height);
     }
 
     /// <summary>Full-width row hanging from the parent's top edge, with an optional side margin.</summary>
