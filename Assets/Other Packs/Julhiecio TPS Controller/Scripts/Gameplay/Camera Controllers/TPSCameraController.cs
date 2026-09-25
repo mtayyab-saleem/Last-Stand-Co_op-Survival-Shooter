@@ -8,6 +8,7 @@ namespace JUTPS.CameraSystems
     [AddComponentMenu("JU TPS/Third Person System/Cameras/JU Third Person Camera Controller")]
     public class TPSCameraController : JUCameraController
     {
+        public static bool RotateWithFreeCursor;
 
         public JUCharacterController characterTarget;
 
@@ -96,7 +97,8 @@ namespace JUTPS.CameraSystems
 
         protected virtual void SetRotationInput()
         {
-            if (Cursor.lockState != CursorLockMode.Locked && JUGameManager.IsMobileControls == false)
+            // Last Stand: EditorTestSettings keeps the cursor free in the editor and still wants mouse look.
+            if (Cursor.lockState != CursorLockMode.Locked && JUGameManager.IsMobileControls == false && !RotateWithFreeCursor)
             {
                 xmouse = 0;
                 ymouse = 0;
