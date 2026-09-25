@@ -432,6 +432,28 @@ public class MatchResultUI : MonoBehaviour
         mainMenuButton = CreateMainMenuButton(window);
 
         StartCoroutine(AnimateIn(window, windowGroup));
+        StartCoroutine(FitButtonNextFrame());
+    }
+
+    /// <summary>
+    /// The MUIP button sizes itself to its text through nested layout groups, and built
+    /// inside a window that is still animating in it kept its empty-text width: a green
+    /// dot with the icon drawn over "MAIN MENU". One forced pass once everything exists
+    /// gives it its real width.
+    /// </summary>
+    private IEnumerator FitButtonNextFrame()
+    {
+        yield return null;
+
+        if (mainMenuButton == null)
+            yield break;
+
+        var rect = (RectTransform)mainMenuButton.transform;
+
+        // Innermost first: each content-size fitter needs its children's sizes.
+        RectTransform[] parts = rect.GetComponentsInChildren<RectTransform>(true);
+        for (int i = parts.Length - 1; i >= 0; i--)
+            LayoutRebuilder.ForceRebuildLayoutImmediate(parts[i]);
     }
 
     /// <summary>Rules sit either side of the title, so they follow its width.</summary>
