@@ -1,4 +1,5 @@
 using System.Collections.Generic;
+using JUTPS.CrossPlataform;
 using Michsky.MUIP;
 using Mirror;
 using TMPro;
@@ -57,8 +58,6 @@ public class LobbyUIManager : MonoBehaviour
     {
         "Health Bar",
         "Current Item Information",
-        "Crosshair Dynamic",
-        "Crosshair Resizeable",
         "Hit Marker",
         "FPS Counter"
     };
@@ -354,6 +353,54 @@ public class LobbyUIManager : MonoBehaviour
         BuildActions(root);
 
         ApplyExpandedState();
+
+        // Last, so it sits on top of everything else in the lobby.
+        BuildNoFightNotice(root);
+    }
+
+    /// <summary>
+    /// Shown every time the lobby opens: players can shoot and swing here, but nobody
+    /// takes damage (PlayerHealthManager ignores all damage in LobbyScene) until the
+    /// match starts. The dim blocks the lobby buttons until OK is pressed.
+    /// </summary>
+    private void BuildNoFightNotice(RectTransform root)
+    {
+        RectTransform overlay = LSUITheme.Panel("NoFightNotice", root, new Color(0f, 0f, 0f, 0.6f), true);
+        LSUITheme.Stretch(overlay);
+
+        RectTransform border = LSUITheme.Panel("Border", overlay, LSUITheme.BoxBorder, true);
+        LSUITheme.Place(border, new Vector2(0.5f, 0.5f), new Vector2(0.5f, 0.5f), Vector2.zero,
+                        new Vector2(640f, 300f), new Vector2(0.5f, 0.5f));
+
+        RectTransform window = LSUITheme.Panel("Window", border, LSUITheme.Window, true);
+        LSUITheme.Stretch(window);
+        window.offsetMin = new Vector2(2f, 2f);
+        window.offsetMax = new Vector2(-2f, -2f);
+
+        RectTransform accent = LSUITheme.Panel("AccentBar", window, LSUITheme.Accent);
+        LSUITheme.PlaceTop(accent, 0f, 4f);
+
+        TextMeshProUGUI title = LSUITheme.Label("Title", window, font, "LOBBY RULES", 34f, 8f,
+                                                LSUITheme.Text, TextAlignmentOptions.Center);
+        LSUITheme.PlaceTop((RectTransform)title.transform, -34f, 48f);
+
+        TextMeshProUGUI message = LSUITheme.Label("Message", window, font,
+            "OTHER PLAYERS CANNOT BE DAMAGED IN THE LOBBY.\n<size=75%><color=#77838F>TRY YOUR WEAPONS FREELY - DAMAGE TURNS ON WHEN THE MATCH STARTS.</color></size>",
+            22f, 2f, LSUITheme.Text, TextAlignmentOptions.Center);
+        message.textWrappingMode = TextWrappingModes.Normal;
+        LSUITheme.PlaceTop((RectTransform)message.transform, -96f, 90f, 40f);
+
+        ButtonManager ok = LSUITheme.Button(buttonPrefab, window, "OkButton", "OKAY", readyIcon,
+                                            LSUITheme.ButtonGreen, () => Destroy(overlay.gameObject));
+
+        if (ok != null)
+        {
+            var rect = (RectTransform)ok.transform;
+            rect.anchorMin = rect.anchorMax = new Vector2(0.5f, 0f);
+            rect.pivot = new Vector2(0.5f, 0f);
+            rect.anchoredPosition = new Vector2(0f, 30f);
+            rect.sizeDelta = new Vector2(rect.sizeDelta.x, 60f);
+        }
     }
 
     private void BuildHeader(RectTransform root)
@@ -491,6 +538,12 @@ public class LobbyUIManager : MonoBehaviour
 
         foreach (Transform child in wrapper.UIPanel.GetComponentsInChildren<Transform>(true))
         {
+            // The mobile controls are never touched. The weapon switcher in there has its
+            // own "Current Item Information" - the icon and name of the held weapon or
+            // melee item - and matching it by name hid it along with the HUD panel.
+            if (child.GetComponentInParent<MobileRig>(true) != null)
+                continue;
+
             for (int i = 0; i < GameplayHudToHide.Length; i++)
             {
                 if (child.name == GameplayHudToHide[i])

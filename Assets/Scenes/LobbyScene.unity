@@ -3790,7 +3790,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1686178913}
   m_HandleRect: {fileID: 1686178912}
   m_Direction: 2
-  m_Value: 0
+  m_Value: 1
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -4791,7 +4791,7 @@ MeshRenderer:
   m_RenderingLayerMask: 1
   m_RendererPriority: 0
   m_Materials:
-  - {fileID: 2100000, guid: a3dd73c83098e6846bc02c83efcd626c, type: 2}
+  - {fileID: 2100000, guid: 8d417c5abfdff2044b1ba6c882a20776, type: 2}
   m_StaticBatchInfo:
     firstSubMesh: 0
     subMeshCount: 0
@@ -7012,6 +7012,47 @@ MonoBehaviour:
   gameModeRules: {fileID: 11400000, guid: 22cc4731eb5c2fe4386c46ad13f400c7, type: 2}
   enableTeamDebug: 0
   maxPlayers: 8
+  fillWithAI: 0
+  botSettings:
+    detectRange: 50
+    targetMemory: 3
+    engageRange: 35
+    preferredDistance: 14
+    tooCloseDistance: 6
+    reactionTime: {x: 0.45, y: 0.9}
+    aimError: 1.4
+    aimSettleSpeed: 1.2
+    minimumAimError: 0.25
+    burstDuration: {x: 0.35, y: 0.9}
+    burstPause: {x: 0.6, y: 1.4}
+    zoneTargetDepth: 0.55
+    roamDepth: 0.75
+    zoneComfort: 0.85
+    preferredWeapons:
+    - UMP
+    - P226
+    - SNIPER M82
+    reserveAmmo: 999
+    names:
+    - Viper
+    - Ghost
+    - Raven
+    - Blaze
+    - Hunter
+    - Nova
+    - Shadow
+    - Titan
+    - Reaper
+    - Falcon
+    - Storm
+    - Wolf
+    - Cobra
+    - Phantom
+    - Striker
+    - Onyx
+  spawnSeparation: 60
+  teammateSpread: 4
+  spawnZoneDepth: 0.8
 --- !u!4 &1374394499
 Transform:
   m_ObjectHideFlags: 0
@@ -7047,6 +7088,10 @@ MonoBehaviour:
   winningTeamId: 0
   winnerPlayerName: 
   winningTeamMemberNames: 
+  alivePlayers: 0
+  aliveTeams: 0
+  aliveHumans: 0
+  totalPlayers: 0
   enableMatchDebug: 0
 --- !u!1 &1389047674
 GameObject:
