@@ -34,6 +34,13 @@ public class PlayerShotSync : NetworkBehaviour
 
     private bool subscribed;
 
+    /// <summary>
+    /// Raised on this machine once for every shot anyone fires that can be heard here:
+    /// the local player's and, on the host, bots' real shots, and everyone else's
+    /// replayed ones. EnemyAwarenessHUD uses it to point at gunfire.
+    /// </summary>
+    public static event System.Action<PlayerShotSync> ShotHeard;
+
     private LSPlayer lsPlayer;
 
     private void Awake()
@@ -123,6 +130,8 @@ public class PlayerShotSync : NetworkBehaviour
 
         bool leftHand = weapon == character.WeaponInUseLeftHand;
 
+        ShotHeard?.Invoke(this);
+
         // A bot fires on the server already, so it goes straight to the clients.
         if (lsPlayer != null && lsPlayer.IsServerBot)
             RpcFire(leftHand, endPoint, hitNetId, hitLocalPoint);
@@ -148,6 +157,8 @@ public class PlayerShotSync : NetworkBehaviour
         // On the host a bot's real shot already played; replaying it would double it.
         if (lsPlayer != null && lsPlayer.IsServerBot)
             return;
+
+        ShotHeard?.Invoke(this);
 
         Weapon weapon = leftHand ? character.WeaponInUseLeftHand : character.WeaponInUseRightHand;
 
