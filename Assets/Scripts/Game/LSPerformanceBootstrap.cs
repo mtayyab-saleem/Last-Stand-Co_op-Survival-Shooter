@@ -33,10 +33,14 @@ public static class LSPerformanceBootstrap
         // Physics rate. JUTPS's camera library used to force this to 0.015 (66.7 Hz)
         // from its own Start, which is why an earlier attempt at this never stuck;
         // that line is gone, so this is now the single owner of the value.
-        // Remote characters are kinematic and the only real rigidbodies are bullets
-        // and pickups, so mobile does not need more than 40 Hz.
+        // On phones it matches the frame cap. JUTPS moves the player (and bots on the
+        // host) through its Rigidbody, so they only move on physics steps; at 40 Hz
+        // under a 60 fps cap that was two frames out of three - the jerky sprint.
+        // Rigidbody interpolation cannot fix it: JUTPS also turns the character by
+        // writing its Transform every frame, which cancels interpolation and made the
+        // turn jitter. One step per frame keeps both movement and turning smooth.
 #if UNITY_ANDROID || UNITY_IOS
-        Time.fixedDeltaTime = 1f / 40f;
+        Time.fixedDeltaTime = 1f / MobileTargetFrameRate;
 #else
         Time.fixedDeltaTime = 1f / 50f;
 #endif

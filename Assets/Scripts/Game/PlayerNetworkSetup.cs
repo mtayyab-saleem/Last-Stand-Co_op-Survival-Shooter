@@ -19,6 +19,13 @@ public class PlayerNetworkSetup : NetworkBehaviour
             playerAnimator = GetComponent<Animator>();
         }
 
+        // JUTPS's BodyLeanInert switches the animator to physics-rate updates in its
+        // Awake, so arms, gun and body only got a new pose on physics steps - which do
+        // not line up with rendered frames. Root motion is off on this character, so
+        // nothing needs physics-rate animation; animate every frame.
+        if (playerAnimator != null)
+            playerAnimator.updateMode = AnimatorUpdateMode.Normal;
+
         // AI PLAYER, ON THE SERVER: the server drives it, so unlike a remote player it
         // keeps its character controller and real physics. Everywhere else a bot is an
         // ordinary remote player and takes the branch below.
@@ -84,6 +91,9 @@ public class PlayerNetworkSetup : NetworkBehaviour
         gameObject.tag = "Untagged";
         StripRemotePlayerCost();
 
+        if (TryGetComponent(out JUCharacterController character))
+            DisableStepUp(character);
+
         // LSBotBrain decides the culling mode: bones must keep updating off-screen only
         // while the bot is fighting.
         if (playerAnimator != null)
@@ -114,8 +124,23 @@ public class PlayerNetworkSetup : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// JUTPS's step-up pushes the body up with an impulse every physics step whenever
+    /// the ground ahead is a little higher and flat, and counts the character as
+    /// grounded for as long as it is doing so - so it never falls back. On terrain it
+    /// fired on every bump: the player hopped by itself while sprinting, and bots, which
+    /// run all the time, piled the impulses up and floated off the ground. The terrain
+    /// has no stairs or kerbs for it to help with; the capsule rides over bumps itself.
+    /// </summary>
+    static void DisableStepUp(JUCharacterController character)
+    {
+        character.EnableStepCorrection = false;
+        character.EnableUngroundedStepUp = false;
+    }
+
     void SetupLocalPlayer()
     {
+
         // GAME MANAGER SETUP
         var character = GetComponent<JUCharacterController>();
         if (character != null)
@@ -128,6 +153,14 @@ public class PlayerNetworkSetup : NetworkBehaviour
             Debug.LogError("JUCharacterController not found on player!");
             return;
         }
+
+        DisableStepUp(character);
+
+        // Nothing steeper than 55 degrees can be climbed; JUTPS slides the player off it.
+        // This player only - bots keep JUTPS's own slope handling.
+        character.MaxWalkableAngle = 55f;
+        if (!TryGetComponent(out PlayerSlopeLimiter _))
+            gameObject.AddComponent<PlayerSlopeLimiter>();
 
         //CAMERA SETUP
         var cam = CameraManager.MainCam;
