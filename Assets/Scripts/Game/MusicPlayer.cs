@@ -23,6 +23,7 @@ public class MusicPlayer : MonoBehaviour
     private AudioSource source;
     private Coroutine fadeRoutine;
     private AudioClip currentClip;
+    private bool held;
 
     public static MusicPlayer Instance { get { return instance; } }
 
@@ -104,6 +105,24 @@ public class MusicPlayer : MonoBehaviour
         fadeRoutine = StartCoroutine(SwapTrack(clip));
     }
 
+    /// <summary>
+    /// Holds the music while something else owns the sound, such as the intro video.
+    /// A track that starts while held (the first one is still fading in when the intro
+    /// begins) starts paused, so nothing slips through.
+    /// </summary>
+    public void SetPaused(bool paused)
+    {
+        held = paused;
+
+        if (source == null)
+            return;
+
+        if (paused)
+            source.Pause();
+        else
+            source.UnPause();
+    }
+
     private IEnumerator SwapTrack(AudioClip clip)
     {
         float fade = Mathf.Max(0.01f, library.fadeSeconds);
@@ -134,6 +153,9 @@ public class MusicPlayer : MonoBehaviour
         source.clip = clip;
         source.loop = library.loop;
         source.Play();
+
+        if (held)
+            source.Pause();
 
         float target = Mathf.Clamp01(library.trackVolume);
 
