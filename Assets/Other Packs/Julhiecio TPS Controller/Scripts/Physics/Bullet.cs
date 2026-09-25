@@ -219,19 +219,31 @@ namespace JUTPS.WeaponSystem
                     }
                 }
 
-                //Set a new final point
-                if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1))
+                // Put the impact where the bullet actually touched. FinalPoint was the
+                // shooter's aim point, which on a side hit - or on another screen, where the
+                // target stood slightly elsewhere - lies off the body, so the blood and hit
+                // mark hung in the air next to the player.
+                if (col.contactCount > 0)
+                {
+                    ContactPoint contact = col.GetContact(0);
+                    FinalPoint = contact.point;
+                    FinalPointNormal = contact.normal;
+                }
+                else if (Physics.Raycast(transform.position, transform.forward, out RaycastHit hit, 1))
                 {
                     FinalPoint = hit.point;
                     FinalPointNormal = hit.normal;
-                    //Debug.Log("Bullet Finded new final point");
                 }
 
                 //Get hitted gameobject tag
                 CollidedGameObjectTag = col.gameObject.tag;
 
+                // Any part of a character bleeds. Hands, neck and shoulders are Untagged and
+                // used to get the wall impact - smoke and a grey bullet hole on the body.
+                string impactTag = col.gameObject.layer == 15 ? "Skin" : col.gameObject.tag;
+
                 //Instantiate hitted Surface Impact Particle
-                SurfaceFX.InstantiateParticleFX(ImpactFX, col.gameObject.tag, FinalPoint, Quaternion.FromToRotation(transform.forward, FinalPointNormal) * transform.rotation, col.gameObject.transform);
+                SurfaceFX.InstantiateParticleFX(ImpactFX, impactTag, FinalPoint, Quaternion.FromToRotation(transform.forward, FinalPointNormal) * transform.rotation, col.gameObject.transform);
 
                 //Hit Marker
                 if (GetOwner() != null && Owner.CompareTag("Player"))
