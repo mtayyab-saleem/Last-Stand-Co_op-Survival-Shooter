@@ -34,10 +34,23 @@ public class PlayerShotSync : NetworkBehaviour
 
     private bool subscribed;
 
+    private LSPlayer lsPlayer;
+
     private void Awake()
     {
         if (character == null)
             character = GetComponent<JUCharacterController>();
+
+        lsPlayer = GetComponent<LSPlayer>();
+    }
+
+    // A bot has no owner to report its shots, so the server listens for it.
+    public override void OnStartServer()
+    {
+        base.OnStartServer();
+
+        if (lsPlayer != null && lsPlayer.isBot)
+            Subscribe(true);
     }
 
     // Weapon.OnShotFired is static, so the subscription is kept to the shortest
@@ -108,7 +121,13 @@ public class PlayerShotSync : NetworkBehaviour
             }
         }
 
-        CmdFire(weapon == character.WeaponInUseLeftHand, endPoint, hitNetId, hitLocalPoint);
+        bool leftHand = weapon == character.WeaponInUseLeftHand;
+
+        // A bot fires on the server already, so it goes straight to the clients.
+        if (lsPlayer != null && lsPlayer.IsServerBot)
+            RpcFire(leftHand, endPoint, hitNetId, hitLocalPoint);
+        else
+            CmdFire(leftHand, endPoint, hitNetId, hitLocalPoint);
     }
 
     // Unreliable: a dropped shot effect is not worth retransmitting, and automatic fire
@@ -124,6 +143,10 @@ public class PlayerShotSync : NetworkBehaviour
     private void RpcFire(bool leftHand, Vector3 endPoint, uint hitNetId, Vector3 hitLocalPoint)
     {
         if (character == null)
+            return;
+
+        // On the host a bot's real shot already played; replaying it would double it.
+        if (lsPlayer != null && lsPlayer.IsServerBot)
             return;
 
         Weapon weapon = leftHand ? character.WeaponInUseLeftHand : character.WeaponInUseRightHand;

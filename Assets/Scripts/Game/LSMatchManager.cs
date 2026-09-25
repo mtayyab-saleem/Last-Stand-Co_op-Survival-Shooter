@@ -1,6 +1,7 @@
 using UnityEngine;
 using Mirror;
 using Mirror.Discovery;
+using JUTPS;
 using UnityEngine.SceneManagement;
 using System.Collections;
 using System.Collections.Generic;
@@ -36,6 +37,36 @@ public class LSMatchManager : NetworkBehaviour
     [Header("Lobby Settings")]
     [Tooltip("Maximum players allowed in the lobby (Host + Clients).")]
     public int maxPlayers = 8;
+
+    /// <summary>PlayerPrefs key the Host popup's AI checkbox writes.</summary>
+    public const string FillWithAIKey = "HostFillWithAI";
+
+    private const string GameSceneName = "GameScene";
+
+    [Header("AI Players")]
+    [Tooltip("Set from the Host popup. Empty slots are filled with AI players up to maxPlayers.")]
+    [SyncVar(hook = nameof(OnFillWithAIChanged))]
+    public bool fillWithAI = false;
+
+    [SerializeField] private LSBotSettings botSettings = new LSBotSettings();
+
+    // Bots decided at match start, spawned once GameScene has loaded.
+    private readonly List<LSBotPlanner.BotSlot> plannedBots = new List<LSBotPlanner.BotSlot>();
+
+    [Header("Spawning")]
+    [Tooltip("Every team starts at least this far from every other team. Never less than the bots' detect range + 10, so no fight starts the moment the match loads.")]
+    [SerializeField] private float spawnSeparation = 60f;
+
+    [Tooltip("Teammates start within this distance of their team's spot.")]
+    [SerializeField] private float teammateSpread = 4f;
+
+    [Tooltip("Spawns are picked inside this part of the safe zone's starting radius.")]
+    [Range(0.1f, 1f)]
+    [SerializeField] private float spawnZoneDepth = 0.8f;
+
+    // One random spot per team for the current match; teammates start around it.
+    private readonly Dictionary<int, Vector3> teamSpawns = new Dictionary<int, Vector3>();
+    private int looseSpawnKey;
 
     /// <summary>Live player objects. The server owns this list.</summary>
     public readonly SyncList<LSPlayer> players = new SyncList<LSPlayer>();
@@ -84,6 +115,9 @@ public class LSMatchManager : NetworkBehaviour
         // Load the mode selected by the host from the Host Menu.
         int savedMode = PlayerPrefs.GetInt("HostSelectedMode", 0);
         currentMode = (GameMode)savedMode;
+
+        fillWithAI = PlayerPrefs.GetInt(FillWithAIKey, 0) == 1;
+        plannedBots.Clear();
 
         if (enableTeamDebug)
         {
@@ -554,9 +588,20 @@ public class LSMatchManager : NetworkBehaviour
         // Snapshot the original match roster before the scene change.
         // MatchTracker keys humans by Mirror connection ID, so the snapshot survives
         // the Lobby -> GameScene player-object respawn.
+        // AI players for every empty slot, planned now so the tracker counts them
+        // from the very start. They are spawned once GameScene has loaded.
+        plannedBots.Clear();
+        teamSpawns.Clear();
+
+        if (fillWithAI)
+            plannedBots.AddRange(PlanBots());
+
         if (MatchTracker.Instance != null)
         {
             MatchTracker.Instance.ServerInitializeMatch(ActiveRoster(), currentMode);
+
+            foreach (LSBotPlanner.BotSlot bot in plannedBots)
+                MatchTracker.Instance.ServerAddBot(bot.key, bot.name, bot.teamId, bot.memberIndex);
         }
         else
         {
@@ -623,6 +668,247 @@ public class LSMatchManager : NetworkBehaviour
 
         // Wait briefly so Mirror can finish moving/spawning player objects.
         StartCoroutine(RestoreTeamsAfterSceneLoad());
+
+        if (scene.name == GameSceneName && plannedBots.Count > 0)
+            StartCoroutine(SpawnPlannedBots());
+    }
+
+    // -------------------------
+    // AI players
+    // -------------------------
+
+    /// <summary>How many AI players the match would get right now. Drives the lobby hint.</summary>
+    public int BotsToFill => fillWithAI ? Mathf.Max(0, maxPlayers - PlayerCount()) : 0;
+
+    [Server]
+    private List<LSBotPlanner.BotSlot> PlanBots()
+    {
+        var humans = new List<LSBotPlanner.HumanSlot>();
+
+        foreach (LSPlayer player in ActiveRoster())
+            humans.Add(new LSBotPlanner.HumanSlot(player.teamID, player.teamMemberIndex));
+
+        return LSBotPlanner.Plan(humans, maxPlayers, GetMaximumPlayersPerTeam(),
+                                 botSettings.names, new System.Random());
+    }
+
+    [Server]
+    private IEnumerator SpawnPlannedBots()
+    {
+        // Let the scene finish loading and Mirror spawn its scene objects first.
+        yield return new WaitForSeconds(1f);
+
+        var toSpawn = new List<LSBotPlanner.BotSlot>(plannedBots);
+        plannedBots.Clear();   // exactly once per match
+
+        foreach (LSBotPlanner.BotSlot bot in toSpawn)
+        {
+            if (!NetworkServer.active || !matchStarted)
+                yield break;
+
+            if (MatchTracker.Instance != null && MatchTracker.Instance.MatchEnded)
+                yield break;
+
+            // A bot that could not be spawned must not stay "alive" in the tracker,
+            // or the match could never be decided.
+            if (!SpawnBot(bot) && MatchTracker.Instance != null)
+                MatchTracker.Instance.ServerNotifyConnectionLost(bot.key);
+
+            yield return null;   // one per frame, to spread the cost
+        }
+    }
+
+    /// <summary>
+    /// A bot is the ordinary player prefab spawned without a connection. Mirror syncs it
+    /// to everyone like any player; the server drives it through LSBotBrain.
+    /// </summary>
+    [Server]
+    private bool SpawnBot(LSBotPlanner.BotSlot bot)
+    {
+        NetworkManager manager = NetworkManager.singleton;
+
+        if (manager == null || manager.playerPrefab == null)
+            return false;
+
+        ServerSpawnPose(bot.teamId, out Vector3 position, out Quaternion rotation);
+
+        GameObject botObject = Instantiate(manager.playerPrefab, position, rotation);
+        botObject.name = bot.name;
+
+        if (!botObject.TryGetComponent(out LSPlayer player))
+        {
+            Destroy(botObject);
+            return false;
+        }
+
+        // Before Spawn, so every client receives it in the spawn message.
+        player.isBot = true;
+        player.botKey = bot.key;
+        player.playerName = bot.name;
+        player.teamID = bot.teamId;
+        player.teamMemberIndex = bot.memberIndex;
+        player.isReady = true;
+
+        if (botObject.TryGetComponent(out JUCharacterController character))
+        {
+            // Before the brain is added: LSBotBrain relies on this flag to make JUTPS
+            // drop the camera the character picked up in its own Awake.
+            character.IsArtificialIntelligence = true;
+            character.UseDefaultControllerInput = false;
+        }
+
+        // Server only, and not a NetworkBehaviour, so the network layout is untouched.
+        botObject.AddComponent<LSBotBrain>().Initialise(botSettings);
+
+        NetworkServer.Spawn(botObject);
+        return true;
+    }
+
+    // -------------------------
+    // Spawning
+    // -------------------------
+
+    /// <summary>
+    /// Where a human player starts in GameScene. False outside a running match, where
+    /// the normal start positions are used.
+    /// </summary>
+    [Server]
+    public bool ServerTryGetPlayerSpawn(int connectionId, out Vector3 position, out Quaternion rotation)
+    {
+        position = Vector3.zero;
+        rotation = Quaternion.identity;
+
+        if (!matchStarted || SceneManager.GetActiveScene().name != GameSceneName)
+            return false;
+
+        savedTeamByConnection.TryGetValue(connectionId, out int teamId);
+        ServerSpawnPose(teamId, out position, out rotation);
+        return true;
+    }
+
+    /// <summary>
+    /// A random start for a member of this team. The first member of a team picks the
+    /// team's spot, at least spawnSeparation from every other team; the rest start a
+    /// few metres around it.
+    /// </summary>
+    [Server]
+    private void ServerSpawnPose(int teamId, out Vector3 position, out Quaternion rotation)
+    {
+        SafeZoneController zone = FindAnyObjectByType<SafeZoneController>();
+        Vector3 centre = zone != null ? zone.ZoneCenter : Vector3.zero;
+
+        // No team (should not happen in a match): a spot of its own.
+        int key = teamId > 0 ? teamId : --looseSpawnKey;
+
+        if (!teamSpawns.TryGetValue(key, out Vector3 teamSpot))
+        {
+            teamSpot = PickTeamSpawn(zone, centre);
+            teamSpawns[key] = teamSpot;
+            position = teamSpot;
+        }
+        else
+        {
+            position = PickNear(teamSpot);
+        }
+
+        Vector3 toCentre = centre - position;
+        toCentre.y = 0f;
+        rotation = toCentre.sqrMagnitude > 1f ? Quaternion.LookRotation(toCentre) : Quaternion.identity;
+    }
+
+    private Vector3 PickTeamSpawn(SafeZoneController zone, Vector3 centre)
+    {
+        float radius = (zone != null ? zone.CurrentRadius : 100f) * spawnZoneDepth;
+        float separation = Mathf.Max(spawnSeparation, botSettings.detectRange + 10f);
+
+        // Relax the spacing only if the map genuinely has no room left.
+        for (float relax = 1f; relax > 0.3f; relax -= 0.2f)
+        {
+            float minSqr = separation * relax * separation * relax;
+
+            for (int attempt = 0; attempt < 60; attempt++)
+            {
+                Vector2 offset = Random.insideUnitCircle * radius;
+
+                if (!TryGetSpawnGround(new Vector3(centre.x + offset.x, 0f, centre.z + offset.y), out Vector3 spot))
+                    continue;
+
+                bool crowded = false;
+                foreach (Vector3 other in teamSpawns.Values)
+                {
+                    float dx = other.x - spot.x, dz = other.z - spot.z;
+                    if (dx * dx + dz * dz < minSqr) { crowded = true; break; }
+                }
+
+                if (!crowded)
+                    return spot;
+            }
+        }
+
+        Debug.LogWarning("[LSMatchManager] No free random spawn found; using a start position.");
+        Transform start = NetworkManager.singleton != null ? NetworkManager.singleton.GetStartPosition() : null;
+        return start != null ? start.position : centre;
+    }
+
+    private Vector3 PickNear(Vector3 teamSpot)
+    {
+        for (int attempt = 0; attempt < 20; attempt++)
+        {
+            Vector2 offset = Random.insideUnitCircle.normalized * Random.Range(1.5f, teammateSpread);
+
+            if (TryGetSpawnGround(teamSpot + new Vector3(offset.x, 0f, offset.y), out Vector3 spot))
+                return spot;
+        }
+
+        return teamSpot;
+    }
+
+    /// <summary>
+    /// Ground under this XZ where a character fits: on the terrain, away from its
+    /// edge, not on a steep slope, and clear of trees, props and other players.
+    /// </summary>
+    private static bool TryGetSpawnGround(Vector3 point, out Vector3 ground)
+    {
+        ground = point;
+        Terrain terrain = Terrain.activeTerrain;
+
+        if (terrain != null)
+        {
+            // PlayerBoundary stops players 20 m from the edge; stay clear of that.
+            const float edge = 30f;
+            Vector3 origin = terrain.GetPosition();
+            Vector3 size = terrain.terrainData.size;
+
+            if (point.x < origin.x + edge || point.x > origin.x + size.x - edge ||
+                point.z < origin.z + edge || point.z > origin.z + size.z - edge)
+                return false;
+
+            float nx = (point.x - origin.x) / size.x;
+            float nz = (point.z - origin.z) / size.z;
+
+            if (terrain.terrainData.GetSteepness(nx, nz) > 30f)
+                return false;
+
+            ground.y = terrain.SampleHeight(point) + origin.y;
+        }
+        else if (Physics.Raycast(point + Vector3.up * 500f, Vector3.down, out RaycastHit hit, 1000f,
+                                 Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+        {
+            ground = hit.point;
+        }
+        else
+        {
+            return false;
+        }
+
+        // Body-sized capsule starting knee-high, so the ground itself never counts but
+        // a tree trunk, a rock or another player does.
+        if (Physics.CheckCapsule(ground + Vector3.up * 0.9f, ground + Vector3.up * 1.7f, 0.45f,
+                                 Physics.DefaultRaycastLayers, QueryTriggerInteraction.Ignore))
+            return false;
+
+        ground.y += 0.05f;
+        return true;
     }
 
     private IEnumerator RestoreTeamsAfterSceneLoad()
@@ -659,8 +945,9 @@ public class LSMatchManager : NetworkBehaviour
 
     private int GetMinimumPlayersToStart()
     {
-        // Solo can start with only the host.
-        if (currentMode == GameMode.Solo)
+        // Solo can start with only the host, and with AI fill the bots make up the
+        // teams, so any mode can.
+        if (currentMode == GameMode.Solo || fillWithAI)
             return 1;
 
         int maxTeamSize = GetMaximumPlayersPerTeam();
@@ -742,6 +1029,12 @@ public class LSMatchManager : NetworkBehaviour
             UpdateLocalUI();
     }
 
+    private void OnFillWithAIChanged(bool oldValue, bool newValue)
+    {
+        if (isClient)
+            UpdateLocalUI();
+    }
+
     [ClientRpc]
     private void RpcRefreshUI()
     {
@@ -790,6 +1083,7 @@ public class LSMatchManager : NetworkBehaviour
         lobbyPlayers.Clear();
         savedTeamByConnection.Clear();
         savedMemberIndexByConnection.Clear();
+        plannedBots.Clear();
 
         matchStarted = false;
         canHostStart = false;

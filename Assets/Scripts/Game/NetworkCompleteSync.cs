@@ -78,8 +78,14 @@ public class NetworkCompleteSync : NetworkBehaviour
     private float lastStateSyncTime;
     private const float SYNC_INTERVAL = 0.05f; // 20 updates per second
 
+    private LSPlayer lsPlayer;
+
+    /// <summary>A bot on the server is the source of its own state, like a local player.</summary>
+    private bool IsServerBot => lsPlayer != null && lsPlayer.IsServerBot;
+
     private void Awake()
     {
+        lsPlayer = GetComponent<LSPlayer>();
         if (juController == null) juController = GetComponent<JUCharacterController>();
         if (characterAnimator == null) characterAnimator = GetComponent<Animator>();
         if (juHealth == null) juHealth = GetComponent<JUHealth>();
@@ -92,7 +98,8 @@ public class NetworkCompleteSync : NetworkBehaviour
             // Disable local input processing for remote avatars to prevent interference
             juController.UseDefaultControllerInput = false;
 
-            if (TryGetComponent(out Rigidbody rb))
+            // A bot on the server moves with real physics; only puppets are kinematic.
+            if (!IsServerBot && TryGetComponent(out Rigidbody rb))
             {
                 rb.isKinematic = true;
             }
@@ -105,9 +112,43 @@ public class NetworkCompleteSync : NetworkBehaviour
         {
             ProcessLocalPlayer();
         }
+        else if (IsServerBot)
+        {
+            PublishServerBotState();
+        }
         else
         {
             ProcessRemotePlayer();
+        }
+    }
+
+    /// <summary>
+    /// The server-side counterpart of ProcessLocalPlayer for an AI player: it writes the
+    /// synced state straight from the character, since there is no client to send it.
+    /// Applying the (empty) synced state instead would freeze the bot and unequip its gun.
+    /// </summary>
+    private void PublishServerBotState()
+    {
+        netIsRunning = juController.IsRunning;
+        netIsCrouched = juController.IsCrouched;
+        netIsProne = juController.IsProne;
+        netIsAiming = juController.IsAiming;
+        netIsFiringMode = juController.FiringMode;
+        netIsJumping = juController.IsJumping;
+        netIsGrounded = juController.IsGrounded;
+        netIsItemEquipped = juController.IsItemEquiped;
+        netIsDead = juHealth != null && juHealth.IsDead;
+
+        // Same threshold the owner path uses, so an idle bot does not resend every frame.
+        if (Vector3.Distance(netLookPosition, juController.LookAtPosition) > 0.1f)
+            netLookPosition = juController.LookAtPosition;
+
+        var inventory = juController.Inventory;
+
+        if (inventory != null)
+        {
+            netRightWeaponID = inventory.CurrentRightHandItemID;
+            netLeftWeaponID = inventory.CurrentLeftHandItemID;
         }
     }
 

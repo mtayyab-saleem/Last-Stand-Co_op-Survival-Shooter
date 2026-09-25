@@ -82,6 +82,14 @@ public class LSNetworkManager : NetworkManager
             player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
             NetworkServer.AddPlayerForConnection(conn, player);
         }
+        else if (LSMatchManager.Instance != null &&
+                 LSMatchManager.Instance.ServerTryGetPlayerSpawn(conn.connectionId, out Vector3 spawnPos, out Quaternion spawnRot))
+        {
+            // A random spot for the player's team, away from every other team.
+            GameObject player = Instantiate(playerPrefab, spawnPos, spawnRot);
+            player.name = $"{playerPrefab.name} [connId={conn.connectionId}]";
+            NetworkServer.AddPlayerForConnection(conn, player);
+        }
         else
         {
             base.OnServerAddPlayer(conn);

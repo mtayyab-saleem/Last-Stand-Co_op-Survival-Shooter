@@ -198,6 +198,17 @@ namespace JUTPS.WeaponSystem
                         PlayerHealthManager.LocalInstance.CmdShootTarget(targetPlayer.gameObject, RealDamage);
                     }
                 }
+                // >>> AI players exist only on the server, so their hits are settled there.
+                else if (Mirror.NetworkServer.active && Owner != null &&
+                         Owner.TryGetComponent(out LSPlayer shooter) && shooter.isBot &&
+                         Owner.TryGetComponent(out PlayerHealthManager shooterHealth))
+                {
+                    var targetPlayer = col.gameObject.GetComponentInParent<PlayerHealthManager>();
+                    if (targetPlayer != null)
+                    {
+                        shooterHealth.ServerShootTarget(targetPlayer.gameObject, RealDamage);
+                    }
+                }
 
                 // >>> Impact Add Force
                 if (ImpactAddForce)

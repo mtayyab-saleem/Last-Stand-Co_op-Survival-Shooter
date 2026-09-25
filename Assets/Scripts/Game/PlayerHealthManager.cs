@@ -90,6 +90,17 @@ public class PlayerHealthManager : NetworkBehaviour
     [Command]
     public void CmdShootTarget(GameObject target, float weaponDamage)
     {
+        ServerShootTarget(target, weaponDamage);
+    }
+
+    /// <summary>
+    /// A hit by this player on <paramref name="target"/>, settled on the server. Humans
+    /// reach it through CmdShootTarget; AI players, which only exist on the server, call
+    /// it directly from their bullets.
+    /// </summary>
+    [Server]
+    public void ServerShootTarget(GameObject target, float weaponDamage)
+    {
         // Validate the damage value first.
         if (weaponDamage <= 0 || weaponDamage > MAX_ALLOWED_DAMAGE)
         {
@@ -186,8 +197,16 @@ public class PlayerHealthManager : NetworkBehaviour
         // Apply valid enemy damage on the server, and tell the victim which way it came
         // from. Only a hit that actually landed is reported - a corpse or the lobby
         // must not flash indicators.
-        if (targetScript.ServerApplyDamage(weaponDamage))
+        if (!targetScript.ServerApplyDamage(weaponDamage))
+            return;
+
+        // Bots have no connection, so there is nobody to show a direction indicator to.
+        if (targetScript.connectionToClient != null)
             targetScript.TargetDamagedFrom(netId, transform.position);
+
+        // A bot that gets hit turns on whoever hit it, even from behind.
+        if (targetScript.TryGetComponent(out LSBotBrain brain))
+            brain.OnHitBy(_playerData);
     }
 
     // No connection parameter: Mirror sends it to this object's owner, i.e. the victim.

@@ -19,6 +19,15 @@ public class PlayerNetworkSetup : NetworkBehaviour
             playerAnimator = GetComponent<Animator>();
         }
 
+        // AI PLAYER, ON THE SERVER: the server drives it, so unlike a remote player it
+        // keeps its character controller and real physics. Everywhere else a bot is an
+        // ordinary remote player and takes the branch below.
+        if (TryGetComponent(out LSPlayer lsPlayer) && lsPlayer.IsServerBot)
+        {
+            SetupServerBot();
+            return;
+        }
+
         // REMOTE PLAYERS
         if (!isLocalPlayer)
         {
@@ -51,6 +60,34 @@ public class PlayerNetworkSetup : NetworkBehaviour
             gameObject.tag = "Player";
             SetupLocalPlayer();
         }
+    }
+
+    /// <summary>
+    /// Input, inventory pickups and footsteps are all player-only; the character
+    /// controller stays on because LSBotBrain moves the bot through it.
+    /// </summary>
+    void SetupServerBot()
+    {
+        foreach (var s in scriptsToDisable)
+        {
+            if (s == null || s is JUCharacterController)
+                continue;
+
+            // ItemSwitchManager queues "equip the start item" with Invoke in its Start,
+            // and Invoke still fires on a disabled component: 0.2 s after spawning it
+            // switched the bot back to empty hands, leaving it stuck in fire mode with
+            // no gun. Anything these player-only scripts had lined up is cancelled.
+            s.CancelInvoke();
+            s.enabled = false;
+        }
+
+        gameObject.tag = "Untagged";
+        StripRemotePlayerCost();
+
+        // LSBotBrain decides the culling mode: bones must keep updating off-screen only
+        // while the bot is fighting.
+        if (playerAnimator != null)
+            playerAnimator.enabled = true;
     }
 
     /// <summary>

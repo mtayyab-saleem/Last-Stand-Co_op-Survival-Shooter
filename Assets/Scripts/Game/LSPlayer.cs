@@ -18,6 +18,18 @@ public class LSPlayer : NetworkBehaviour
 
     [SyncVar] public bool isAlive = true;
 
+    /// <summary>
+    /// An AI player. Set by the server before spawning, so every client knows too.
+    /// Bots have no connection: the server drives them, see LSBotBrain.
+    /// </summary>
+    [SyncVar] public bool isBot = false;
+
+    /// <summary>Server only: the bot's identity in MatchTracker (always negative).</summary>
+    [System.NonSerialized] public int botKey;
+
+    /// <summary>True on the server for a bot it is driving - the one place a bot is not a puppet.</summary>
+    public bool IsServerBot => isBot && isServer;
+
     [SerializeField] private PlayerProfileSO playerProfile;
 
     public static LSPlayer LocalInstance { get; private set; }

@@ -138,7 +138,8 @@ public class LobbyUIManager : MonoBehaviour
             gameModeInt == 1 ? "DUO" :
             gameModeInt == 2 ? "SQUAD" : "SOLO";
 
-        subtitleLabel.text = mode + "  ·  BATTLE ROYALE";
+        bool aiFill = match != null && match.fillWithAI;
+        subtitleLabel.text = mode + "  ·  BATTLE ROYALE" + (aiFill ? "  ·  AI FILL" : string.Empty);
 
         countLabel.text = playerCount + "/" + maxPlayers;
         countLabel.color = playerCount >= maxPlayers ? LSUITheme.Accent : LSUITheme.Text;
@@ -165,9 +166,12 @@ public class LobbyUIManager : MonoBehaviour
 
         LSUITheme.SetButtonColor(primaryButton, canHostStart ? LSUITheme.ButtonGreen : LSUITheme.ButtonIdle);
 
-        hintLabel.text = canHostStart
-            ? "EVERYONE IS READY"
-            : "NEED " + minimumPlayers + " PLAYERS TO START  ·  " + playerCount + "/" + minimumPlayers;
+        int bots = LSMatchManager.Instance != null ? LSMatchManager.Instance.BotsToFill : 0;
+
+        if (canHostStart)
+            hintLabel.text = bots > 0 ? "READY  ·  AI FILLS " + bots + " SLOTS" : "EVERYONE IS READY";
+        else
+            hintLabel.text = "NEED " + minimumPlayers + " PLAYERS TO START  ·  " + playerCount + "/" + minimumPlayers;
 
         hintLabel.color = canHostStart ? LSUITheme.Accent : LSUITheme.Muted;
     }

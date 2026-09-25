@@ -27,6 +27,8 @@ public class MatchTracker : NetworkBehaviour
     [SyncVar][SerializeField] private string winningTeamMemberNames = string.Empty;
     [SyncVar][SerializeField] private int alivePlayers = 0;
     [SyncVar][SerializeField] private int aliveTeams = 0;
+    [SyncVar][SerializeField] private int aliveHumans = 0;
+    [SyncVar][SerializeField] private int totalPlayers = 0;
 
     [Header("Debug")]
     [SerializeField] private bool enableMatchDebug = false;
@@ -39,6 +41,12 @@ public class MatchTracker : NetworkBehaviour
     /// <summary>Players still in the match, for the eliminated player's screen.</summary>
     public int AlivePlayers => alivePlayers;
     public int AliveTeams => aliveTeams;
+
+    /// <summary>Real players still in the match. Bots are keyed below zero.</summary>
+    public int AliveHumans => aliveHumans;
+
+    /// <summary>Everyone who started the match, bots included, for the "alive / total" HUD.</summary>
+    public int TotalPlayers => totalPlayers;
     /// <summary>Winning team members, one name per line.</summary>
     public string WinningTeamMemberNames => winningTeamMemberNames;
 
@@ -96,6 +104,8 @@ public class MatchTracker : NetworkBehaviour
         winningTeamMemberNames = string.Empty;
         alivePlayers = 0;
         aliveTeams = 0;
+        aliveHumans = 0;
+        totalPlayers = 0;
 
         if (pendingWinnerCheck != null)
         {
@@ -131,6 +141,30 @@ public class MatchTracker : NetworkBehaviour
         }
     }
 
+    /// <summary>
+    /// Adds an AI player to the match. Called for every planned bot right after
+    /// ServerInitializeMatch, before GameScene loads, so a match full of bots can never
+    /// be decided before the bots have even spawned.
+    /// </summary>
+    [Server]
+    public void ServerAddBot(int key, string playerName, int teamId, int memberIndex)
+    {
+        if (participants.ContainsKey(key))
+            return;
+
+        participants.Add(key, new Participant
+        {
+            connectionId = key,
+            playerName = playerName,
+            teamId = teamId,
+            memberIndex = memberIndex,
+            alive = true
+        });
+
+        trackingActive = participants.Count > 0;
+        RefreshAliveCounts();
+    }
+
     /// <summary>Called by PlayerHealthManager exactly when server health reaches zero.</summary>
     [Server]
     public void ServerNotifyPlayerEliminated(LSPlayer player)
@@ -162,6 +196,7 @@ public class MatchTracker : NetworkBehaviour
     /// <summary>
     /// Called only for a real Mirror connection loss, never for a scene change. Takes the
     /// connection ID rather than the player object, which may not exist any more.
+    /// Also used with a bot's key for a bot that could not be spawned.
     /// </summary>
     [Server]
     public void ServerNotifyConnectionLost(int connectionId)
@@ -192,10 +227,18 @@ public class MatchTracker : NetworkBehaviour
     [Server]
     private Participant CaptureParticipant(LSPlayer player, bool initialAlive)
     {
-        if (player == null || player.connectionToClient == null)
+        if (player == null)
             return null;
 
-        int connectionId = player.connectionToClient.connectionId;
+        // Humans are keyed by connection, bots by the key they were planned with.
+        int connectionId;
+
+        if (player.isBot)
+            connectionId = player.botKey;
+        else if (player.connectionToClient != null)
+            connectionId = player.connectionToClient.connectionId;
+        else
+            return null;
 
         if (!participants.TryGetValue(connectionId, out Participant participant))
         {
@@ -231,6 +274,8 @@ public class MatchTracker : NetworkBehaviour
     {
         alivePlayers = participants.Values.Count(p => p.alive);
         aliveTeams = AliveTeamCount();
+        aliveHumans = participants.Values.Count(p => p.alive && p.connectionId >= 0);
+        totalPlayers = participants.Count;
     }
 
     [Server]

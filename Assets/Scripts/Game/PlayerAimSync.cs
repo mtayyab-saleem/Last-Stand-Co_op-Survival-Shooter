@@ -60,10 +60,20 @@ public class PlayerAimSync : NetworkBehaviour
     public Quaternion AimRotation => Quaternion.Euler(aimPitch, aimYaw, 0f);
     public bool IsAiming => aiming;
 
+    private LSPlayer lsPlayer;
+
+    /// <summary>
+    /// Whoever computes this character's real aim: its owner, or the server for a bot.
+    /// Everyone else only replays the synced values.
+    /// </summary>
+    private bool DrivesItself => isOwned || (lsPlayer != null && lsPlayer.IsServerBot);
+
     private void Awake()
     {
         if (character == null)
             character = GetComponent<JUCharacterController>();
+
+        lsPlayer = GetComponent<LSPlayer>();
     }
 
     // Remote work happens in Update so it lands before the animator's IK pass, which is
@@ -71,7 +81,7 @@ public class PlayerAimSync : NetworkBehaviour
     // as it is in JUTPS itself, which also reads it from Update for the local player.
     private void Update()
     {
-        if (isOwned || character == null)
+        if (DrivesItself || character == null)
             return;
 
         ApplyRemoteAim();
@@ -81,7 +91,7 @@ public class PlayerAimSync : NetworkBehaviour
     // The owner publishes after its camera has settled for the frame.
     private void LateUpdate()
     {
-        if (isOwned && character != null)
+        if (DrivesItself && character != null)
             PublishOwnerAim();
     }
 
@@ -218,7 +228,8 @@ public class PlayerAimSync : NetworkBehaviour
     // even though JUCharacterController - which has its own copy - is disabled.
     private void OnAnimatorIK(int layerIndex)
     {
-        if (isOwned || character == null)
+        // The driving side runs the real JUCharacterController, which does its own IK.
+        if (DrivesItself || character == null)
             return;
 
         if (!character.InverseKinematics || character.IsRolling)

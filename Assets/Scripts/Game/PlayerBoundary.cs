@@ -35,11 +35,13 @@ public class PlayerBoundary : MonoBehaviour
     private bool boundsReady;
     private Rigidbody body;
     private NetworkIdentity identity;
+    private LSPlayer lsPlayer;
 
 private void Awake()
     {
         body = GetComponent<Rigidbody>();
         identity = GetComponent<NetworkIdentity>();
+        lsPlayer = GetComponent<LSPlayer>();
     }
 
     private void Start()
@@ -52,7 +54,10 @@ private void Awake()
     {
         // Only the player actually driving this character needs clamping. Doing it
         // here makes the stop immediate instead of waiting for a network correction.
-        if (!boundsReady || identity == null || !identity.isOwned)
+        // A bot on the server is driven there, so the server clamps it.
+        bool drivenHere = identity != null && (identity.isOwned || (lsPlayer != null && lsPlayer.IsServerBot));
+
+        if (!boundsReady || !drivenHere)
             return;
 
         Vector3 position = transform.position;

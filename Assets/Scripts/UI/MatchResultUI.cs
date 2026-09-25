@@ -158,7 +158,13 @@ public class MatchResultUI : MonoBehaviour
     /// </summary>
     private bool CanReturnNow()
     {
-        return state == ResultState.MatchOver || !NetworkServer.active;
+        if (state == ResultState.MatchOver || !NetworkServer.active)
+            return true;
+
+        // With AI players, the humans can all be out while bots fight on for minutes.
+        // Leaving then spoils nothing for anyone, so the dead host is free to go.
+        MatchTracker tracker = MatchTracker.Instance;
+        return tracker != null && tracker.AliveHumans == 0;
     }
 
     // -------------------------
@@ -283,8 +289,18 @@ public class MatchResultUI : MonoBehaviour
 
     private void UpdateCountdown()
     {
-        if (countdownLabel == null || returnAtTime < 0f)
+        if (countdownLabel == null)
             return;
+
+        if (returnAtTime < 0f)
+        {
+            // A dead host was told to wait. Start as soon as leaving hurts nobody.
+            if (!CanReturnNow())
+                return;
+
+            returnAtTime = Time.unscaledTime + Mathf.Max(1f, autoReturnSeconds);
+            lastCountdownShown = -1;
+        }
 
         float remaining = returnAtTime - Time.unscaledTime;
 

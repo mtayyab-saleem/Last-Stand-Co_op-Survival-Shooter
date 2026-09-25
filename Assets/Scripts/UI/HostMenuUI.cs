@@ -2,6 +2,8 @@ using UnityEngine;
 using Mirror;
 using Mirror.Discovery;
 using Michsky.MUIP;
+using TMPro;
+using UnityEngine.UI;
 
 /// <summary>
 /// Host Match popup: pick a match mode and a match type, then start hosting.
@@ -31,6 +33,10 @@ public class HostMenuUI : MonoBehaviour
 
     private int selectedModeIndex = 0;
     private int selectedTypeIndex = 0;
+
+    // "Fill with AI": remembered between sessions, saved when hosting.
+    private bool fillWithAI;
+    private Image aiCheckFill;
     private bool isOpen;
 
     public bool IsOpen { get { return isOpen; } }
@@ -55,6 +61,69 @@ public class HostMenuUI : MonoBehaviour
         }
 
         WireBackdrop();
+
+        fillWithAI = PlayerPrefs.GetInt(LSMatchManager.FillWithAIKey, 0) == 1;
+        BuildAIToggle();
+    }
+
+    /// <summary>
+    /// A "FILL WITH AI" checkbox in the top-right corner of the Match Type box, in the
+    /// same colours as the cards. Built here so the popup prefab needs no new wiring.
+    /// </summary>
+    private void BuildAIToggle()
+    {
+        Transform box = panelRoot.transform.Find("Window/Box_Type");
+
+        if (box == null)
+        {
+            Debug.LogWarning("[HostMenuUI] Match Type box not found; the AI checkbox was not added.");
+            return;
+        }
+
+        // Borrow the font the box title already uses.
+        Transform title = box.Find("T_MATCH TYPE");
+        TMP_FontAsset font = title != null && title.TryGetComponent(out TMP_Text titleText) ? titleText.font : null;
+
+        // The whole row is the tap target, which is kinder on a phone than a 32 px box.
+        RectTransform row = LSUITheme.Panel("AIToggle", box, Color.clear, true);
+        LSUITheme.Place(row, new Vector2(1f, 1f), new Vector2(1f, 1f), new Vector2(-24f, -14f),
+                        new Vector2(340f, 44f), new Vector2(1f, 1f));
+
+        var button = row.gameObject.AddComponent<Button>();
+        button.transition = Selectable.Transition.None;
+        button.onClick.AddListener(ToggleAI);
+
+        RectTransform border = LSUITheme.Panel("Box", row, LSUITheme.BoxBorder);
+        LSUITheme.Place(border, new Vector2(1f, 0.5f), new Vector2(1f, 0.5f), Vector2.zero,
+                        new Vector2(32f, 32f), new Vector2(1f, 0.5f));
+
+        RectTransform inner = LSUITheme.Panel("Inner", border, LSUITheme.BoxInner);
+        LSUITheme.Stretch(inner);
+        inner.sizeDelta = new Vector2(-4f, -4f);
+
+        RectTransform fill = LSUITheme.Panel("Fill", inner, LSUITheme.Accent);
+        LSUITheme.Stretch(fill);
+        fill.sizeDelta = new Vector2(-8f, -8f);
+        aiCheckFill = fill.GetComponent<Image>();
+
+        TextMeshProUGUI label = LSUITheme.Label("Label", row, font, "FILL WITH AI", 22f, 4f,
+                                                LSUITheme.Text, TextAlignmentOptions.Right);
+        LSUITheme.Stretch((RectTransform)label.transform);
+        ((RectTransform)label.transform).offsetMax = new Vector2(-46f, 0f);
+
+        RefreshAIToggle();
+    }
+
+    private void ToggleAI()
+    {
+        fillWithAI = !fillWithAI;
+        RefreshAIToggle();
+    }
+
+    private void RefreshAIToggle()
+    {
+        if (aiCheckFill != null)
+            aiCheckFill.enabled = fillWithAI;
     }
 
     private void Start()
@@ -174,6 +243,7 @@ public class HostMenuUI : MonoBehaviour
         // LSMatchManager reads this on OnStartServer to pick the team rules.
         PlayerPrefs.SetInt("HostSelectedMode", selectedModeIndex);
         PlayerPrefs.SetInt("HostSelectedMap", selectedTypeIndex);
+        PlayerPrefs.SetInt(LSMatchManager.FillWithAIKey, fillWithAI ? 1 : 0);
         PlayerPrefs.Save();
 
         Close();
