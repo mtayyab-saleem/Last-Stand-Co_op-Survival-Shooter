@@ -1,12 +1,15 @@
 using TMPro;
 using UnityEngine;
+using UnityEngine.UI;
 
 /// <summary>
-/// On-screen safe zone status: what the zone is doing and how long until it changes.
+/// The match status bar at the top of the screen: how many players are still alive out
+/// of how many started, what the safe zone is doing, how long until it changes, and a
+/// warning with the distance back when the local player is outside it.
 ///
-/// The countdown is derived from the controller's synced phase end time, so every
-/// client shows the same number without any extra network traffic. Builds its own
-/// labels at runtime when none are assigned, so no manual UI wiring is needed.
+/// Everything is read from synced state - MatchTracker's alive/total counts and the
+/// zone controller's phase end time - so every client shows the same numbers without
+/// any extra network traffic. The bar builds itself at runtime; nothing to wire up.
 /// </summary>
 [DisallowMultipleComponent]
 public class SafeZoneHUD : MonoBehaviour
@@ -21,67 +24,129 @@ public class SafeZoneHUD : MonoBehaviour
 
     [Header("Style")]
     [SerializeField] private TMP_FontAsset font;
-    [SerializeField] private float statusFontSize = 22f;
-    [SerializeField] private float timerFontSize = 34f;
-    [SerializeField] private Vector2 anchoredOffset = new Vector2(0f, -28f);
+    [SerializeField] private float statusFontSize = 17f;
+    [SerializeField] private float timerFontSize = 38f;
+    [SerializeField] private Vector2 anchoredOffset = new Vector2(0f, -18f);
 
     [Header("Colours")]
-    [SerializeField] private Color zoneColor = new Color32(0x00, 0xD2, 0xFF, 0xFF);
-    [SerializeField] private Color warningColor = new Color32(0xFF, 0x6B, 0x4A, 0xFF);
+    [SerializeField] private Color zoneColor = new Color32(0x3D, 0x9B, 0xFF, 0xFF);
+    [SerializeField] private Color warningColor = new Color32(0xFF, 0x5A, 0x4A, 0xFF);
 
     [Header("Text")]
     [SerializeField] private string shrinkingText = "ZONE SHRINKING";
     [SerializeField] private string waitingText = "NEXT ZONE IN";
     [SerializeField] private string finalText = "FINAL ZONE";
-    [SerializeField] private string outsideSuffix = "  -  GET INSIDE";
+    [SerializeField] private string outsideSuffix = "GET INSIDE";
+
+    private const float ChipHeight = 84f;
+    private const float AliveWidth = 150f;
+    private const float ZoneWidth = 360f;
+    private const float Gap = 10f;
+
+    private static readonly Color ChipColor = new Color(0.035f, 0.047f, 0.063f, 0.9f);
 
     private RectTransform builtRoot;
+    private RectTransform aliveChip;
+    private RectTransform zoneChip;
+    private TMP_Text aliveLabel;
+    private Image zoneAccent;
+    private RectTransform progressFill;
+    private Image progressImage;
+
+    // Length of the phase being counted down, so the bar can show how much is left.
+    private SafeZoneController.ZonePhase trackedPhase;
+    private int trackedCase = int.MinValue;
+    private float phaseLength = 1f;
 
     private void Awake()
     {
         if (statusLabel == null || timerLabel == null)
-            BuildLabels();
+            BuildBar();
     }
 
     private void Update()
+    {
+        bool aliveShown = UpdateAliveChip();
+        bool zoneShown = UpdateZoneChip();
+
+        if (builtRoot != null)
+        {
+            bool show = aliveShown || zoneShown;
+            if (builtRoot.gameObject.activeSelf != show)
+                builtRoot.gameObject.SetActive(show);
+        }
+    }
+
+    // -------------------------
+    // Alive count
+    // -------------------------
+
+    private bool UpdateAliveChip()
+    {
+        MatchTracker tracker = MatchTracker.Instance;
+        bool show = tracker != null && tracker.TrackingActive && !tracker.MatchEnded && tracker.TotalPlayers > 0;
+
+        SetActive(aliveChip, show);
+
+        if (show && aliveLabel != null)
+            aliveLabel.text = $"{tracker.AlivePlayers}<size=72%><color=#8A96A3> / {tracker.TotalPlayers}</color></size>";
+
+        return show;
+    }
+
+    // -------------------------
+    // Safe zone
+    // -------------------------
+
+    private bool UpdateZoneChip()
     {
         if (zone == null)
         {
             // The zone lives in the gameplay scene, so it appears after a scene load.
             zone = FindFirstObjectByType<SafeZoneController>();
-
-            if (zone == null)
-            {
-                SetVisible(false);
-                return;
-            }
         }
 
-        SafeZoneController.ZonePhase phase = zone.Phase;
+        SafeZoneController.ZonePhase phase = zone != null ? zone.Phase : SafeZoneController.ZonePhase.Idle;
+        bool show = phase != SafeZoneController.ZonePhase.Idle && phase != SafeZoneController.ZonePhase.Ended;
 
-        if (phase == SafeZoneController.ZonePhase.Idle || phase == SafeZoneController.ZonePhase.Ended)
+        SetActive(zoneChip, show);
+        if (statusLabel != null && builtRoot == null) statusLabel.enabled = show;
+        if (timerLabel != null && builtRoot == null) timerLabel.enabled = show;
+
+        if (!show)
+            return false;
+
+        float remaining = zone.SecondsRemaining;
+
+        if (phase != trackedPhase || zone.CurrentCaseIndex != trackedCase)
         {
-            SetVisible(false);
-            return;
+            trackedPhase = phase;
+            trackedCase = zone.CurrentCaseIndex;
+            phaseLength = Mathf.Max(remaining, 0.01f);
         }
 
-        SetVisible(true);
-
-        bool outside = IsLocalPlayerOutside();
+        float outsideBy = DistanceOutsideZone();
+        bool outside = outsideBy > 0f;
         Color tint = outside ? warningColor : zoneColor;
 
         if (statusLabel != null)
         {
-            string label =
-                phase == SafeZoneController.ZonePhase.Shrinking ? shrinkingText :
-                phase == SafeZoneController.ZonePhase.Final ? finalText : waitingText;
-
-            int total = zone.TotalCases;
-            if (total > 0 && phase != SafeZoneController.ZonePhase.Final)
-                label += "   " + Mathf.Clamp(zone.CurrentCaseIndex + 1, 1, total) + "/" + total;
+            string label;
 
             if (outside)
-                label += outsideSuffix;
+            {
+                label = $"{outsideSuffix}  ·  {Mathf.CeilToInt(outsideBy)} M";
+            }
+            else
+            {
+                label =
+                    phase == SafeZoneController.ZonePhase.Shrinking ? shrinkingText :
+                    phase == SafeZoneController.ZonePhase.Final ? finalText : waitingText;
+
+                int total = zone.TotalCases;
+                if (total > 0 && phase != SafeZoneController.ZonePhase.Final)
+                    label += "  ·  " + Mathf.Clamp(zone.CurrentCaseIndex + 1, 1, total) + "/" + total;
+            }
 
             statusLabel.text = label;
             statusLabel.color = tint;
@@ -90,22 +155,36 @@ public class SafeZoneHUD : MonoBehaviour
         if (timerLabel != null)
         {
             // The final stage never ends, so a countdown there would be meaningless.
-            timerLabel.text = phase == SafeZoneController.ZonePhase.Final
-                ? string.Empty
-                : FormatTime(zone.SecondsRemaining);
-
-            timerLabel.color = tint;
+            timerLabel.text = phase == SafeZoneController.ZonePhase.Final ? "--:--" : FormatTime(remaining);
+            timerLabel.color = outside ? warningColor : Color.white;
         }
+
+        if (zoneAccent != null)
+            zoneAccent.color = tint;
+
+        if (progressFill != null)
+        {
+            float left = phase == SafeZoneController.ZonePhase.Final ? 1f : Mathf.Clamp01(remaining / phaseLength);
+            progressFill.anchorMax = new Vector2(left, 1f);
+            progressImage.color = tint;
+        }
+
+        return true;
     }
 
-    private bool IsLocalPlayerOutside()
+    /// <summary>Metres the local player has to go to get back inside; 0 when inside.</summary>
+    private float DistanceOutsideZone()
     {
         LSPlayer local = LSPlayer.LocalInstance;
 
-        if (local == null || zone == null)
-            return false;
+        if (local == null || zone == null || !local.isAlive)
+            return 0f;
 
-        return !zone.IsInsideZone(local.transform.position);
+        Vector3 centre = zone.ZoneCenter;
+        Vector3 position = local.transform.position;
+        float fromCentre = new Vector2(position.x - centre.x, position.z - centre.z).magnitude;
+
+        return Mathf.Max(0f, fromCentre - zone.CurrentRadius);
     }
 
     private static string FormatTime(float seconds)
@@ -114,65 +193,77 @@ public class SafeZoneHUD : MonoBehaviour
         return (whole / 60).ToString("0") + ":" + (whole % 60).ToString("00");
     }
 
-    private void SetVisible(bool visible)
+    private static void SetActive(Component target, bool active)
     {
-        if (builtRoot != null && builtRoot.gameObject.activeSelf != visible)
-            builtRoot.gameObject.SetActive(visible);
-
-        if (builtRoot == null)
-        {
-            if (statusLabel != null) statusLabel.enabled = visible;
-            if (timerLabel != null) timerLabel.enabled = visible;
-        }
+        if (target != null && target.gameObject.activeSelf != active)
+            target.gameObject.SetActive(active);
     }
 
-    /// <summary>Top-centre status block, built so the HUD needs no manual setup.</summary>
-    private void BuildLabels()
-    {
-        Canvas canvas = GetComponentInParent<Canvas>();
+    // -------------------------
+    // Layout
+    // -------------------------
 
-        if (canvas == null)
+    /// <summary>
+    /// Two dark chips hanging from the top centre, clear of the settings button on the
+    /// left and the health and weapon panel on the right:
+    /// [ 7 / 8  ALIVE ] [ NEXT ZONE IN · 1/4        1:25 ]
+    /// </summary>
+    private void BuildBar()
+    {
+        if (GetComponentInParent<Canvas>() == null)
         {
-            Debug.LogWarning("[SafeZoneHUD] No Canvas in parents; labels cannot be built.");
+            Debug.LogWarning("[SafeZoneHUD] No Canvas in parents; the status bar cannot be built.");
             return;
         }
 
-        var rootGo = new GameObject("SafeZoneStatus", typeof(RectTransform));
-        rootGo.transform.SetParent(transform, false);
+        builtRoot = new GameObject("MatchStatusBar", typeof(RectTransform)).GetComponent<RectTransform>();
+        builtRoot.SetParent(transform, false);
+        float width = AliveWidth + Gap + ZoneWidth;
+        LSUITheme.Place(builtRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), anchoredOffset,
+                        new Vector2(width, ChipHeight), new Vector2(0.5f, 1f));
 
-        builtRoot = (RectTransform)rootGo.transform;
-        builtRoot.anchorMin = new Vector2(0.5f, 1f);
-        builtRoot.anchorMax = new Vector2(0.5f, 1f);
-        builtRoot.pivot = new Vector2(0.5f, 1f);
-        builtRoot.anchoredPosition = anchoredOffset;
-        builtRoot.sizeDelta = new Vector2(760f, 100f);
+        // Alive chip
+        aliveChip = LSUITheme.Panel("Alive", builtRoot, ChipColor);
+        LSUITheme.Place(aliveChip, new Vector2(0f, 1f), new Vector2(0f, 1f), Vector2.zero,
+                        new Vector2(AliveWidth, ChipHeight), new Vector2(0f, 1f));
 
-        statusLabel = CreateLabel("Status", builtRoot, 0f, 34f, statusFontSize);
-        statusLabel.characterSpacing = 6f;
+        RectTransform aliveAccent = LSUITheme.Panel("Accent", aliveChip, LSUITheme.Accent);
+        LSUITheme.Place(aliveAccent, new Vector2(0f, 0f), new Vector2(0f, 1f), Vector2.zero, new Vector2(4f, 0f), new Vector2(0f, 0.5f));
 
-        timerLabel = CreateLabel("Timer", builtRoot, -34f, 52f, timerFontSize);
-    }
+        aliveLabel = LSUITheme.Label("Count", aliveChip, font, "-", timerFontSize + 4f, 0f, LSUITheme.Text, TextAlignmentOptions.Center);
+        LSUITheme.Place(aliveLabel.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(2f, -4f),
+                        new Vector2(-4f, 50f), new Vector2(0.5f, 1f));
 
-    private TMP_Text CreateLabel(string name, RectTransform parent, float y, float height, float size)
-    {
-        var go = new GameObject(name, typeof(RectTransform));
-        go.transform.SetParent(parent, false);
+        TMP_Text aliveCaption = LSUITheme.Label("Caption", aliveChip, font, "ALIVE", statusFontSize - 2f, 5f, LSUITheme.Muted, TextAlignmentOptions.Center);
+        LSUITheme.Place(aliveCaption.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(2f, 8f),
+                        new Vector2(-4f, 20f), new Vector2(0.5f, 0f));
 
-        var rect = (RectTransform)go.transform;
-        rect.anchorMin = new Vector2(0f, 1f);
-        rect.anchorMax = new Vector2(1f, 1f);
-        rect.pivot = new Vector2(0.5f, 1f);
-        rect.anchoredPosition = new Vector2(0f, y);
-        rect.sizeDelta = new Vector2(0f, height);
+        // Zone chip
+        zoneChip = LSUITheme.Panel("Zone", builtRoot, ChipColor);
+        LSUITheme.Place(zoneChip, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(AliveWidth + Gap, 0f),
+                        new Vector2(ZoneWidth, ChipHeight), new Vector2(0f, 1f));
 
-        var text = go.AddComponent<TextMeshProUGUI>();
-        if (font != null) text.font = font;
-        text.fontSize = size;
-        text.alignment = TextAlignmentOptions.Center;
-        text.color = zoneColor;
-        text.raycastTarget = false;
-        text.text = string.Empty;
+        zoneAccent = LSUITheme.Panel("Accent", zoneChip, zoneColor).GetComponent<Image>();
+        LSUITheme.Place(zoneAccent.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 1f), Vector2.zero, new Vector2(4f, 0f), new Vector2(0f, 0.5f));
 
-        return text;
+        statusLabel = LSUITheme.Label("Status", zoneChip, font, string.Empty, statusFontSize, 3f, zoneColor, TextAlignmentOptions.Left);
+        LSUITheme.Place(statusLabel.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(20f, -10f),
+                        new Vector2(-36f, 24f), new Vector2(0f, 1f));
+
+        timerLabel = LSUITheme.Label("Timer", zoneChip, font, string.Empty, timerFontSize, 2f, Color.white, TextAlignmentOptions.Left);
+        LSUITheme.Place(timerLabel.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(20f, 10f),
+                        new Vector2(-36f, 46f), new Vector2(0f, 0f));
+
+        // Time left in the current phase, along the bottom edge.
+        RectTransform track = LSUITheme.Panel("Progress", zoneChip, new Color(1f, 1f, 1f, 0.08f));
+        LSUITheme.Place(track, new Vector2(0f, 0f), new Vector2(1f, 0f), Vector2.zero, new Vector2(0f, 4f), new Vector2(0.5f, 0f));
+
+        progressFill = LSUITheme.Panel("Fill", track, zoneColor);
+        progressFill.anchorMin = Vector2.zero;
+        progressFill.anchorMax = Vector2.one;
+        progressFill.offsetMin = progressFill.offsetMax = Vector2.zero;
+        progressImage = progressFill.GetComponent<Image>();
+
+        builtRoot.gameObject.SetActive(false);
     }
 }

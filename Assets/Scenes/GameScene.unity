@@ -14,12 +14,12 @@ OcclusionCullingSettings:
 RenderSettings:
   m_ObjectHideFlags: 0
   serializedVersion: 10
-  m_Fog: 0
-  m_FogColor: {r: 0.5, g: 0.5, b: 0.5, a: 1}
-  m_FogMode: 3
+  m_Fog: 1
+  m_FogColor: {r: 0.52, g: 0.57, b: 0.61, a: 1}
+  m_FogMode: 1
   m_FogDensity: 0.01
-  m_LinearFogStart: 0
-  m_LinearFogEnd: 300
+  m_LinearFogStart: 50
+  m_LinearFogEnd: 210
   m_AmbientSkyColor: {r: 0.212, g: 0.227, b: 0.259, a: 1}
   m_AmbientEquatorColor: {r: 0.114, g: 0.125, b: 0.133, a: 1}
   m_AmbientGroundColor: {r: 0.047, g: 0.043, b: 0.035, a: 1}
@@ -220,6 +220,26 @@ CanvasGroup:
   m_Interactable: 1
   m_BlocksRaycasts: 1
   m_IgnoreParentGroups: 0
+--- !u!1 &39835768 stripped
+GameObject:
+  m_CorrespondingSourceObject: {fileID: 5046795514518783369, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
+  m_PrefabInstance: {fileID: 77898790}
+  m_PrefabAsset: {fileID: 0}
+--- !u!114 &39835772
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 39835768}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 10fabc07deea3ff45b896051a8a5c1e7, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::ForestRenderer
+  drawDistance: 170
+  cellSize: 32
+  shadowMargin: 15
 --- !u!1001 &77898790
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -277,8 +297,16 @@ PrefabInstance:
       value: 0
       objectReference: {fileID: 0}
     - target: {fileID: 2856717349707764027, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
+      propertyPath: m_TerrainData
+      value: 
+      objectReference: {fileID: 15600000, guid: 793d6de997109c746acff699efcc6f82, type: 2}
+    - target: {fileID: 2856717349707764027, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
       propertyPath: m_TreeDistance
-      value: 85
+      value: 170
+      objectReference: {fileID: 0}
+    - target: {fileID: 2856717349707764027, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
+      propertyPath: m_DrawInstanced
+      value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 2856717349707764027, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
       propertyPath: m_DrawTreesAndFoliage
@@ -297,70 +325,21 @@ PrefabInstance:
       value: 1
       objectReference: {fileID: 0}
     - target: {fileID: 6989075594113477859, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
+      propertyPath: m_TerrainData
+      value: 
+      objectReference: {fileID: 15600000, guid: 793d6de997109c746acff699efcc6f82, type: 2}
+    - target: {fileID: 6989075594113477859, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
       propertyPath: m_EnableTreeColliders
       value: 1
       objectReference: {fileID: 0}
     m_RemovedComponents: []
     m_RemovedGameObjects: []
     m_AddedGameObjects: []
-    m_AddedComponents: []
+    m_AddedComponents:
+    - targetCorrespondingSourceObject: {fileID: 5046795514518783369, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
+      insertIndex: -1
+      addedObject: {fileID: 39835772}
   m_SourcePrefab: {fileID: 100100000, guid: 10afd84d0af6a7c4d8906fa73cfba057, type: 3}
---- !u!1 &77966819
-GameObject:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 77966820}
-  - component: {fileID: 77966821}
-  m_Layer: 0
-  m_Name: DamageDirectionHUD
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!224 &77966820
-RectTransform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 77966819}
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children: []
-  m_Father: {fileID: 1345482976}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
-  m_Pivot: {x: 0.5, y: 0.5}
---- !u!114 &77966821
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 77966819}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 42f203c8b51e7594880fe0029c2503d1, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::DamageDirectionHUD
-  indicatorSprite: {fileID: 21300000, guid: f49a4b384c47ea64aaf81bad3cc990be, type: 3}
-  tint: {r: 1, g: 1, b: 1, a: 1}
-  maxIndicators: 4
-  indicatorWidth: 250
-  distanceFromCenter: 181
-  holdTime: 1.2
-  fadeTime: 0.8
-  hitPulseScale: 1.12
 --- !u!1001 &130788236
 PrefabInstance:
   m_ObjectHideFlags: 0
@@ -1684,15 +1663,15 @@ MonoBehaviour:
   statusLabel: {fileID: 0}
   timerLabel: {fileID: 0}
   font: {fileID: 11400000, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
-  statusFontSize: 22
-  timerFontSize: 34
-  anchoredOffset: {x: 0, y: -28}
-  zoneColor: {r: 0, g: 0.8235294, b: 1, a: 1}
-  warningColor: {r: 1, g: 0.41960785, b: 0.2901961, a: 1}
+  statusFontSize: 17
+  timerFontSize: 38
+  anchoredOffset: {x: 0, y: -18}
+  zoneColor: {r: 0.23921569, g: 0.60784316, b: 1, a: 1}
+  warningColor: {r: 1, g: 0.3529412, b: 0.2901961, a: 1}
   shrinkingText: ZONE SHRINKING
   waitingText: NEXT ZONE IN
   finalText: FINAL ZONE
-  outsideSuffix: '  -  GET INSIDE'
+  outsideSuffix: GET INSIDE
 --- !u!1 &916373711
 GameObject:
   m_ObjectHideFlags: 0
@@ -1818,7 +1797,7 @@ RectTransform:
   m_GameObject: {fileID: 931341100}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
   m_LocalPosition: {x: 0, y: 0, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_LocalScale: {x: 0.55, y: 0.55, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 1141220654}
@@ -1827,11 +1806,11 @@ RectTransform:
   - {fileID: 897085795}
   m_Father: {fileID: 1345482974}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 1, y: 1}
-  m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: -550, y: -118.5}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 102, y: -27.5}
   m_SizeDelta: {x: 366.81, y: 100}
-  m_Pivot: {x: 0.5, y: 0.5}
+  m_Pivot: {x: 0, y: 1}
 --- !u!114 &931341102
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1885,7 +1864,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   buttonIcon: {fileID: 21300000, guid: d58c56a572b8c424b977292054ceb745, type: 3}
-  buttonText: Disconnect
+  buttonText: Leave
   iconScale: 1
   textSize: 40
   autoFitContent: 1
@@ -2054,7 +2033,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Disconnect
+  m_text: Leave
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
   m_sharedMaterial: {fileID: -8187402374190366037, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
@@ -2242,7 +2221,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Disconnect
+  m_text: Leave
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
   m_sharedMaterial: {fileID: -8187402374190366037, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
@@ -2394,7 +2373,7 @@ MonoBehaviour:
   m_OnCullStateChanged:
     m_PersistentCalls:
       m_Calls: []
-  m_text: Disconnect
+  m_text: Leave
   m_isRightToLeft: 0
   m_fontAsset: {fileID: 11400000, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
   m_sharedMaterial: {fileID: -8187402374190366037, guid: 4f9503e40872e074fb36c233b968ca65, type: 2}
@@ -3605,6 +3584,14 @@ PrefabInstance:
       propertyPath: m_AnchorMax.y
       value: 0
       objectReference: {fileID: 0}
+    - target: {fileID: 6650159759127090238, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
+      propertyPath: m_LocalScale.x
+      value: 0.75
+      objectReference: {fileID: 0}
+    - target: {fileID: 6650159759127090238, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
+      propertyPath: m_LocalScale.y
+      value: 0.75
+      objectReference: {fileID: 0}
     - target: {fileID: 6675995760088736567, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
       propertyPath: m_IsActive
       value: 1
@@ -3736,6 +3723,10 @@ PrefabInstance:
     - target: {fileID: 7029114239654419012, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
       propertyPath: m_IsActive
       value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 7116506639204141903, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
+      propertyPath: CharacterLayer.m_Bits
+      value: 4
       objectReference: {fileID: 0}
     - target: {fileID: 7289342064744477547, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
       propertyPath: m_IsActive
@@ -3906,7 +3897,7 @@ PrefabInstance:
       addedObject: {fileID: 1668009817}
     - targetCorrespondingSourceObject: {fileID: 104378148937617365, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
       insertIndex: 2
-      addedObject: {fileID: 77966820}
+      addedObject: {fileID: 2037732070}
     - targetCorrespondingSourceObject: {fileID: 104378148937617365, guid: cdd1ef2cd07409c4cbf0d593dad85a05, type: 3}
       insertIndex: -1
       addedObject: {fileID: 130788237}
@@ -4408,11 +4399,11 @@ PrefabInstance:
       objectReference: {fileID: 0}
     - target: {fileID: 1744488677587244907, guid: f502deef1231c784f874d67476cf0c01, type: 3}
       propertyPath: m_LocalScale.x
-      value: 0.4
+      value: 0.62
       objectReference: {fileID: 0}
     - target: {fileID: 1744488677587244907, guid: f502deef1231c784f874d67476cf0c01, type: 3}
       propertyPath: m_LocalScale.y
-      value: 0.4
+      value: 0.62
       objectReference: {fileID: 0}
     - target: {fileID: 1744488677587244907, guid: f502deef1231c784f874d67476cf0c01, type: 3}
       propertyPath: m_LocalPosition.x
@@ -4977,6 +4968,76 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 41f84591ce72545258ea98cb7518d8b9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Mirror::Mirror.NetworkStartPosition
+--- !u!1 &2037732069
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 2037732070}
+  - component: {fileID: 2037732071}
+  m_Layer: 0
+  m_Name: EnemyAwarenessHUD
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!224 &2037732070
+RectTransform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2037732069}
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 1345482976}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_AnchorMin: {x: 0, y: 0}
+  m_AnchorMax: {x: 1, y: 1}
+  m_AnchoredPosition: {x: 0, y: 0}
+  m_SizeDelta: {x: 0, y: 0}
+  m_Pivot: {x: 0.5, y: 0.5}
+--- !u!114 &2037732071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2037732069}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 6182a39a1b4fa184192d91475cc9af18, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyAwarenessHUD
+  ringSprite: {fileID: 21300000, guid: 59d722df2752b604daee052c4a6a23ad, type: 3}
+  gunshotIcon: {fileID: 21300000, guid: 88070cc7f0a23024183cddc175acad48, type: 3}
+  footstepIcon: {fileID: 21300000, guid: b82981525bb5a684b9631b59646c2703, type: 3}
+  damageIcon: {fileID: 21300000, guid: 77673f0de75c27c439d4be3d5380c01a, type: 3}
+  damageColor: {r: 0.95, g: 0.16, b: 0.16, a: 1}
+  gunshotColor: {r: 1, g: 0.5, b: 0.15, a: 1}
+  footstepColor: {r: 1, g: 1, b: 1, a: 0.9}
+  ringRadius: 300
+  gunshotArc: 20
+  footstepArc: 15
+  damageArc: 25
+  iconSize: 40
+  iconGap: 25
+  iconSeparation: 15
+  gunshotRange: 400
+  footstepRange: 80
+  footstepMinSpeed: 1
+  damageHoldTime: 1.4
+  gunshotHoldTime: 2.5
+  footstepHoldTime: 0.6
+  fadeTime: 0.6
+  maxIcons: 8
 --- !u!1 &2051415421
 GameObject:
   m_ObjectHideFlags: 0
