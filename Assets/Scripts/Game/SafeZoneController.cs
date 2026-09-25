@@ -115,6 +115,18 @@ public class SafeZoneController : NetworkBehaviour
     // Lifecycle
     // -------------------------
 
+    private void Awake()
+    {
+        // The wall has to start below the lowest ground it can cross. With a fixed
+        // groundY it began above the terrain's hollows, so from inside one the wall was
+        // a band floating overhead instead of a barrier. Terrain heights never go below
+        // the terrain's own position.
+        Terrain terrain = FindAnyObjectByType<Terrain>();
+
+        if (terrain != null)
+            groundY = Mathf.Min(groundY, terrain.GetPosition().y - 2f);
+    }
+
     private void Start()
     {
         // A client that joins mid-hold would otherwise draw the authored values:
