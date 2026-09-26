@@ -10,6 +10,12 @@ using UnityEngine;
 /// removes the part of the velocity that goes into a face that is too steep - the
 /// player still slides along it and can walk away or back down freely.
 ///
+/// Tree trunks are handled too: brushing one used to stop a sprint dead (the capsule
+/// kept pushing into the trunk and friction held it there). A trunk is steered around
+/// at full speed instead - the direction along its surface, or a side when running
+/// straight into it. The surface is taken from the body's real contact when it touches
+/// one, and from a probe ahead otherwise.
+///
 /// Added by PlayerNetworkSetup to the local player only; bots keep JUTPS's behaviour.
 /// </summary>
 [DefaultExecutionOrder(100)]
@@ -26,6 +32,11 @@ public class PlayerSlopeLimiter : MonoBehaviour
     private JUCharacterController character;
     private Rigidbody body;
     private float bodyRadius = 0.4f;
+
+    // Steepest-facing contact from the last physics step (OnCollisionStay runs after it).
+    private bool hasContact;
+    private Vector3 contactNormal;
+    private bool contactIsTree;
 
     private void Awake()
     {
@@ -44,11 +55,28 @@ public class PlayerSlopeLimiter : MonoBehaviour
         Vector3 velocity = body.linearVelocity;
         Vector3 flat = new Vector3(velocity.x, 0f, velocity.z);
 
+        bool touching = hasContact;
+        Vector3 touchedNormal = contactNormal;
+        bool touchedTree = contactIsTree;
+        hasContact = false;
+
         if (flat.sqrMagnitude < 0.01f)
             return;
 
-        if (!FindSteepFace(flat.normalized, out Vector3 faceNormal))
+        Vector3 faceNormal;
+        bool isTree;
+
+        // What the body actually touches beats what a probe expects to touch: a probe
+        // narrower than the body meets a round trunk at a different angle.
+        if (touching && Vector3.Dot(flat, touchedNormal) < 0f)
+        {
+            faceNormal = touchedNormal;
+            isTree = touchedTree;
+        }
+        else if (!FindSteepFace(flat.normalized, out faceNormal, out isTree))
+        {
             return;
+        }
 
         // Horizontal direction pointing away from the face; moving against it is climbing.
         Vector3 away = new Vector3(faceNormal.x, 0f, faceNormal.z);
@@ -62,40 +90,97 @@ public class PlayerSlopeLimiter : MonoBehaviour
         if (into >= 0f)
             return;   // moving along it or away from it
 
-        flat -= away * into;
+        Vector3 along = flat - away * into;
+
+        if (isTree)
+        {
+            // Straight into the trunk leaves nothing along it: pass on one side.
+            if (along.sqrMagnitude < 0.0001f)
+                along = Vector3.Cross(Vector3.up, away);
+
+            along = along.normalized * flat.magnitude;
+        }
+
+        flat = along;
 
         // A jump keeps its own upward speed; walking into the face never gains height.
         float vertical = character.IsJumping ? velocity.y : Mathf.Min(velocity.y, 0f);
         body.linearVelocity = new Vector3(flat.x, vertical, flat.z);
     }
 
+    private void OnCollisionStay(Collision collision)
+    {
+        float minUp = Mathf.Cos(maxClimbAngle * Mathf.Deg2Rad);
+        Vector3 flat = new Vector3(body.linearVelocity.x, 0f, body.linearVelocity.z);
+
+        for (int i = 0; i < collision.contactCount; i++)
+        {
+            Vector3 normal = collision.GetContact(i).normal;
+
+            if (normal.y >= minUp)
+                continue;   // ground that can be walked on
+
+            // Keep the one most against the way the body is going.
+            if (hasContact && Vector3.Dot(flat, normal) >= Vector3.Dot(flat, contactNormal))
+                continue;
+
+            hasContact = true;
+            contactNormal = normal;
+            contactIsTree = IsTrunk(collision.collider, normal);
+        }
+    }
+
+    private void OnCollisionEnter(Collision collision)
+    {
+        OnCollisionStay(collision);
+    }
+
+    // Terrain trees are part of the TerrainCollider; a trunk is the only near-vertical
+    // surface it has (the ground itself never gets that steep).
+    private static bool IsTrunk(Collider collider, Vector3 normal)
+    {
+        return collider is TerrainCollider && Mathf.Abs(normal.y) < 0.15f;
+    }
+
     /// <summary>
     /// Feels ahead at knee and waist height, and under the feet, for ground steeper than
     /// the limit. Gentle slopes are hit too, but their normals are upright enough to pass.
+    /// The forward probes are as wide as the body, so a trunk the body only brushes is
+    /// found as well as one straight ahead.
     /// </summary>
-    private bool FindSteepFace(Vector3 direction, out Vector3 normal)
+    private bool FindSteepFace(Vector3 direction, out Vector3 normal, out bool isTree)
     {
         float minUp = Mathf.Cos(maxClimbAngle * Mathf.Deg2Rad);
-        float reach = bodyRadius + probeDistance;
+        float reach = probeDistance + bodyRadius * 0.25f;
+        float width = bodyRadius * 0.75f;
         int mask = character.WhatIsGround;
         Vector3 feet = transform.position;
 
-        if (Probe(feet + Vector3.up * 0.3f, direction, reach, mask, minUp, out normal) ||
-            Probe(feet + Vector3.up * 0.9f, direction, reach, mask, minUp, out normal))
+        if (Probe(feet + Vector3.up * 0.5f, direction, width, reach, mask, minUp, out normal, out isTree) ||
+            Probe(feet + Vector3.up * 1.0f, direction, width, reach, mask, minUp, out normal, out isTree))
             return true;
 
         // Already standing on the steep part.
-        return Probe(feet + Vector3.up * 0.5f + direction * bodyRadius, Vector3.down, 1f, mask, minUp, out normal);
+        return Probe(feet + Vector3.up * 0.5f + direction * bodyRadius, Vector3.down, 0f, 1f, mask, minUp, out normal, out isTree);
     }
 
-    private static bool Probe(Vector3 origin, Vector3 direction, float distance, int mask, float minUp, out Vector3 normal)
+    private static bool Probe(Vector3 origin, Vector3 direction, float width, float distance, int mask, float minUp,
+                              out Vector3 normal, out bool isTree)
     {
         normal = Vector3.up;
+        isTree = false;
 
-        if (!Physics.Raycast(origin, direction, out RaycastHit hit, distance, mask, QueryTriggerInteraction.Ignore))
+        RaycastHit hit;
+        bool found = width > 0f
+            ? Physics.SphereCast(origin, width, direction, out hit, distance, mask, QueryTriggerInteraction.Ignore)
+            : Physics.Raycast(origin, direction, out hit, distance, mask, QueryTriggerInteraction.Ignore);
+
+        if (!found)
             return false;
 
         normal = hit.normal;
+
+        isTree = IsTrunk(hit.collider, hit.normal);
         return hit.normal.y < minUp;
     }
 }
