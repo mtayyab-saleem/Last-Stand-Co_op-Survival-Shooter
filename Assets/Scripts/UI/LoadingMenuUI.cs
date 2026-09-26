@@ -16,7 +16,6 @@ public class LoadingMenuUI : MonoBehaviour
     [SerializeField] private GameObject characterImage;
 
     private string _menuSceneName;
-    private bool _isFirstLoad = true;
 
     // 5 Simple Loading Tips
     private readonly string[] _tips = new string[]
@@ -52,6 +51,22 @@ public class LoadingMenuUI : MonoBehaviour
         StartCoroutine(LoadingSequence());
     }
 
+    // The panel can be closed before its run ends (the intro video, a disconnect
+    // opening the menu). The sound must not stay muted when that happens.
+    private void OnDisable()
+    {
+        AudioListener.volume = 1.0f;
+    }
+
+    /// <summary>
+    /// A host or client is running: the run ends on the lobby or match behind it.
+    /// Otherwise (app start, after leaving a match) it ends on the main menu.
+    /// Decided from the live network state rather than a flag flipped after every
+    /// completed run: a run cut short left that flag wrong, and the next hosting then
+    /// ended its loading screen by opening the main menu over the lobby.
+    /// </summary>
+    private static bool InSession => NetworkServer.active || NetworkClient.active;
+
     private void ShowRandomTip()
     {
         if (tipText != null)
@@ -65,7 +80,7 @@ public class LoadingMenuUI : MonoBehaviour
     {
         float visualProgress = 0f;
 
-        if (_isFirstLoad)
+        if (!InSession)
         {
             // 1. Loading Text with dots logic
             UpdateDotsText("Loading.");
@@ -83,8 +98,7 @@ public class LoadingMenuUI : MonoBehaviour
                 yield return null;
             }
 
-            if (GameUIManager.Instance != null) GameUIManager.Instance.ShowMainMenu();
-            _isFirstLoad = false;
+            FinishLoading();
         }
         else
         {
@@ -118,10 +132,20 @@ public class LoadingMenuUI : MonoBehaviour
                 yield return null;
             }
 
-            if (GameUIManager.Instance != null) GameUIManager.Instance.HideAllPanels();
-            _isFirstLoad = true;
             AudioListener.volume = 1.0f;
+            FinishLoading();
         }
+    }
+
+    private void FinishLoading()
+    {
+        if (GameUIManager.Instance == null)
+            return;
+
+        if (InSession)
+            GameUIManager.Instance.HideAllPanels();
+        else
+            GameUIManager.Instance.ShowMainMenu();
     }
 
     private void UpdateStatusText(string message)

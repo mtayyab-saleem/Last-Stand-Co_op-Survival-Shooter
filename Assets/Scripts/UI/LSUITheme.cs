@@ -217,7 +217,12 @@ public static class LSUITheme
     /// </summary>
     public static void EnsureEventSystem()
     {
-        if (EventSystem.current != null)
+        // The JUTPS UI brings its own EventSystem, but UISafetyWrapper keeps that UI
+        // switched off until the local player spawns, so on the lobby's first frame it
+        // was not current. A second one was made, and Unity then warned about two event
+        // systems every frame. One that is merely waiting to be switched on counts.
+        if (EventSystem.current != null ||
+            Object.FindAnyObjectByType<EventSystem>(FindObjectsInactive.Include) != null)
             return;
 
         new GameObject("EventSystem (LS UI)", typeof(EventSystem), typeof(StandaloneInputModule));
