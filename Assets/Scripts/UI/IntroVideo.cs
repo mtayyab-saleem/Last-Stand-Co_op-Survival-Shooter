@@ -1,4 +1,3 @@
-using TMPro;
 using UnityEngine;
 using UnityEngine.UI;
 using UnityEngine.Video;
@@ -10,7 +9,7 @@ using UnityEngine.Video;
 /// It sets itself up after the first scene loads (no scene wiring): the clip comes from
 /// Resources/IntroVideoConfig. The video is prepared while the loading screen runs;
 /// when that ends, LoadingMenuUI hands over to it instead of opening the menu. It covers
-/// the whole screen and has a SKIP button. Menu music waits until it is over - only the
+/// the whole screen. Menu music waits until it is over - only the
 /// video's own sound is heard - and a PlayerPrefs flag makes sure it never plays again.
 /// </summary>
 public class IntroVideo : MonoBehaviour
@@ -45,7 +44,7 @@ public class IntroVideo : MonoBehaviour
 
     /// <summary>
     /// Called by the loading screen where it would open the main menu. True when the
-    /// intro takes over; it opens the main menu itself once it ends or is skipped.
+    /// intro takes over; it opens the main menu itself once it ends.
     /// </summary>
     public static bool TryPlayPending()
     {
@@ -93,8 +92,8 @@ public class IntroVideo : MonoBehaviour
     }
 
     /// <summary>
-    /// Black full-screen canvas above every menu canvas, with the video filling it and a
-    /// SKIP button in the corner. It takes all touches, so nothing behind can be pressed.
+    /// Black full-screen canvas above every menu canvas, with the video filling it. It
+    /// takes all touches, so nothing behind can be pressed.
     /// </summary>
     private void BuildOverlay()
     {
@@ -125,31 +124,6 @@ public class IntroVideo : MonoBehaviour
         fitter.aspectMode = AspectRatioFitter.AspectMode.EnvelopeParent;
         fitter.aspectRatio = target.width / (float)target.height;
 
-        BuildSkipButton();
-    }
-
-    private void BuildSkipButton()
-    {
-        // The menu's own font, so the button matches the rest of the UI.
-        TMP_Text menuText = GameUIManager.Instance != null
-            ? GameUIManager.Instance.GetComponentInChildren<TMP_Text>(true)
-            : null;
-
-        RectTransform border = LSUITheme.Panel("SkipButton", overlay.transform, new Color(1f, 1f, 1f, 0.35f), true);
-        LSUITheme.Place(border, new Vector2(1f, 0f), new Vector2(1f, 0f), new Vector2(-48f, 48f),
-                        new Vector2(190f, 64f), new Vector2(1f, 0f));
-
-        RectTransform inner = LSUITheme.Panel("Fill", border, new Color(0f, 0f, 0f, 0.55f));
-        LSUITheme.Stretch(inner);
-        inner.sizeDelta = new Vector2(-4f, -4f);
-
-        TextMeshProUGUI label = LSUITheme.Label("Label", border, menuText != null ? menuText.font : null,
-                                                "SKIP", 26f, 6f, LSUITheme.Text, TextAlignmentOptions.Center);
-        LSUITheme.Stretch((RectTransform)label.transform);
-
-        var button = border.gameObject.AddComponent<Button>();
-        button.transition = Selectable.Transition.None;
-        button.onClick.AddListener(Finish);
     }
 
     private void Finish()
