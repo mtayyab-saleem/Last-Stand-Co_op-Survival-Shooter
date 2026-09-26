@@ -3,6 +3,7 @@ using JUTPS.GameSettings;
 using Michsky.MUIP;
 using TMPro;
 using UnityEngine;
+using UnityEngine.SceneManagement;
 using UnityEngine.UI;
 
 /// <summary>
@@ -50,6 +51,14 @@ public class LSSettingsPanel : MonoBehaviour
     private bool isOpen;
     private bool isRefreshing;
 
+    // AI difficulty row, built in code below the Audio section.
+    private const float DifficultyBlockHeight = 130f;
+    private static readonly string[] DifficultyNames = { "EASY", "MEDIUM", "HARD" };
+    private Image[] difficultyFills;
+    private TextMeshProUGUI[] difficultyLabels;
+    private Button[] difficultyButtons;
+    private TextMeshProUGUI difficultyNote;
+
     public bool IsOpen { get { return isOpen; } }
 
 private void Awake()
@@ -59,6 +68,7 @@ private void Awake()
 
         WireControls();
         WireBackdrop();
+        BuildDifficultyRow();
 
         // LSSettingsRuntime owns applying settings at startup and per scene load,
         // because this panel is authored disabled and its Awake may never run.
@@ -118,6 +128,7 @@ private void Awake()
         }
 
         RefreshFromSettings();
+        RefreshDifficulty();
 
         // MUIP widgets reset themselves in their own OnEnable, which ran during the
         // SetActive above. Refreshing again next frame makes sure our values win.
@@ -166,6 +177,117 @@ public void Close()
             suspendedCamera.enabled = true;
             suspendedCamera = null;
         }
+    }
+
+    // -------------------------
+    // AI difficulty
+    // -------------------------
+
+    /// <summary>
+    /// "AI DIFFICULTY" with Easy / Medium / Hard, under Audio. The window grows to fit
+    /// and the close button moves down. Built here so the panel needs no new wiring.
+    /// </summary>
+    private void BuildDifficultyRow()
+    {
+        var window = panelRoot.transform.Find("Window") as RectTransform;
+        Transform audioTitle = window != null ? window.Find("Text_AUDIO") : null;
+
+        if (audioTitle == null)
+        {
+            Debug.LogWarning("[LSSettingsPanel] Window/Text_AUDIO not found; the AI difficulty row was not added.");
+            return;
+        }
+
+        window.sizeDelta += new Vector2(0f, DifficultyBlockHeight);
+
+        foreach (string below in new[] { "Divider2", "CloseButton" })
+        {
+            if (window.Find(below) is RectTransform moved)
+                moved.anchoredPosition -= new Vector2(0f, DifficultyBlockHeight);
+        }
+
+        // Section title in the same style as PROFILE / CONTROLS / AUDIO.
+        GameObject title = Instantiate(audioTitle.gameObject, window);
+        title.name = "Text_AI DIFFICULTY";
+        ((RectTransform)title.transform).anchoredPosition = new Vector2(56f, -676f);
+        TMP_Text titleText = title.GetComponent<TMP_Text>();
+        titleText.text = "AI DIFFICULTY";
+        TMP_FontAsset font = titleText.font;
+
+        difficultyFills = new Image[3];
+        difficultyLabels = new TextMeshProUGUI[3];
+        difficultyButtons = new Button[3];
+
+        for (int i = 0; i < 3; i++)
+        {
+            int level = i;
+
+            RectTransform border = LSUITheme.Panel("Difficulty_" + DifficultyNames[i], window, LSUITheme.BoxBorder, true);
+            TopLeft(border, new Vector2(56f + i * 262f, -718f), new Vector2(244f, 46f));
+
+            RectTransform inner = LSUITheme.Panel("Fill", border, LSUITheme.BoxInner);
+            LSUITheme.Stretch(inner);
+            inner.sizeDelta = new Vector2(-4f, -4f);
+            difficultyFills[i] = inner.GetComponent<Image>();
+
+            difficultyLabels[i] = LSUITheme.Label("Label", border, font, DifficultyNames[i], 22f, 4f,
+                                                  LSUITheme.Text, TextAlignmentOptions.Center);
+            LSUITheme.Stretch((RectTransform)difficultyLabels[i].transform);
+
+            difficultyButtons[i] = border.gameObject.AddComponent<Button>();
+            difficultyButtons[i].transition = Selectable.Transition.None;
+            difficultyButtons[i].onClick.AddListener(() => SelectDifficulty((BotDifficulty)level));
+        }
+
+        difficultyNote = LSUITheme.Label("Note", window, font, string.Empty, 16f, 2f,
+                                         LSUITheme.Muted, TextAlignmentOptions.Left);
+        TopLeft((RectTransform)difficultyNote.transform, new Vector2(56f, -774f), new Vector2(768f, 26f));
+
+        RefreshDifficulty();
+    }
+
+    private static void TopLeft(RectTransform rect, Vector2 position, Vector2 size)
+    {
+        LSUITheme.Place(rect, new Vector2(0f, 1f), new Vector2(0f, 1f), position, size, new Vector2(0f, 1f));
+    }
+
+    private void SelectDifficulty(BotDifficulty difficulty)
+    {
+        if (MatchRunning())
+            return;
+
+        LSBotDifficulty.Current = difficulty;
+        RefreshDifficulty();
+    }
+
+    // Bots are planned when the host starts the match; from then on the choice is fixed.
+    private static bool MatchRunning()
+    {
+        return SceneManager.GetActiveScene().name == "GameScene";
+    }
+
+    private void RefreshDifficulty()
+    {
+        if (difficultyButtons == null)
+            return;
+
+        bool locked = MatchRunning();
+        int selected = (int)LSBotDifficulty.Current;
+
+        for (int i = 0; i < difficultyButtons.Length; i++)
+        {
+            bool on = i == selected;
+            difficultyButtons[i].interactable = !locked;
+            difficultyFills[i].color = on ? LSUITheme.ButtonGreen : LSUITheme.BoxInner;
+            difficultyLabels[i].color = on ? LSUITheme.Text : LSUITheme.Muted;
+
+            // Dimmed while locked, the chosen one still readable.
+            difficultyLabels[i].alpha = locked && !on ? 0.4f : 1f;
+        }
+
+        difficultyNote.text = locked
+            ? "LOCKED DURING A MATCH  ·  THE HOST'S DIFFICULTY IS IN USE"
+            : "SET BEFORE THE MATCH  ·  IN A MATCH THE HOST'S DIFFICULTY IS USED";
     }
 
     /// <summary>

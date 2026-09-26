@@ -48,7 +48,11 @@ public class LSMatchManager : NetworkBehaviour
     [SyncVar(hook = nameof(OnFillWithAIChanged))]
     public bool fillWithAI = false;
 
+    [Tooltip("The Hard difficulty. Medium and Easy are derived from these values (LSBotSettings.ForDifficulty).")]
     [SerializeField] private LSBotSettings botSettings = new LSBotSettings();
+
+    // The host's difficulty, fixed when the match starts.
+    private LSBotSettings matchBotSettings;
 
     // Bots decided at match start, spawned once GameScene has loaded.
     private readonly List<LSBotPlanner.BotSlot> plannedBots = new List<LSBotPlanner.BotSlot>();
@@ -627,7 +631,11 @@ public class LSMatchManager : NetworkBehaviour
         teamSpawns.Clear();
 
         if (fillWithAI)
+        {
+            // The host's own Settings choice; later changes wait for the next match.
+            matchBotSettings = botSettings.ForDifficulty(LSBotDifficulty.Current);
             plannedBots.AddRange(PlanBots());
+        }
 
         if (MatchTracker.Instance != null)
         {
@@ -794,7 +802,7 @@ public class LSMatchManager : NetworkBehaviour
         }
 
         // Server only, and not a NetworkBehaviour, so the network layout is untouched.
-        botObject.AddComponent<LSBotBrain>().Initialise(botSettings);
+        botObject.AddComponent<LSBotBrain>().Initialise(matchBotSettings ?? botSettings);
 
         NetworkServer.Spawn(botObject);
         return true;

@@ -3790,7 +3790,7 @@ MonoBehaviour:
   m_TargetGraphic: {fileID: 1686178913}
   m_HandleRect: {fileID: 1686178912}
   m_Direction: 2
-  m_Value: 1
+  m_Value: 0
   m_Size: 1
   m_NumberOfSteps: 0
   m_OnValueChanged:
@@ -7020,7 +7020,7 @@ MonoBehaviour:
     preferredDistance: 14
     tooCloseDistance: 6
     reactionTime: {x: 0.45, y: 0.9}
-    aimError: 1.4
+    aimError: 2.5
     aimSettleSpeed: 1.2
     minimumAimError: 0.25
     burstDuration: {x: 0.35, y: 0.9}

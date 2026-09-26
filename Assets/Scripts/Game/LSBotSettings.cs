@@ -1,5 +1,22 @@
 using UnityEngine;
 
+public enum BotDifficulty { Easy, Medium, Hard }
+
+/// <summary>
+/// The AI difficulty picked in the Settings panel. Every player has their own, but only
+/// the host's is used: it is read once when the host starts the match.
+/// </summary>
+public static class LSBotDifficulty
+{
+    public const string Key = "LSBotDifficulty";
+
+    public static BotDifficulty Current
+    {
+        get { return (BotDifficulty)Mathf.Clamp(PlayerPrefs.GetInt(Key, (int)BotDifficulty.Hard), 0, 2); }
+        set { PlayerPrefs.SetInt(Key, (int)value); PlayerPrefs.Save(); }
+    }
+}
+
 /// <summary>
 /// Tuning for the AI players. Lives on LSMatchManager, so it can be adjusted in the
 /// Inspector of the persistent match object in LobbyScene.
@@ -62,6 +79,30 @@ public class LSBotSettings
 
     [Tooltip("Reserve ammo given to a bot's gun, so it never runs dry mid-match.")]
     public int reserveAmmo = 999;
+
+    /// <summary>
+    /// A copy tuned for <paramref name="difficulty"/>. Hard is exactly the values set in
+    /// the Inspector; Medium and Easy notice enemies later, react slower, aim worse and
+    /// pause longer between bursts.
+    /// </summary>
+    public LSBotSettings ForDifficulty(BotDifficulty difficulty)
+    {
+        var tuned = (LSBotSettings)MemberwiseClone();
+
+        if (difficulty == BotDifficulty.Hard)
+            return tuned;
+
+        bool easy = difficulty == BotDifficulty.Easy;
+
+        tuned.detectRange *= easy ? 0.7f : 0.85f;
+        tuned.engageRange *= easy ? 0.7f : 0.85f;
+        tuned.reactionTime *= easy ? 2f : 1.4f;
+        tuned.aimError *= easy ? 2.2f : 1.5f;
+        tuned.aimSettleSpeed *= easy ? 0.5f : 0.75f;
+        tuned.minimumAimError = Mathf.Min(1f, minimumAimError + (easy ? 0.35f : 0.15f));
+        tuned.burstPause *= easy ? 1.8f : 1.3f;
+        return tuned;
+    }
 
     [Header("Names")]
     public string[] names =
