@@ -90,6 +90,15 @@ public class LSMatchManager : NetworkBehaviour
             Instance = this;
         else
         {
+            // LobbyScene brings a new copy every time it loads, but the first one lives
+            // on (DontDestroyOnLoad). Mirror switches scene objects on and then spawns
+            // them in the same call, so this copy could still be spawned before Destroy
+            // took effect - and destroying a spawned object runs OnStopClient and
+            // OnStopServer, which hid the new lobby's UI on the second visit. Without a
+            // scene id Mirror never spawns it at all.
+            if (TryGetComponent(out NetworkIdentity identity))
+                identity.sceneId = 0;
+
             Destroy(gameObject);
             return;
         }
@@ -101,8 +110,14 @@ public class LSMatchManager : NetworkBehaviour
         SceneManager.sceneLoaded += OnSceneLoaded;
     }
 
+    /// <summary>A copy that is destroying itself in Awake; it must touch nothing shared.</summary>
+    private bool IsDuplicate => Instance != this;
+
     public override void OnStartServer()
     {
+        if (IsDuplicate)
+            return;
+
         // Start every new server session with clean match data.
         players.Clear();
         lobbyPlayers.Clear();
@@ -127,6 +142,9 @@ public class LSMatchManager : NetworkBehaviour
 
     public override void OnStartClient()
     {
+        if (IsDuplicate)
+            return;
+
         // Requirement: every client UI redraws itself from the SyncList callback.
         lobbyPlayers.Callback -= OnLobbyPlayersChanged;
         lobbyPlayers.Callback += OnLobbyPlayersChanged;
@@ -1075,10 +1093,29 @@ public class LSMatchManager : NetworkBehaviour
     private void OnDestroy()
     {
         SceneManager.sceneLoaded -= OnSceneLoaded;
+
+        if (Instance == this)
+            Instance = null;
+    }
+
+    /// <summary>
+    /// The session is over (host stopped or client left). This persistent object has
+    /// done its job; the next LobbyScene's own copy takes over as a fresh manager, so no
+    /// state - or a second copy fighting this one - ever carries into the next match.
+    /// </summary>
+    private void EndSession()
+    {
+        Destroy(gameObject);
     }
 
     public override void OnStopServer()
     {
+        if (IsDuplicate)
+        {
+            base.OnStopServer();
+            return;
+        }
+
         players.Clear();
         lobbyPlayers.Clear();
         savedTeamByConnection.Clear();
@@ -1094,10 +1131,17 @@ public class LSMatchManager : NetworkBehaviour
         }
 
         base.OnStopServer();
+        EndSession();
     }
 
     public override void OnStopClient()
     {
+        if (IsDuplicate)
+        {
+            base.OnStopClient();
+            return;
+        }
+
         // SyncVars are server-owned, so nothing is written back here.
         lobbyPlayers.Callback -= OnLobbyPlayersChanged;
 
@@ -1107,5 +1151,6 @@ public class LSMatchManager : NetworkBehaviour
         }
 
         base.OnStopClient();
+        EndSession();
     }
 }

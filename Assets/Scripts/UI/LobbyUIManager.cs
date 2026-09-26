@@ -126,6 +126,11 @@ public class LobbyUIManager : MonoBehaviour
     public void RefreshLobbyUI(bool isLocalPlayerHost, LSPlayer localPlayer, List<LSPlayer> allPlayers,
                                int gameModeInt, bool canHostStart)
     {
+        // A refresh only comes while a lobby session is running, so the screen belongs
+        // on. It may have been switched off by a ResetUI meant for the previous session.
+        if (!gameObject.activeSelf)
+            gameObject.SetActive(true);
+
         Build();
 
         LSMatchManager match = LSMatchManager.Instance;
