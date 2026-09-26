@@ -26,6 +26,10 @@ public class PlayerNetworkSetup : NetworkBehaviour
         if (playerAnimator != null)
             playerAnimator.updateMode = AnimatorUpdateMode.Normal;
 
+        // Everyone else's guns and armour are not drawn once they are far away.
+        if (!isLocalPlayer && !TryGetComponent(out CharacterPropCulling _))
+            gameObject.AddComponent<CharacterPropCulling>();
+
         // AI PLAYER, ON THE SERVER: the server drives it, so unlike a remote player it
         // keeps its character controller and real physics. Everywhere else a bot is an
         // ordinary remote player and takes the branch below.

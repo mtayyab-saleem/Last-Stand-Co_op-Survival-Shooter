@@ -175,13 +175,24 @@ namespace JUTPS.UI
             ObjectOnCrosshairPoint = null;
         }
 
+        private GameObject lastTaggedObject;
+        private string lastTag;
+
         public Color GetCurrentCrosshairColor(GameObject ObjectOnCrosshairPoint)
         {
             Color color = NormalColor;
             if (ObjectOnCrosshairPoint == null) return color;
 
-            if (IsAimingOnNonShootableObject(ObjectOnCrosshairPoint, NoShootableTags)) color = NonShootableColor;
-            if (IsAimingOnShootableObject(ObjectOnCrosshairPoint, TargetTags)) color = ShootableColor;
+            // Last Stand: GameObject.tag allocates a new string on every read, and this
+            // ran once per listed tag every frame. Read it once per object instead.
+            if (ObjectOnCrosshairPoint != lastTaggedObject)
+            {
+                lastTaggedObject = ObjectOnCrosshairPoint;
+                lastTag = ObjectOnCrosshairPoint.tag;
+            }
+
+            if (System.Array.IndexOf(NoShootableTags, lastTag) >= 0) color = NonShootableColor;
+            if (System.Array.IndexOf(TargetTags, lastTag) >= 0) color = ShootableColor;
 
             return color;
         }

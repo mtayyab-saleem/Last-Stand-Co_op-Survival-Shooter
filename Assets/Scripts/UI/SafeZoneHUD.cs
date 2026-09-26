@@ -88,7 +88,9 @@ public class SafeZoneHUD : MonoBehaviour
 
         SetActive(aliveChip, show);
 
-        if (show && aliveLabel != null)
+        // Texts are only rebuilt when what they show changes: a new string every frame
+        // is garbage the phone has to collect.
+        if (show && aliveLabel != null && Changed(ref shownAlive, tracker.AlivePlayers * 1000 + tracker.TotalPlayers))
             aliveLabel.text = $"{tracker.AlivePlayers}<size=72%><color=#8A96A3> / {tracker.TotalPlayers}</color></size>";
 
         return show;
@@ -129,7 +131,9 @@ public class SafeZoneHUD : MonoBehaviour
         bool outside = outsideBy > 0f;
         Color tint = outside ? warningColor : zoneColor;
 
-        if (statusLabel != null)
+        int statusKey = outside ? 100000 + Mathf.CeilToInt(outsideBy) : (int)phase * 1000 + zone.CurrentCaseIndex;
+
+        if (statusLabel != null && Changed(ref shownStatus, statusKey))
         {
             string label;
 
@@ -149,13 +153,17 @@ public class SafeZoneHUD : MonoBehaviour
             }
 
             statusLabel.text = label;
-            statusLabel.color = tint;
         }
+
+        if (statusLabel != null)
+            statusLabel.color = tint;
 
         if (timerLabel != null)
         {
             // The final stage never ends, so a countdown there would be meaningless.
-            timerLabel.text = phase == SafeZoneController.ZonePhase.Final ? "--:--" : FormatTime(remaining);
+            int timerKey = phase == SafeZoneController.ZonePhase.Final ? -1 : Mathf.CeilToInt(Mathf.Max(0f, remaining));
+            if (Changed(ref shownTimer, timerKey))
+                timerLabel.text = timerKey < 0 ? "--:--" : FormatTime(remaining);
             timerLabel.color = outside ? warningColor : Color.white;
         }
 
@@ -191,6 +199,18 @@ public class SafeZoneHUD : MonoBehaviour
     {
         int whole = Mathf.CeilToInt(Mathf.Max(0f, seconds));
         return (whole / 60).ToString("0") + ":" + (whole % 60).ToString("00");
+    }
+
+    // Last values the labels were built from; int.MinValue forces the first build.
+    private int shownAlive = int.MinValue, shownStatus = int.MinValue, shownTimer = int.MinValue;
+
+    private static bool Changed(ref int shown, int value)
+    {
+        if (shown == value)
+            return false;
+
+        shown = value;
+        return true;
     }
 
     private static void SetActive(Component target, bool active)
