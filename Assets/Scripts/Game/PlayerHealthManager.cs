@@ -29,6 +29,20 @@ public class PlayerHealthManager : NetworkBehaviour
     [Header("Power-Ups")]
     public GameObject[] powerUpPrefabs;
 
+    [Header("Auto Heal")]
+    [Tooltip("Seconds without taking any damage before health starts coming back.")]
+    [SerializeField] private float autoHealDelay = 60f;
+
+    [Tooltip("Health given back each step.")]
+    [SerializeField] private float autoHealAmount = 5f;
+
+    [Tooltip("Seconds between steps.")]
+    [SerializeField] private float autoHealInterval = 0.5f;
+
+    // Server only.
+    private float lastDamageTime;
+    private float nextHealTime;
+
     /// <summary>
     /// Raised on the local player's client each time an enemy hit lands on it:
     /// attacker netId, and where the attacker stood when the hit landed.
@@ -60,6 +74,7 @@ public class PlayerHealthManager : NetworkBehaviour
 
     public override void OnStartServer()
     {
+        lastDamageTime = Time.time;
         netHealth = _juHealth.Health;
         netIsDead = _juHealth.IsDead;
         ServerPlayerCache[gameObject] = (this, _playerData);
@@ -234,6 +249,27 @@ public class PlayerHealthManager : NetworkBehaviour
 
     /// <returns>True when the damage was applied.</returns>
     [Server]
+    /// <summary>
+    /// Health comes back on its own once a player has gone autoHealDelay seconds without
+    /// being hurt: autoHealAmount every autoHealInterval until full. Any hit restarts the
+    /// wait. Server only; netHealth syncs it to everyone.
+    /// </summary>
+    [ServerCallback]
+    private void Update()
+    {
+        if (netIsDead || autoHealAmount <= 0f || _juHealth == null)
+            return;
+
+        float max = _juHealth.MaxHealth;
+
+        if (netHealth >= max || Time.time - lastDamageTime < autoHealDelay || Time.time < nextHealTime)
+            return;
+
+        nextHealTime = Time.time + autoHealInterval;
+        netHealth = Mathf.Min(max, netHealth + autoHealAmount);
+        _juHealth.Health = netHealth;
+    }
+
     public bool ServerApplyDamage(float amount)
     {
         // 1. NO DAMAGE IN LOBBY SCENE
@@ -256,6 +292,7 @@ public class PlayerHealthManager : NetworkBehaviour
         }
 
         netHealth -= amount;
+        lastDamageTime = Time.time;
 
         // Clamp health to prevent negative values
         netHealth = Mathf.Clamp(netHealth, 0, _juHealth.MaxHealth);
