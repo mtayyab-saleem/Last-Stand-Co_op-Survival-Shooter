@@ -12,4 +12,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 9fa4723644401d44d99fdd39cb2383c8, type: 3}
   m_Name: IntroVideoConfig
   m_EditorClassIdentifier: Assembly-CSharp::IntroVideoConfig
-  clip: {fileID: 32900000, guid: a2f10f642aa4acc4ba0ad8c47eaf45c7, type: 3}
+  clip: {fileID: 32900000, guid: 0826a0de9df4f2e498f5ab34058a1958, type: 3}

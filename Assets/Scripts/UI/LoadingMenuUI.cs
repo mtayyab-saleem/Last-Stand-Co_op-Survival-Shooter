@@ -144,7 +144,7 @@ public class LoadingMenuUI : MonoBehaviour
 
         if (InSession)
             GameUIManager.Instance.HideAllPanels();
-        else
+        else if (!IntroVideo.TryPlayPending())   // first launch: the intro opens the menu when it ends
             GameUIManager.Instance.ShowMainMenu();
     }
 
