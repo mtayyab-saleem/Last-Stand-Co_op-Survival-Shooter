@@ -40,6 +40,7 @@ public class SafeZoneHUD : MonoBehaviour
 
     private const float ChipHeight = 84f;
     private const float AliveWidth = 150f;
+    private const float TeamWidth = 150f;
     private const float ZoneWidth = 360f;
     private const float Gap = 10f;
 
@@ -49,6 +50,14 @@ public class SafeZoneHUD : MonoBehaviour
     private RectTransform aliveChip;
     private RectTransform zoneChip;
     private TMP_Text aliveLabel;
+
+    // Team chip: the local player's teammates (self included), Duo and Squad only.
+    private RectTransform teamChip;
+    private TMP_Text teamLabel;
+    private Image teamAccent;
+    private int teamAlive, teamTotal;
+    private float nextTeamScan;
+    private bool teamLaidOut = true;
     private Image zoneAccent;
     private RectTransform progressFill;
     private Image progressImage;
@@ -67,7 +76,9 @@ public class SafeZoneHUD : MonoBehaviour
     private void Update()
     {
         bool aliveShown = UpdateAliveChip();
+        bool teamShown = UpdateTeamChip(aliveShown);
         bool zoneShown = UpdateZoneChip();
+        LayoutChips(teamShown);
 
         if (builtRoot != null)
         {
@@ -94,6 +105,70 @@ public class SafeZoneHUD : MonoBehaviour
             aliveLabel.text = $"{tracker.AlivePlayers}<size=72%><color=#8A96A3> / {tracker.TotalPlayers}</color></size>";
 
         return show;
+    }
+
+    // -------------------------
+    // Team count
+    // -------------------------
+
+    private bool UpdateTeamChip(bool matchRunning)
+    {
+        if (teamChip == null)
+            return false;
+
+        if (matchRunning && Time.unscaledTime >= nextTeamScan)
+        {
+            // Twice a second is plenty: it only changes when someone dies or leaves.
+            nextTeamScan = Time.unscaledTime + 0.5f;
+            ScanTeam();
+        }
+
+        // Solo teams hold one player; the box only means something with teammates.
+        bool show = matchRunning && teamTotal > 1;
+        SetActive(teamChip, show);
+
+        if (show && teamLabel != null && Changed(ref shownTeam, teamAlive * 1000 + teamTotal))
+            teamLabel.text = $"{teamAlive}<size=72%><color=#8A96A3> / {teamTotal}</color></size>";
+
+        return show;
+    }
+
+    /// <summary>Counts the local player's team from the synced player objects (bots included).</summary>
+    private void ScanTeam()
+    {
+        teamAlive = 0;
+        teamTotal = 0;
+
+        LSPlayer local = LSPlayer.LocalInstance;
+
+        if (local == null || local.teamID <= 0)
+            return;
+
+        foreach (LSPlayer player in FindObjectsByType<LSPlayer>(FindObjectsSortMode.None))
+        {
+            if (player.teamID != local.teamID)
+                continue;
+
+            teamTotal++;
+
+            if (player.isAlive)
+                teamAlive++;
+        }
+
+        if (teamAccent != null)
+            teamAccent.color = LSUITheme.TeamColor(local.teamID);
+    }
+
+    /// <summary>[ALIVE] [TEAM] [ZONE], or [ALIVE] [ZONE] without a team, kept centred.</summary>
+    private void LayoutChips(bool withTeam)
+    {
+        if (builtRoot == null || zoneChip == null || withTeam == teamLaidOut)
+            return;
+
+        teamLaidOut = withTeam;
+        float zoneX = AliveWidth + Gap + (withTeam ? TeamWidth + Gap : 0f);
+        zoneChip.anchoredPosition = new Vector2(zoneX, 0f);
+        builtRoot.sizeDelta = new Vector2(zoneX + ZoneWidth, ChipHeight);
     }
 
     // -------------------------
@@ -202,7 +277,7 @@ public class SafeZoneHUD : MonoBehaviour
     }
 
     // Last values the labels were built from; int.MinValue forces the first build.
-    private int shownAlive = int.MinValue, shownStatus = int.MinValue, shownTimer = int.MinValue;
+    private int shownAlive = int.MinValue, shownTeam = int.MinValue, shownStatus = int.MinValue, shownTimer = int.MinValue;
 
     private static bool Changed(ref int shown, int value)
     {
@@ -226,7 +301,7 @@ public class SafeZoneHUD : MonoBehaviour
     /// <summary>
     /// Two dark chips hanging from the top centre, clear of the settings button on the
     /// left and the health and weapon panel on the right:
-    /// [ 7 / 8  ALIVE ] [ NEXT ZONE IN · 1/4        1:25 ]
+    /// [ 7 / 8  ALIVE ] [ 2 / 2  TEAM ] [ NEXT ZONE IN · 1/4        1:25 ]
     /// </summary>
     private void BuildBar()
     {
@@ -238,7 +313,7 @@ public class SafeZoneHUD : MonoBehaviour
 
         builtRoot = new GameObject("MatchStatusBar", typeof(RectTransform)).GetComponent<RectTransform>();
         builtRoot.SetParent(transform, false);
-        float width = AliveWidth + Gap + ZoneWidth;
+        float width = AliveWidth + Gap + TeamWidth + Gap + ZoneWidth;
         LSUITheme.Place(builtRoot, new Vector2(0.5f, 1f), new Vector2(0.5f, 1f), anchoredOffset,
                         new Vector2(width, ChipHeight), new Vector2(0.5f, 1f));
 
@@ -258,9 +333,27 @@ public class SafeZoneHUD : MonoBehaviour
         LSUITheme.Place(aliveCaption.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(2f, 8f),
                         new Vector2(-4f, 20f), new Vector2(0.5f, 0f));
 
+        // Team chip, between the two; hidden (and the zone chip moved back) in Solo.
+        teamChip = LSUITheme.Panel("Team", builtRoot, ChipColor);
+        LSUITheme.Place(teamChip, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(AliveWidth + Gap, 0f),
+                        new Vector2(TeamWidth, ChipHeight), new Vector2(0f, 1f));
+
+        teamAccent = LSUITheme.Panel("Accent", teamChip, LSUITheme.Accent).GetComponent<Image>();
+        LSUITheme.Place(teamAccent.rectTransform, new Vector2(0f, 0f), new Vector2(0f, 1f), Vector2.zero, new Vector2(4f, 0f), new Vector2(0f, 0.5f));
+
+        teamLabel = LSUITheme.Label("Count", teamChip, font, "-", timerFontSize + 4f, 0f, LSUITheme.Text, TextAlignmentOptions.Center);
+        LSUITheme.Place(teamLabel.rectTransform, new Vector2(0f, 1f), new Vector2(1f, 1f), new Vector2(2f, -4f),
+                        new Vector2(-4f, 50f), new Vector2(0.5f, 1f));
+
+        TMP_Text teamCaption = LSUITheme.Label("Caption", teamChip, font, "TEAM", statusFontSize - 2f, 5f, LSUITheme.Muted, TextAlignmentOptions.Center);
+        LSUITheme.Place(teamCaption.rectTransform, new Vector2(0f, 0f), new Vector2(1f, 0f), new Vector2(2f, 8f),
+                        new Vector2(-4f, 20f), new Vector2(0.5f, 0f));
+
+        teamChip.gameObject.SetActive(false);
+
         // Zone chip
         zoneChip = LSUITheme.Panel("Zone", builtRoot, ChipColor);
-        LSUITheme.Place(zoneChip, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(AliveWidth + Gap, 0f),
+        LSUITheme.Place(zoneChip, new Vector2(0f, 1f), new Vector2(0f, 1f), new Vector2(AliveWidth + Gap + TeamWidth + Gap, 0f),
                         new Vector2(ZoneWidth, ChipHeight), new Vector2(0f, 1f));
 
         zoneAccent = LSUITheme.Panel("Accent", zoneChip, zoneColor).GetComponent<Image>();
