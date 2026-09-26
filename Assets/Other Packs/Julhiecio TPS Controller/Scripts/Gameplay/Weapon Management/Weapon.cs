@@ -50,6 +50,11 @@ namespace JUTPS.WeaponSystem
 		public float CameraFOV = 30f;
 
 
+		[Header("Recoil Strength")]
+		[Tooltip("Last Stand: scales this gun's whole recoil - the camera kick and the gun's own kick back and twist. 1 = as authored below, 0 = no recoil.")]
+		[Range(0f, 1f)]
+		public float RecoilStrength = 1f;
+
 		[Header("Procedural Animation")]
 		public bool GenerateProceduralAnimation = true;
 
@@ -514,6 +519,9 @@ namespace JUTPS.WeaponSystem
 		}
 		public void WeaponRecoil()
 		{
+			float RecoilForce = this.RecoilForce * RecoilStrength;
+			float RecoilForceRotation = this.RecoilForceRotation * RecoilStrength;
+
 			if (CamPivot != null) CamPivot.RecoilReaction(CameraRecoilMultiplier * 20 * RecoilForce);
 
 			if (WeaponRotationCenter == null) return;

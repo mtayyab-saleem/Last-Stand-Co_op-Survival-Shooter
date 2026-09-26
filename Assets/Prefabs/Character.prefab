@@ -8523,11 +8523,11 @@ MonoBehaviour:
   WalkSpeed: 0.5
   CrouchSpeed: 0.5
   RunSpeed: 1.5
-  SprintingSpeedMax: 3
+  SprintingSpeedMax: 2.4
   SprintingAcceleration: 2
   SprintingDeceleration: 0.6
   RotationSpeed: 5
-  JumpForce: 3
+  JumpForce: 2.5
   StoppingSpeed: 2
   AirInfluenceControll: 0.5
   MaxWalkableAngle: 45
@@ -8960,6 +8960,7 @@ MonoBehaviour:
   teamID: -1
   teamMemberIndex: 0
   isAlive: 1
+  isBot: 0
   playerProfile: {fileID: 0}
 --- !u!114 &3349043981577625938
 MonoBehaviour:
@@ -12087,7 +12088,11 @@ PrefabInstance:
       objectReference: {fileID: 8300000, guid: 66feb496a3228bc498296ea0c505919e, type: 3}
     - target: {fileID: 6169894348648410233, guid: 21944e43693201f46a01a25ae54686d3, type: 3}
       propertyPath: TotalBullets
-      value: 248
+      value: 498
+      objectReference: {fileID: 0}
+    - target: {fileID: 6169894348648410233, guid: 21944e43693201f46a01a25ae54686d3, type: 3}
+      propertyPath: RecoilStrength
+      value: 0.5
       objectReference: {fileID: 0}
     - target: {fileID: 6169894348648410233, guid: 21944e43693201f46a01a25ae54686d3, type: 3}
       propertyPath: ItemModelInBody
