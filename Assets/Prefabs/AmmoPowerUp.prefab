@@ -9709,6 +9709,7 @@ GameObject:
   - component: {fileID: 5768554644693483716}
   - component: {fileID: 5768554644693483712}
   - component: {fileID: -7805055945709737725}
+  - component: {fileID: -9164875640780432724}
   m_Layer: 17
   m_Name: AmmoPowerUp
   m_TagString: Untagged
@@ -9802,6 +9803,31 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!205 &-9164875640780432724
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 6687682940110421504}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0.009881079, y: 0.004827261, z: -0.000000014901161}
+  m_Size: 0.5941453
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.014157208
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 5768554643994930031}
+    - renderer: {fileID: 5768554643310428238}
+    - renderer: {fileID: 5154444074441871962}
+  - screenRelativeHeight: 0.0053089526
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 5154444074441871962}
+  m_Enabled: 1
 --- !u!1 &8906569856634767934
 GameObject:
   m_ObjectHideFlags: 0

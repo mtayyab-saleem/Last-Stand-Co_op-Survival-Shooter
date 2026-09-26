@@ -105,6 +105,7 @@ GameObject:
   - component: {fileID: 4327380730265084475}
   - component: {fileID: 4327380730265084477}
   - component: {fileID: -7485523273116729938}
+  - component: {fileID: -4058040769115318708}
   m_Layer: 17
   m_Name: HealthPowerUp
   m_TagString: Untagged
@@ -254,6 +255,33 @@ MonoBehaviour:
   serverOnly: 0
   visibility: 0
   hasSpawned: 0
+--- !u!205 &-4058040769115318708
+LODGroup:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 3516352575337148050}
+  serializedVersion: 2
+  m_LocalReferencePoint: {x: 0, y: 0, z: 0}
+  m_Size: 0.48000017
+  m_FadeMode: 0
+  m_AnimateCrossFading: 0
+  m_LastLODIsBillboard: 0
+  m_LODs:
+  - screenRelativeHeight: 0.011437374
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 3156007911221595975}
+    - renderer: {fileID: 4327380730043561594}
+    - renderer: {fileID: 4327380730962707820}
+    - renderer: {fileID: 3960512504105811291}
+  - screenRelativeHeight: 0.004289015
+    fadeTransitionWidth: 0
+    renderers:
+    - renderer: {fileID: 3156007911221595975}
+    - renderer: {fileID: 3960512504105811291}
+  m_Enabled: 1
 --- !u!1 &4327380730043561592
 GameObject:
   m_ObjectHideFlags: 0

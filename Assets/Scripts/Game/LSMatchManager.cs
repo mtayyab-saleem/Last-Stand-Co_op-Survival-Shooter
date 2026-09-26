@@ -64,6 +64,21 @@ public class LSMatchManager : NetworkBehaviour
     [Range(0.1f, 1f)]
     [SerializeField] private float spawnZoneDepth = 0.8f;
 
+    [Header("Loot")]
+    [Tooltip("Power-ups (ammo and health) scattered over the map when the match starts.")]
+    [Min(0)] [SerializeField] private int startingLoot = 80;
+
+    [Tooltip("Seconds between loot waves.")]
+    [Min(10f)] [SerializeField] private float lootWaveInterval = 120f;
+
+    [Tooltip("Power-ups added inside the current safe zone each wave.")]
+    [Min(0)] [SerializeField] private int lootPerWave = 20;
+
+    [Tooltip("Waves stop adding once this many power-ups lie on the map, so a long match cannot pile them up on phones.")]
+    [Min(1)] [SerializeField] private int maxLootOnMap = 160;
+
+    private readonly List<GameObject> spawnedLoot = new List<GameObject>();
+
     // One random spot per team for the current match; teammates start around it.
     private readonly Dictionary<int, Vector3> teamSpawns = new Dictionary<int, Vector3>();
     private int looseSpawnKey;
@@ -689,6 +704,9 @@ public class LSMatchManager : NetworkBehaviour
 
         if (scene.name == GameSceneName && plannedBots.Count > 0)
             StartCoroutine(SpawnPlannedBots());
+
+        if (scene.name == GameSceneName)
+            StartCoroutine(ServerLootLoop());
     }
 
     // -------------------------
@@ -780,6 +798,104 @@ public class LSMatchManager : NetworkBehaviour
 
         NetworkServer.Spawn(botObject);
         return true;
+    }
+
+    // -------------------------
+    // Loot
+    // -------------------------
+
+    /// <summary>
+    /// Scatters power-ups over the whole zone at the start, then tops up inside the
+    /// current safe zone every wave. The power-ups are the ones registered with the
+    /// NetworkManager; picking one up is handled by PlayerNetworkSetup.CmdCollectPowerup.
+    /// </summary>
+    [Server]
+    private IEnumerator ServerLootLoop()
+    {
+        spawnedLoot.Clear();
+
+        // After the scene objects (and the safe zone) exist.
+        yield return new WaitForSeconds(1.5f);
+
+        List<GameObject> prefabs = LootPrefabs();
+
+        if (prefabs.Count == 0)
+        {
+            Debug.LogWarning("[LSMatchManager] No power-up prefabs registered with the NetworkManager; no loot spawned.");
+            yield break;
+        }
+
+        yield return SpawnLoot(prefabs, startingLoot);
+
+        var wait = new WaitForSeconds(lootWaveInterval);
+
+        while (true)
+        {
+            yield return wait;
+
+            if (!LootCanSpawn())
+                yield break;
+
+            spawnedLoot.RemoveAll(item => item == null);
+            yield return SpawnLoot(prefabs, Mathf.Min(lootPerWave, maxLootOnMap - spawnedLoot.Count));
+        }
+    }
+
+    private bool LootCanSpawn()
+    {
+        return NetworkServer.active && matchStarted &&
+               SceneManager.GetActiveScene().name == GameSceneName &&
+               (MatchTracker.Instance == null || !MatchTracker.Instance.MatchEnded);
+    }
+
+    private static List<GameObject> LootPrefabs()
+    {
+        var prefabs = new List<GameObject>();
+
+        if (NetworkManager.singleton == null)
+            return prefabs;
+
+        foreach (GameObject prefab in NetworkManager.singleton.spawnPrefabs)
+        {
+            if (prefab != null &&
+                (prefab.GetComponent<JUTPS.WeaponSystem.AmmoBox>() != null ||
+                 prefab.GetComponent<JUTPS.PowerUps.HealthPowerUp>() != null))
+                prefabs.Add(prefab);
+        }
+
+        return prefabs;
+    }
+
+    /// <summary>Spawns up to <paramref name="count"/> power-ups inside the current safe zone, a few per frame.</summary>
+    [Server]
+    private IEnumerator SpawnLoot(List<GameObject> prefabs, int count)
+    {
+        SafeZoneController zone = FindAnyObjectByType<SafeZoneController>();
+        Vector3 centre = zone != null ? zone.ZoneCenter : Vector3.zero;
+        float radius = (zone != null ? zone.CurrentRadius : 100f) * 0.9f;
+
+        for (int i = 0; i < count; i++)
+        {
+            if (!LootCanSpawn())
+                yield break;
+
+            for (int attempt = 0; attempt < 20; attempt++)
+            {
+                Vector2 offset = Random.insideUnitCircle * radius;
+
+                if (!TryGetSpawnGround(new Vector3(centre.x + offset.x, 0f, centre.z + offset.y), out Vector3 ground))
+                    continue;
+
+                GameObject prefab = prefabs[Random.Range(0, prefabs.Count)];
+                GameObject item = Instantiate(prefab, ground + Vector3.up * 0.5f, Quaternion.identity);
+                NetworkServer.Spawn(item);
+                spawnedLoot.Add(item);
+                break;
+            }
+
+            if (i % 4 == 3)
+                yield return null;   // spread the cost over a few frames
+        }
     }
 
     // -------------------------
