@@ -1,4 +1,47 @@
+<div align="center">
+
+<img src="docs/images/banner.jpg" alt="Last Stand: Co-op Survival Shooter" width="100%">
+
 # Last Stand: Co-op Survival Shooter
+
+**An offline battle royale for Android. Play with friends, no internet needed.**
+
+![Unity](https://img.shields.io/badge/Unity-6000.3.5f2-000000?style=for-the-badge&logo=unity&logoColor=white)
+![C#](https://img.shields.io/badge/C%23-Scripts-512BD4?style=for-the-badge&logo=csharp&logoColor=white)
+![Android](https://img.shields.io/badge/Android-8.0%2B-3DDC84?style=for-the-badge&logo=android&logoColor=white)
+![Mirror](https://img.shields.io/badge/Networking-Mirror-1E88E5?style=for-the-badge)
+
+![Players](https://img.shields.io/badge/Players-1--4-3DDC6E?style=flat-square)
+![Offline](https://img.shields.io/badge/Internet-Not%20needed-3DDC6E?style=flat-square)
+![Modes](https://img.shields.io/badge/Modes-Solo%20%C2%B7%20Duo%20%C2%B7%20Squad-3DDC6E?style=flat-square)
+![AI Bots](https://img.shields.io/badge/AI%20Bots-Easy%20%C2%B7%20Medium%20%C2%B7%20Hard-FF9F43?style=flat-square)
+![Render Pipeline](https://img.shields.io/badge/Graphics-URP-555555?style=flat-square)
+![FYP](https://img.shields.io/badge/Final%20Year%20Project-2022--2026-555555?style=flat-square)
+
+</div>
+
+---
+
+## Screenshots
+
+<table>
+  <tr>
+    <td width="50%"><img src="docs/images/main-menu.jpg" alt="Main menu"><br><sub><b>Main menu</b> – host a match or join a friend</sub></td>
+    <td width="50%"><img src="docs/images/lobby.jpg" alt="Match lobby"><br><sub><b>Lobby</b> – see who joined, get ready, try your weapons</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/images/gameplay-team.jpg" alt="Gameplay with the match bar"><br><sub><b>In a match</b> – players alive, your team, and the next zone at the top</sub></td>
+    <td width="50%"><img src="docs/images/gameplay-forest.jpg" alt="Gameplay in the forest"><br><sub><b>The map</b> – a forest with the safe zone wall behind the trees</sub></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="docs/images/settings.jpg" alt="Settings panel"><br><sub><b>Settings</b> – controls, sound and AI difficulty</sub></td>
+    <td width="50%"><img src="docs/images/lobby-rules.jpg" alt="Lobby rules notice"><br><sub><b>Lobby rules</b> – nobody gets hurt before the match starts</sub></td>
+  </tr>
+</table>
+
+---
+
+## About
 
 A battle royale game for Android phones that you can play with friends **without internet**.
 One phone hosts the match, and up to three friends join it over a mobile hotspot or Wi-Fi.
